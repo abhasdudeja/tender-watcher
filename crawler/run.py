@@ -37,6 +37,7 @@ CRAWLERS = {"gepnic": gepnic.crawl_source, "nprocure": nprocure.crawl_source}
 PROGRESS_FILE = "progress.json"     # the old single-file layout (still read, never written)
 STALE_AFTER_SECONDS = 600           # a running source with no update for this long is flagged
 STATUS_FILE = "_status.json"      # last crawl status of a source, kept next to its data
+THROTTLE_FILE = "_throttle.json"  # what each portal said when it throttled us (last few runs; not published)
 
 log = logging.getLogger("tenderwatch")
 
@@ -156,7 +157,18 @@ def clear_progress(site_dir: Path, slugs=None, only_dead: bool = False) -> None:
 def write_source_status(data_dir: Path, slug: str, status: dict) -> None:
     d = data_dir / slug
     d.mkdir(parents=True, exist_ok=True)
+    status = dict(status)
+    events = status.pop("throttle_events", None)       # detailed telemetry stays out of the published status
     (d / STATUS_FILE).write_text(json.dumps(status, ensure_ascii=False, indent=1), encoding="utf-8")
+    if events:
+        p, runs = d / THROTTLE_FILE, []
+        try:
+            runs = json.loads(p.read_text(encoding="utf-8")).get("runs", [])
+        except (OSError, ValueError, AttributeError):
+            pass
+        runs.append({"started": status.get("started"), "recoveries_s": status.get("throttle_recoveries", []),
+                     "events": events})
+        p.write_text(json.dumps({"runs": runs[-3:]}, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def statuses_from_disk(data_dir: Path, sources: List[dict]) -> List[dict]:

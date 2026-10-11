@@ -5,13 +5,16 @@ source and `restart()` throws the cookies away when the portal reports a stale s
 """
 from __future__ import annotations
 
+import email.utils
 import hashlib
 import logging
+import math
 import os
 import re
 import tempfile
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 from urllib.parse import urlsplit
@@ -58,8 +61,13 @@ class StaleSession(Exception):
 
 class Throttled(Exception):
     """The portal is pushing back (HTTP 429/503, timeouts, dropped connections) even after the short
-    retries in PortalSession. The crawl engine reacts by cooling down (default 15 min) and retrying.
+    retries in PortalSession. The crawl engine reacts by cooling down (probing 1, 2, 4 ... up to 15 min)
+    and retrying. `retry_after` is the portal's own Retry-After (seconds) when it sent one.
     A DNS failure, a 404 or a 500 is NOT throttling and stays an ordinary error."""
+
+    def __init__(self, message: str = "", retry_after: Optional[float] = None):
+        super().__init__(message)
+        self.retry_after = retry_after
 
 
 class HostNotFound(RequestException):
@@ -69,7 +77,52 @@ class HostNotFound(RequestException):
 
 
 class _ThrottleSignal(RequestException):
-    """HTTP 429 / 503 seen by _request (internal: lets the retry loop classify the failure)."""
+    """HTTP 429 / 503 seen by _request (internal: lets the retry loop classify the failure).
+    Carries what the portal told us: status, rate-limit headers, Retry-After seconds, start of the body."""
+    status = 429
+    headers: Dict[str, str] = {}
+    retry_after: Optional[float] = None
+    body = ""
+
+
+def _parse_retry_after(value) -> Optional[float]:
+    """Retry-After is either delta-seconds or an HTTP date."""
+    if not value:
+        return None
+    try:
+        return max(0.0, float(value))
+    except (TypeError, ValueError):
+        pass
+    try:
+        when = email.utils.parsedate_to_datetime(str(value))
+        return max(0.0, (when - datetime.now(when.tzinfo)).total_seconds())
+    except (TypeError, ValueError):
+        return None
+
+
+def _rate_headers(headers) -> Dict[str, str]:
+    """The response headers that say anything about rate limits (plus Server, for context)."""
+    out = {}
+    try:
+        for k, v in headers.items():
+            low = str(k).lower()
+            if "ratelimit" in low or "rate-limit" in low or "retry" in low or low in ("server", "x-powered-by"):
+                out[low] = str(v)[:120]
+    except AttributeError:
+        pass
+    return out
+
+
+def _throttle_signal(r) -> "_ThrottleSignal":
+    e = _ThrottleSignal(f"HTTP {r.status_code}")
+    e.status = r.status_code
+    e.headers = _rate_headers(r.headers)
+    e.retry_after = _parse_retry_after(r.headers.get("Retry-After"))
+    try:
+        e.body = r.content[:200].decode("utf-8", errors="replace").strip()
+    except (AttributeError, TypeError):
+        e.body = ""
+    return e
 
 
 def _looks_like_throttling(exc: Exception) -> bool:
@@ -92,6 +145,16 @@ class RobotsDisallowed(Exception):
     pass
 
 
+# Adaptive pacing: a 429/503 means we are going too fast, so the minimum start-to-start gap becomes
+# 1.5x what we have actually been doing (never below `delay`), at most once a minute, up to RATE_BACKOFF_MAX;
+# after RELAX_AFTER seconds without one it relaxes back towards `delay`, step by step.
+SLOWDOWN = 1.5
+SLOWDOWN_EVERY = 60.0
+RELAX_AFTER = 600.0
+RATE_BACKOFF_MAX = 12.0
+MIN_USEFUL_GAP = 0.5      # below this, "slowing down" is pointless (fast fakes in tests, very fast portals)
+
+
 class PortalSession:
     requests_made = 0
 
@@ -104,6 +167,12 @@ class PortalSession:
         self.requests_made = 0
         self._dump_n = 0
         self._last = 0.0
+        self._interval = self.delay        # current minimum start-to-start gap (>= delay, grows after a 429)
+        self._ema_gap = None               # recent average start-to-start gap, i.e. our real request pace
+        self._slowed_at = -math.inf
+        self._last_throttle = -math.inf
+        self._requests_at_throttle = 0
+        self.on_throttle = None            # optional callback(event dict) for every 429/503 (engine telemetry)
         self._gate = threading.Lock()      # serialises request *starts*, so workers share one rate cap
         self._count = threading.Lock()
         self._robots: Dict[str, RobotFileParser] = {}     # per host
@@ -147,10 +216,43 @@ class PortalSession:
         """Start-to-start spacing of at least `delay` seconds across ALL threads: with several workers the
         requests overlap in flight (that is the speed-up) but never start faster than 1/delay per second."""
         with self._gate:
-            wait = self._last + self.delay - time.monotonic()
+            now = time.monotonic()
+            if self._interval > self.delay and now - max(self._last_throttle, self._slowed_at) >= RELAX_AFTER:
+                self._interval = max(self.delay, self._interval / SLOWDOWN)
+                self._slowed_at = now
+                log.info("no rate limiting for %d min: request spacing relaxed to %.1fs", RELAX_AFTER // 60, self._interval)
+            wait = self._last + max(self.delay, self._interval) - now
             if wait > 0:
                 time.sleep(wait)
-            self._last = time.monotonic()
+            start = time.monotonic()
+            if self._last > 0 and start - self._last < 30:          # (longer gaps are retry back-offs, not our pace)
+                gap = start - self._last
+                self._ema_gap = gap if self._ema_gap is None else 0.8 * self._ema_gap + 0.2 * gap
+            self._last = start
+
+    def _note_throttle(self, sig: "_ThrottleSignal") -> None:
+        """A 429/503 came back: record what the portal said, how long/how many requests since the previous
+        one, and slow down (see SLOWDOWN)."""
+        with self._gate:
+            now = time.monotonic()
+            first = math.isinf(self._last_throttle)
+            event = {"kind": str(sig.status), "since_prev_s": None if first else round(now - self._last_throttle, 1),
+                     "requests_since_prev": self.requests_made - self._requests_at_throttle,
+                     "pace_gap_s": None if self._ema_gap is None else round(self._ema_gap, 2),
+                     "headers": sig.headers, "retry_after": sig.retry_after, "body": sig.body}
+            self._last_throttle, self._requests_at_throttle = now, self.requests_made
+            target = min(RATE_BACKOFF_MAX, max(self.delay, self._ema_gap or 0.0) * SLOWDOWN)
+            if target >= MIN_USEFUL_GAP and target > self._interval and now - self._slowed_at >= SLOWDOWN_EVERY:
+                self._interval, self._slowed_at = target, now
+            event["spacing_s"] = round(max(self.delay, self._interval), 1)
+        log.warning("rate limit (HTTP %s): %s requests, %s s since the previous one; headers %s; body %r; "
+                    "spacing requests >= %.1fs", sig.status, event["requests_since_prev"], event["since_prev_s"],
+                    sig.headers or "none", sig.body[:80], event["spacing_s"])
+        if self.on_throttle:
+            try:
+                self.on_throttle(event)
+            except Exception:  # noqa: BLE001  telemetry must never break a crawl
+                log.debug("on_throttle failed", exc_info=True)
 
     # ---- fetch ----
     def get(self, url: str, _allow_stale: bool = False, label: str = "") -> str:
@@ -178,7 +280,7 @@ class PortalSession:
                     self.requests_made += 1
                 log.debug("%s %s [%s] %.2fs", method, label or url[:80], r.status_code, time.monotonic() - t0)
                 if r.status_code in (429, 503):
-                    raise _ThrottleSignal(f"HTTP {r.status_code}")
+                    raise _throttle_signal(r)
                 if r.status_code >= 500:
                     raise RequestException(f"HTTP {r.status_code}")
                 r.raise_for_status()
@@ -190,12 +292,14 @@ class PortalSession:
                 last_err = e
                 throttled = _looks_like_throttling(e)
                 unresolved = getattr(e, "code", None) == 6
+                if isinstance(e, _ThrottleSignal):
+                    self._note_throttle(e)
                 log.warning("%s %s failed (attempt %d/%d): %s", method, label or url[:80], attempt + 1, RETRIES, e)
                 if attempt < RETRIES - 1:                   # no pointless wait after the last attempt
                     time.sleep(min(60, 5 * (attempt + 1)))
         else:
             if throttled:
-                raise Throttled(str(last_err)) from last_err
+                raise Throttled(str(last_err), getattr(last_err, "retry_after", None)) from last_err
             if unresolved:
                 raise HostNotFound(str(last_err)) from last_err
             raise last_err

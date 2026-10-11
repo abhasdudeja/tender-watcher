@@ -36,8 +36,10 @@ from .progress import Progress
 log = logging.getLogger("tenderwatch.engine")
 
 MAX_RESTARTS = 5
-DEFAULT_COOLDOWN_MINUTES = 15   # how long to back off when a portal throttles us (src["throttle_cooldown_minutes"])
-DEFAULT_MAX_COOLDOWNS = 4       # cool-downs per operation before giving up on the source for this run
+DEFAULT_COOLDOWN_MINUTES = 15   # longest single wait when a portal throttles us (src["throttle_cooldown_minutes"])
+DEFAULT_PROBE_MINUTES = 1.0     # first wait; doubles on every retry that is still throttled (src["throttle_probe_minutes"])
+DEFAULT_MAX_COOLDOWNS = 4       # patience = this many full cool-downs of waiting in total (src["throttle_max_cooldowns"])
+MAX_EVENTS = 300                # throttle telemetry kept per run
 MAX_DETAIL_WORKERS = 8          # upper bound for src["detail_workers"]
 MAX_ORGS_GIVEN_UP_IN_A_ROW = 3  # per-host portals (throttle_scope "org"): abort the source after this many in a row
 DETAIL_CHUNK = 50          # checkpoint after this many detail pages
@@ -117,11 +119,13 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     several detail pages are fetched at once, DETAIL_CHUNK at a time. The session's start-to-start delay
     still caps the request rate; a throttled worker stops the others and the whole source cools down once.
 
-    Throttling: when the portal keeps answering 429/503/timeouts (http.Throttled), the source cools
-    down for src["throttle_cooldown_minutes"] (default 15) and retries the same operation, up to
-    src["throttle_max_cooldowns"] (default 4) times per operation; if the portal still pushes back the
-    source gives up for this run (everything saved so far is kept, the next run resumes). Other
-    sources keep crawling meanwhile.
+    Throttling: when the portal keeps answering 429/503/timeouts (http.Throttled), the source backs off
+    and retries the same operation: first after src["throttle_probe_minutes"] (default 1), doubling each
+    time it is still throttled, up to src["throttle_cooldown_minutes"] (default 15) per wait, or the
+    portal's own Retry-After when it sends one. After a total of throttle_max_cooldowns x cooldown (default
+    4 x 15 = 60 min) of waiting the source gives up for this run (everything saved so far is kept, the
+    next run resumes). Other sources keep crawling meanwhile. How long the portal really needed is logged
+    and recorded (status["throttle_recoveries"], throttle_events).
     """
     change_keys, listing_fields, detail_fields = tuple(change_keys), tuple(listing_fields), tuple(detail_fields)
     slug = src["slug"]
@@ -135,9 +139,11 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                      if max_age_days > 0 else "")
 
     cooldown_s = float(src.get("throttle_cooldown_minutes", DEFAULT_COOLDOWN_MINUTES)) * 60
+    probe_s = min(cooldown_s, float(src.get("throttle_probe_minutes", DEFAULT_PROBE_MINUTES)) * 60)
     org_scope = getattr(portal, "throttle_scope", "source") == "org"   # per-host portals: a hung client != the whole source
     gave_up_in_a_row = 0
     max_cooldowns = int(src.get("throttle_max_cooldowns", DEFAULT_MAX_COOLDOWNS))
+    patience_s = max_cooldowns * cooldown_s                  # total waiting per operation before giving up
     workers = max(1, min(MAX_DETAIL_WORKERS, int(src.get("detail_workers", 1))))
     if workers > 1 and not getattr(portal, "parallel_details", False):
         log.warning("%s: detail_workers=%d ignored: this portal type fetches details one at a time", slug, workers)
@@ -145,7 +151,8 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
 
     status = {"slug": slug, "name": src.get("name", slug), "ok": True, "started": now(),
               "orgs": 0, "orgs_skipped": 0, "orgs_failed": 0, "orgs_unreachable": 0, "listed": 0, "new": 0, "changed": 0,
-              "details_failed": 0, "details_fetched": 0, "throttled": 0, "gave_up": False, "errors": []}
+              "details_failed": 0, "details_fetched": 0, "throttled": 0, "throttle_recoveries": [], "throttle_events": [],
+              "gave_up": False, "errors": []}
     seen = set()
     rows_parsed = 0
     prog: Optional[Progress] = None
@@ -165,30 +172,56 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     def stopping() -> bool:
         return stop is not None and stop.is_set()
 
-    def wait_out(what: str, e: Exception, n: int) -> None:
-        """The cool-down itself: log it, show it in the progress, sleep (waking early on stop)."""
+    def event(**fields) -> None:
+        """Throttle telemetry (kept per run in _throttle.json next to the data)."""
+        if len(status["throttle_events"]) < MAX_EVENTS:
+            status["throttle_events"].append({"t": now(), **fields})
+
+    sess = getattr(portal, "sess", None)
+    if sess is not None and hasattr(sess, "on_throttle"):
+        sess.on_throttle = lambda ev: event(**ev)         # every 429/503, even those that clear on a retry
+
+    def wait_out(what: str, e: Exception, n: int) -> float:
+        """One back-off: the portal's Retry-After if it sent one, else probe_s doubled n times (capped at
+        cooldown_s). Logged, shown in the progress, slept (waking early on stop). Returns the seconds waited."""
+        retry_after = getattr(e, "retry_after", None)
+        wait = max(1.0, min(float(retry_after), 3600.0)) if retry_after else min(cooldown_s, probe_s * 2 ** n)
         status["throttled"] += 1
-        until = (datetime.now() + timedelta(seconds=cooldown_s)).strftime("%H:%M")
-        log.warning("%s: portal is throttling us (%s) - cooling down %g min, retrying at %s (%d/%d)",
-                    what, e, cooldown_s / 60, until, n + 1, max_cooldowns)
+        until = (datetime.now() + timedelta(seconds=wait)).strftime("%H:%M")
+        shown = f"{wait / 60:g} min" if wait >= 60 else f"{wait:g} s"
+        log.warning("%s: portal is throttling us (%s) - cooling down %s%s, retrying at %s (attempt %d)",
+                    what, e, shown, " (its Retry-After)" if retry_after else "", until, n + 1)
+        event(kind="wait", what=what, wait_s=wait, attempt=n + 1, retry_after=retry_after)
         previous = prog.fields.get("phase") if prog else None
         if prog:
             prog.update(phase=f"cooling down until {until} (throttled)", force=True, **counters())
-        _sleep(cooldown_s, stop, tick=(lambda: prog.update()) if prog else None)   # heartbeat: not "stuck"
+        _sleep(wait, stop, tick=(lambda: prog.update()) if prog else None)   # heartbeat: not "stuck"
         if prog and previous:
             prog.update(phase=previous, force=True)
+        return wait
+
+    def recovered(what: str, waited: float, attempts: int) -> None:
+        log.info("%s: portal answers again after %g min of waiting (%d attempts)", what, round(waited / 60, 1), attempts)
+        status["throttle_recoveries"].append(round(waited))
+        event(kind="recovered", what=what, waited_s=round(waited), attempts=attempts)
 
     def cooled(fn, what: str):
-        """Run fn(); if the portal throttles us, cool down and retry it (max_cooldowns times), else re-raise."""
-        for n in range(max_cooldowns + 1):
+        """Run fn(); if the portal throttles us, back off and retry it until `patience_s` of waiting is used up."""
+        waited, n = 0.0, 0
+        while True:
             try:
-                return fn()
+                result = fn()
             except Throttled as e:
-                if n == max_cooldowns or stopping():
+                if waited >= patience_s or stopping():
                     raise
-                wait_out(what, e, n)
+                waited += wait_out(what, e, n)
+                n += 1
                 if stopping():
                     raise
+                continue
+            if n:
+                recovered(what, waited, n)
+            return result
 
     def want_details_off() -> None:
         nonlocal want_details
@@ -258,7 +291,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
         pages are collected, the source cools down ONCE, and only those pages are retried."""
         for lo in range(0, len(todo), DETAIL_CHUNK):
             chunk = todo[lo: lo + DETAIL_CHUNK]
-            cools = 0
+            waited, n = 0.0, 0
             while chunk:
                 hit = threading.Event()
 
@@ -302,12 +335,14 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                 if retry and last is None:                  # skipped only because another worker was throttled
                     last = Throttled("throttled")
                 if retry:
-                    cools += 1
-                    if cools > max_cooldowns:
+                    if waited >= patience_s:
                         raise last
-                    wait_out(f"{name}: details", last, cools - 1)
+                    waited += wait_out(f"{name}: details", last, n)
+                    n += 1
                     if stopping():
                         return
+                elif n:
+                    recovered(f"{name}: details", waited, n)
                 chunk = retry
 
     def walk_org(org: Dict) -> None:
@@ -428,9 +463,9 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                 throttled_out = True
                 gave_up_in_a_row += 1
                 gave_up = not org_scope or gave_up_in_a_row >= MAX_ORGS_GIVEN_UP_IN_A_ROW
-                error(f"{name}: portal keeps throttling us ({e}) after {max_cooldowns} cool-downs of "
-                      f"{cooldown_s / 60:g} min - " + (f"giving up on {slug} for this run (saved progress is kept)"
-                                                       if gave_up else "skipping this organisation"))
+                error(f"{name}: portal keeps throttling us ({e}) after {patience_s / 60:g} min of waiting - "
+                      + (f"giving up on {slug} for this run (saved progress is kept)"
+                         if gave_up else "skipping this organisation"))
                 status["gave_up"] = status["gave_up"] or gave_up
                 break
             except HostNotFound as e:

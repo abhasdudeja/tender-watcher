@@ -185,17 +185,29 @@ warning, because GePNIC details depend on one browser-like session). Safety:
 Start with 2 or 3 and watch for `cooling down` in `--show-progress`; more workers than the portal tolerates
 just means more cool-downs.
 
-### Throttling: cool down, then retry
+### Throttling: slow down, back off, probe, retry
 
-If a portal pushes back, the crawler waits instead of hammering it or failing the run. After the short
-retries in `PortalSession` (3 attempts, 5 s then 10 s apart), these count as **throttling**: HTTP 429 or
-503, a timeout after we connected ("Operation timed out … 0 bytes received", the symptom Kerala showed),
-and a dropped connection. Then the source **cools down for 15 minutes** and retries the same operation
-(the organisation list, one organisation's listing, or one detail page), up to 4 cool-downs per operation
-(about an hour). Still throttled: the source gives up for this run, **keeps everything saved so far**
-(nothing is deactivated) and the next run resumes. Other sources keep crawling meanwhile, and a source in
-cool-down shows as `cooling down until HH:MM (throttled)` in `--show-progress` (the wait writes a progress
-heartbeat every 30 s, so a long cool-down is never flagged `STALE`).
+If a portal pushes back, the crawler adapts instead of hammering it or failing the run. Three layers:
+
+1. **Slow down.** On every HTTP 429/503 the minimum gap between request starts becomes 1.5x the pace we
+   were really keeping (never below `delay_seconds`, at most once a minute, capped at 12 s), and it relaxes
+   one step after every 10 quiet minutes. The point is to stay under the portal's limit so it never
+   escalates to a hard block.
+2. **Back off and probe.** After the short retries in `PortalSession` (3 attempts, 5 s then 10 s apart),
+   these count as **throttling**: HTTP 429/503, a timeout after we connected ("Operation timed out ... 0 bytes
+   received", the symptom Kerala showed) and a dropped connection. The source then waits **1 minute** and
+   retries the same operation (the organisation list, one organisation's listing, or one detail page).
+   Still throttled: **2, 4, 8, then 15 minutes** (the cap). If the portal sends `Retry-After` that is
+   obeyed instead. After about an hour of waiting in total (`throttle_max_cooldowns` x the cap) the source
+   gives up for this run, **keeps everything saved so far** (nothing is deactivated) and the next run resumes.
+3. **Learn.** Every 429/503 is recorded with the rate-limit headers and body the portal sent, how many
+   requests and seconds passed since the previous one, and the spacing in force; every wait and every
+   recovery ("answers again after 3 min") too. They go to `data/<slug>/_throttle.json` (last 3 runs, not
+   published); the status keeps `throttle_recoveries` (seconds the portal really needed), `throttled` (waits)
+   and `gave_up`. Use them to tune `delay_seconds` and the cap.
+
+Other sources keep crawling meanwhile, and a source in a wait shows as `cooling down until HH:MM (throttled)`
+in `--show-progress` (the wait writes a progress heartbeat every 30 s, so it is never flagged `STALE`).
 
 A **host that does not exist** (DNS failure; nProcure still lists clients whose subdomain was removed) is
 not a crawl failure: that organisation is skipped with a warning, counted in the status as `orgs_unreachable`,
@@ -203,8 +215,9 @@ the run stays `ok`, and the tenders already stored for it stay active (we cannot
 Connection refused or timed out while connecting, a 404 or a 500 are ordinary errors with **no** cool-down.
 On nProcure each client is its own host, so a client that stays throttled
 is skipped after its cool-downs and the crawl continues; three in a row end the source for this run.
-Tune per source in `sources.yaml`: `throttle_cooldown_minutes` (default 15) and `throttle_max_cooldowns`
-(default 4). The status records how many cool-downs were taken (`throttled`) and whether it gave up (`gave_up`).
+Tune per source in `sources.yaml`: `throttle_probe_minutes` (first wait, default 1), `throttle_cooldown_minutes`
+(longest wait, default 15; set both equal for a flat cool-down) and `throttle_max_cooldowns` (default 4;
+total patience = this x the longest wait).
 
 ### Nothing is ever deleted
 

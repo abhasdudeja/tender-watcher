@@ -9,7 +9,7 @@ from curl_cffi.requests import exceptions as E
 from crawler import engine, http
 from crawler.http import PortalSession, Throttled
 
-from test_throttle import FakePortal, SRC, crawl, sleeps  # noqa: F401  (sleeps is a fixture)
+from test_throttle import FakePortal, SRC, crawl, schedule, sleeps  # noqa: F401  (sleeps is a fixture)
 
 
 class ParallelPortal(FakePortal):
@@ -67,7 +67,7 @@ def test_portals_that_cannot_do_it_ignore_detail_workers(sleeps):
 def test_a_throttled_worker_stops_the_others_and_the_source_cools_down_once(sleeps):
     portal, store = ParallelPortal(rows=12, throttle={"detail": 2}), {}
     st = crawl(portal, store, src=src(3))
-    assert sleeps == [900.0] and st["throttled"] == 1           # not one cool-down per worker
+    assert sleeps == [60.0] and st["throttled"] == 1            # not one cool-down per worker
     assert st["details_fetched"] == 12 and st["gave_up"] is False
     assert all(r.get("details") for r in store.values())        # the throttled pages were retried afterwards
 
@@ -75,7 +75,7 @@ def test_a_throttled_worker_stops_the_others_and_the_source_cools_down_once(slee
 def test_a_portal_that_keeps_throttling_makes_the_source_give_up_after_the_usual_cooldowns(sleeps):
     portal, store = ParallelPortal(rows=12, always={"detail"}), {}
     st = crawl(portal, store, src=src(3))
-    assert sleeps == [900.0] * engine.DEFAULT_MAX_COOLDOWNS
+    assert sleeps == schedule()
     assert st["gave_up"] is True and st["ok"] is False
     assert len(store) == 12                                     # the listing is kept; only details are missing
 
