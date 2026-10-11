@@ -198,6 +198,13 @@ def test_crawl_pages_the_client_listing_and_fetches_details(monkeypatch):
     assert rec["pub"] == "2026-10-08T18:00" and rec["active"] is True and rec["status"] == "active" and rec["details_fetched_at"]
 
 
+def test_a_stale_client_list_count_is_not_mistaken_for_a_markup_change():
+    # the dropdown still says the client has tenders, but its own listing says total 0: that is the truth
+    fake, store = FakeNprocure({RAJKOT: []}), {}
+    st = crawl(fake, store, only_orgs=["Rajkot Municipal Corporation"])
+    assert st["ok"] is True and st["errors"] == [] and st["listed"] == 0 and fake.listing_calls
+
+
 def test_clients_with_zero_tenders_are_never_requested():
     fake = FakeNprocure({SURAT: rows(2), RAJKOT: rows(1, 800000), "https://amctender.nprocure.com": rows(1, 700000),
                          "https://autender.nprocure.com": rows(1, 600000)})

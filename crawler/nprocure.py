@@ -306,6 +306,7 @@ class NprocurePortal:
                 break
         if page["total"] != org["count"]:
             log.warning("%s: listing says %d tenders, the client list said %d", org["name"], page["total"], org["count"])
+            org["count"] = page["total"]       # the listing is authoritative; the dropdown's count can be stale
 
     def fetch_detail(self, org: Dict, row: Dict) -> Dict:
         html = self.sess.post(org["host"] + DETAIL_PATH, data={"_csrf": "token", "tenderid": row["detail_ref"]},
