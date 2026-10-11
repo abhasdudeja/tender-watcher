@@ -59,7 +59,7 @@ sources:
 
   - slug: govIndia
     name: Govt of India - CPPP
-    type: eprocure
+    type: generic
     base_url: https://etenders.gov.in
     enabled: true
     ignore_robots: true
@@ -69,7 +69,7 @@ sources:
 
   - slug: maharashtra
     name: Maharashtra State PP
-    type: eprocure
+    type: generic
     base_url: https://mahatenders.gov.in
     enabled: true
     ignore_robots: true
