@@ -59,8 +59,8 @@ sources:
 
   - slug: govIndia
     name: Govt of India - CPPP
-    type: generic
-    base_url: https://etenders.gov.in
+    type: gepnic
+    base_url: https://etenders.gov.in/eprocure/app
     enabled: true
     ignore_robots: true
     fetch_details: false
@@ -69,8 +69,8 @@ sources:
 
   - slug: maharashtra
     name: Maharashtra State PP
-    type: generic
-    base_url: https://mahatenders.gov.in
+    type: gepnic
+    base_url: https://mahatenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: true
     fetch_details: false
