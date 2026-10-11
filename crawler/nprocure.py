@@ -276,6 +276,9 @@ class NprocurePortal:
     # Each client is its own host, so one that stays throttled (or hung) is skipped after its cool-downs
     # instead of ending the whole source; three in a row do end it (see engine.MAX_ORGS_GIVEN_UP_IN_A_ROW).
     throttle_scope = "org"
+    # Detail pages are independent POSTs with no server-side session state, so several can be in flight
+    # at once (src["detail_workers"]); the shared PortalSession still caps the start rate at 1/delay_seconds.
+    parallel_details = True
 
     def __init__(self, sess: PortalSession, base: str):
         self.sess, self.base = sess, base.rstrip("/")

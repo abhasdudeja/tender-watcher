@@ -24,7 +24,9 @@ Adapter interface
 from __future__ import annotations
 
 import logging
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Iterable, List, Optional
 
@@ -36,12 +38,17 @@ log = logging.getLogger("tenderwatch.engine")
 MAX_RESTARTS = 5
 DEFAULT_COOLDOWN_MINUTES = 15   # how long to back off when a portal throttles us (src["throttle_cooldown_minutes"])
 DEFAULT_MAX_COOLDOWNS = 4       # cool-downs per operation before giving up on the source for this run
+MAX_DETAIL_WORKERS = 8          # upper bound for src["detail_workers"]
 MAX_ORGS_GIVEN_UP_IN_A_ROW = 3  # per-host portals (throttle_scope "org"): abort the source after this many in a row
 DETAIL_CHUNK = 50          # checkpoint after this many detail pages
 REFRESH_SLACK_HOURS = 1.0  # tolerance so a cron that fires a few minutes late doesn't skip yesterday's tenders
 IST = timezone(timedelta(hours=5, minutes=30))   # portal dates are IST wall-clock
 DEFAULT_CHANGE_KEYS = ("close", "open", "title", "ref", "pub")   # listing fields whose change means "re-fetch details"
 DEFAULT_LISTING_FIELDS = ("ref", "title", "chain", "pub", "close", "open")
+
+
+class _Skip(Exception):
+    """A parallel detail fetch that was not attempted (another worker was throttled, or we are stopping)."""
 
 
 class Restart(Exception):
@@ -106,6 +113,10 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     passed) or "removed" (it vanished before its deadline). If it reappears it is reactivated.
     Partial runs (limit_orgs / only_orgs) and runs with an organisation-level error never deactivate.
 
+    Parallel details: with src["detail_workers"] > 1 (only for adapters that set `parallel_details = True`)
+    several detail pages are fetched at once, DETAIL_CHUNK at a time. The session's start-to-start delay
+    still caps the request rate; a throttled worker stops the others and the whole source cools down once.
+
     Throttling: when the portal keeps answering 429/503/timeouts (http.Throttled), the source cools
     down for src["throttle_cooldown_minutes"] (default 15) and retries the same operation, up to
     src["throttle_max_cooldowns"] (default 4) times per operation; if the portal still pushes back the
@@ -127,6 +138,10 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     org_scope = getattr(portal, "throttle_scope", "source") == "org"   # per-host portals: a hung client != the whole source
     gave_up_in_a_row = 0
     max_cooldowns = int(src.get("throttle_max_cooldowns", DEFAULT_MAX_COOLDOWNS))
+    workers = max(1, min(MAX_DETAIL_WORKERS, int(src.get("detail_workers", 1))))
+    if workers > 1 and not getattr(portal, "parallel_details", False):
+        log.warning("%s: detail_workers=%d ignored: this portal type fetches details one at a time", slug, workers)
+        workers = 1
 
     status = {"slug": slug, "name": src.get("name", slug), "ok": True, "started": now(),
               "orgs": 0, "orgs_skipped": 0, "orgs_failed": 0, "orgs_unreachable": 0, "listed": 0, "new": 0, "changed": 0,
@@ -147,25 +162,32 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
         if len(status["errors"]) < 20:
             status["errors"].append(msg)
 
+    def stopping() -> bool:
+        return stop is not None and stop.is_set()
+
+    def wait_out(what: str, e: Exception, n: int) -> None:
+        """The cool-down itself: log it, show it in the progress, sleep (waking early on stop)."""
+        status["throttled"] += 1
+        until = (datetime.now() + timedelta(seconds=cooldown_s)).strftime("%H:%M")
+        log.warning("%s: portal is throttling us (%s) - cooling down %g min, retrying at %s (%d/%d)",
+                    what, e, cooldown_s / 60, until, n + 1, max_cooldowns)
+        previous = prog.fields.get("phase") if prog else None
+        if prog:
+            prog.update(phase=f"cooling down until {until} (throttled)", force=True, **counters())
+        _sleep(cooldown_s, stop, tick=(lambda: prog.update()) if prog else None)   # heartbeat: not "stuck"
+        if prog and previous:
+            prog.update(phase=previous, force=True)
+
     def cooled(fn, what: str):
         """Run fn(); if the portal throttles us, cool down and retry it (max_cooldowns times), else re-raise."""
         for n in range(max_cooldowns + 1):
             try:
                 return fn()
             except Throttled as e:
-                if n == max_cooldowns or (stop is not None and stop.is_set()):
+                if n == max_cooldowns or stopping():
                     raise
-                status["throttled"] += 1
-                until = (datetime.now() + timedelta(seconds=cooldown_s)).strftime("%H:%M")
-                log.warning("%s: portal is throttling us (%s) - cooling down %g min, retrying at %s (%d/%d)",
-                            what, e, cooldown_s / 60, until, n + 1, max_cooldowns)
-                previous = prog.fields.get("phase") if prog else None
-                if prog:
-                    prog.update(phase=f"cooling down until {until} (throttled)", force=True, **counters())
-                _sleep(cooldown_s, stop, tick=(lambda: prog.update()) if prog else None)   # heartbeat: not "stuck"
-                if prog and previous:
-                    prog.update(phase=previous, force=True)
-                if stop is not None and stop.is_set():
+                wait_out(what, e, n)
+                if stopping():
                     raise
 
     def want_details_off() -> None:
@@ -222,6 +244,72 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
         rec["inactive_since"] = now()
         rec["status"] = "closed" if rec.get("close") and rec["close"] <= now_ist else "removed"
 
+    def apply_detail(rec: Dict, fetched: Dict) -> None:
+        for k in detail_fields:
+            rec.pop(k, None)
+        rec.update(fetched)
+        rec.pop("needs_details", None)
+        rec["details_fetched_at"] = now()
+        status["details_fetched"] += 1
+
+    def fetch_parallel(org: Dict, name: str, todo: List) -> None:
+        """Phase B with `workers` threads, DETAIL_CHUNK pages per round; the store is only touched from
+        this thread. If any worker is throttled the others stop starting new requests, the throttled
+        pages are collected, the source cools down ONCE, and only those pages are retried."""
+        for lo in range(0, len(todo), DETAIL_CHUNK):
+            chunk = todo[lo: lo + DETAIL_CHUNK]
+            cools = 0
+            while chunk:
+                hit = threading.Event()
+
+                def task(item):
+                    if hit.is_set() or stopping():
+                        raise _Skip()
+                    try:
+                        return portal.fetch_detail(org, item[1])
+                    except Throttled:
+                        hit.set()
+                        raise
+
+                with ThreadPoolExecutor(max_workers=workers) as pool:
+                    futures = [(item, pool.submit(task, item)) for item in chunk]
+                retry, last = [], None
+                for item, fut in futures:                  # results are applied in order, on this thread
+                    rec = item[0]
+                    try:
+                        apply_detail(rec, fut.result())
+                    except _Skip:
+                        retry.append(item)
+                    except Throttled as e:
+                        retry.append(item)
+                        last = e
+                    except Restart:
+                        raise
+                    except DetailsBlocked as e:
+                        detail_failed(str(e))
+                        want_details_off()
+                        return
+                    except DetailFailed as e:
+                        detail_failed(str(e))
+                    except Exception as e:  # noqa: BLE001
+                        detail_failed(f"detail {rec['id']}: {e.__class__.__name__}: {e}"[:200])
+                if checkpoint:
+                    checkpoint(name)
+                if prog:
+                    prog.update(org_frac=min(1.0, (lo + len(chunk) - len(retry)) / len(todo)), **counters())
+                if stopping():
+                    return                                  # unfetched pages are picked up by the next run
+                if retry and last is None:                  # skipped only because another worker was throttled
+                    last = Throttled("throttled")
+                if retry:
+                    cools += 1
+                    if cools > max_cooldowns:
+                        raise last
+                    wait_out(f"{name}: details", last, cools - 1)
+                    if stopping():
+                        return
+                chunk = retry
+
     def walk_org(org: Dict) -> None:
         """Phase A: list the org and checkpoint it.
         Phase B: fetch details in chunks, checkpointing after each chunk, so a crash,
@@ -258,18 +346,16 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
         pending.sort(key=lambda p: p[0].get("pub") or "", reverse=True)
         pending.sort(key=lambda p: p[0].get("details_fetched_at", ""))
         todo = pending[: max(0, max_details - status["details_fetched"])]
-        log.info("%s: %d need details, fetching %d this run", name, len(pending), len(todo))
+        log.info("%s: %d need details, fetching %d this run%s", name, len(pending), len(todo),
+                 f" ({workers} workers)" if workers > 1 else "")
+        if workers > 1:
+            fetch_parallel(org, name, todo)
+            return
         for n, (rec, row) in enumerate(todo, 1):
             if stop is not None and stop.is_set():
                 return
             try:
-                fetched = cooled(lambda: portal.fetch_detail(org, row), f"{name}: detail {rec['id']}")
-                for k in detail_fields:
-                    rec.pop(k, None)
-                rec.update(fetched)
-                rec.pop("needs_details", None)
-                rec["details_fetched_at"] = now()
-                status["details_fetched"] += 1
+                apply_detail(rec, cooled(lambda: portal.fetch_detail(org, row), f"{name}: detail {rec['id']}"))
             except (Restart, Throttled):
                 raise  # restart + re-list (already-fetched tenders are skipped next time) / give up on the source
             except DetailsBlocked as e:

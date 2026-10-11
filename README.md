@@ -169,6 +169,22 @@ step in `store.migrate_if_needed`; data written by a *newer* format than the cod
   active count, and no tender needs details. A count mismatch forces a re-list even inside the window.
 - `--force-refresh` ignores all of it.
 
+### Parallel detail fetching
+
+The first crawl of a big source is dominated by detail pages (nProcure answers each one in about 3 s, so
+one at a time is ~17 tenders a minute). `detail_workers: N` in a source of `sources.yaml` fetches N detail
+pages at once (1 = off, the default; at most 8; only nProcure supports it, other types ignore it with a
+warning, because GePNIC details depend on one browser-like session). Safety:
+
+* The session's `delay_seconds` still caps the **start rate** across all workers (1.0 = at most one new
+  request a second), so workers only overlap the waiting; they never make the portal see a faster request rate.
+* All workers share one cool-down: the first throttled worker stops the others from starting new requests,
+  the source waits once (see below), then only the pages that were not fetched are retried.
+* Results are applied in order on the main thread, in rounds of 50 pages that are checkpointed as before.
+
+Start with 2 or 3 and watch for `cooling down` in `--show-progress`; more workers than the portal tolerates
+just means more cool-downs.
+
 ### Throttling: cool down, then retry
 
 If a portal pushes back, the crawler waits instead of hammering it or failing the run. After the short

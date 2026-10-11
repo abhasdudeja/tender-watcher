@@ -10,6 +10,7 @@ import logging
 import os
 import re
 import tempfile
+import threading
 import time
 from pathlib import Path
 from typing import Dict, Optional
@@ -103,6 +104,8 @@ class PortalSession:
         self.requests_made = 0
         self._dump_n = 0
         self._last = 0.0
+        self._gate = threading.Lock()      # serialises request *starts*, so workers share one rate cap
+        self._count = threading.Lock()
         self._robots: Dict[str, RobotFileParser] = {}     # per host
         self.verify = ca_bundle(extra_ca_certs) or True
         self._http = self._new_http()
@@ -141,10 +144,13 @@ class PortalSession:
         return rp.can_fetch("*", url) and rp.can_fetch("tenderwatch", url)
 
     def _throttle(self) -> None:
-        wait = self._last + self.delay - time.monotonic()
-        if wait > 0:
-            time.sleep(wait)
-        self._last = time.monotonic()
+        """Start-to-start spacing of at least `delay` seconds across ALL threads: with several workers the
+        requests overlap in flight (that is the speed-up) but never start faster than 1/delay per second."""
+        with self._gate:
+            wait = self._last + self.delay - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            self._last = time.monotonic()
 
     # ---- fetch ----
     def get(self, url: str, _allow_stale: bool = False, label: str = "") -> str:
@@ -168,7 +174,8 @@ class PortalSession:
                 if method == "POST":
                     kw.update(data=data, headers=headers)
                 r = self._http.request(method, url, **kw)
-                self.requests_made += 1
+                with self._count:
+                    self.requests_made += 1
                 log.debug("%s %s [%s] %.2fs", method, label or url[:80], r.status_code, time.monotonic() - t0)
                 if r.status_code in (429, 503):
                     raise _ThrottleSignal(f"HTTP {r.status_code}")
