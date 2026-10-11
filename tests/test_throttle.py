@@ -6,7 +6,7 @@ import pytest
 from curl_cffi.requests import exceptions as E
 
 from crawler import engine, http
-from crawler.http import PortalSession, Throttled
+from crawler.http import HostNotFound, PortalSession, Throttled
 
 OPERATION_TIMEOUT = "Failed to perform, curl: (28) Operation timed out after 40007 milliseconds with 0 bytes received."
 CONNECT_TIMEOUT = "Failed to perform, curl: (28) Connection timed out after 5001 milliseconds"
@@ -55,6 +55,13 @@ def test_dead_hosts_and_ordinary_errors_are_not_throttling(failure, monkeypatch)
     assert isinstance(ei.value, E.RequestException)
 
 
+def test_a_host_that_does_not_resolve_raises_host_not_found(monkeypatch):
+    sess, calls, _ = session([E.DNSError(DNS, 6)], monkeypatch)
+    with pytest.raises(http.HostNotFound) as ei:
+        sess.get("https://dead.example/p")
+    assert len(calls) == http.RETRIES and isinstance(ei.value, E.RequestException)   # a flaky resolver gets its retries
+
+
 def test_a_throttled_response_that_recovers_within_the_short_retries_is_just_a_success(monkeypatch):
     sess, calls, sleeps = session([503, 200], monkeypatch)
     assert sess.get("https://x.test/p") == "ok" and len(calls) == 2 and sleeps == [5]
@@ -67,16 +74,19 @@ def row(i):
 
 
 class FakePortal:
-    def __init__(self, orgs=None, rows=2, throttle=None, always=None, scope="source"):
+    def __init__(self, orgs=None, rows=2, throttle=None, always=None, scope="source", dead=()):
         self.orgs = orgs or [{"name": "A", "count": rows}]
         self.rows = rows
         self.throttle = dict(throttle or {})        # operation -> how many calls fail with Throttled first
         self.always = set(always or ())             # operations that are throttled forever
+        self.dead = set(dead)                       # organisations whose host does not exist
         self.calls = []
         self.throttle_scope = scope
 
     def _maybe(self, op):
         self.calls.append(op)
+        if op.startswith("walk:") and op.split(":")[1] in self.dead:
+            raise HostNotFound("curl: (6) Could not resolve host")
         if op in self.always:
             raise Throttled("HTTP 503")
         if self.throttle.get(op, 0) > 0:
@@ -111,7 +121,7 @@ SRC = {"slug": "t", "name": "T", "fetch_details": True, "max_detail_fetches": 50
 @pytest.fixture
 def sleeps(monkeypatch):
     rec = []
-    monkeypatch.setattr(engine, "_sleep", lambda seconds, stop=None: rec.append(seconds))
+    monkeypatch.setattr(engine, "_sleep", lambda seconds, stop=None, **_: rec.append(seconds))
     return rec
 
 
@@ -183,10 +193,22 @@ def test_per_host_portals_skip_a_throttled_client_but_stop_after_three_in_a_row(
     assert not any(c.startswith(("walk:E", "walk:F")) for c in portal.calls)
 
 
+def test_a_client_whose_host_does_not_exist_is_skipped_without_failing_the_run(sleeps):
+    gone = {"id": "OLD", "source": "t", "org": "B", "active": True}          # stored earlier, B's host has since vanished
+    store = {"OLD": gone, "ELSEWHERE": {"id": "ELSEWHERE", "source": "t", "org": "C", "active": True}}
+    portal = FakePortal(orgs=[{"name": "A", "count": 2}, {"name": "B", "count": 5}], dead={"B"}, scope="org")
+    st = crawl(portal, store)
+    assert st["ok"] is True and st["orgs_unreachable"] == 1 and st["orgs_failed"] == 0 and st["errors"] == []
+    assert sleeps == []                                                      # no cool-down for a dead host
+    assert gone["active"] is True                                            # we cannot tell it was removed: kept
+    assert store["ELSEWHERE"]["active"] is False                             # but the healthy run still retires other leftovers
+    assert set(store) >= {"T0", "T1"}                                        # and A was crawled normally
+
+
 def test_a_stop_request_during_a_cooldown_ends_the_wait_without_retrying(monkeypatch):
     stop = threading.Event()
     waits = []
-    monkeypatch.setattr(engine, "_sleep", lambda seconds, stop=None: (waits.append(seconds), stop.set()))
+    monkeypatch.setattr(engine, "_sleep", lambda seconds, stop=None, **_: (waits.append(seconds), stop.set()))
     portal = FakePortal(throttle={"orgs": 1})
     st = crawl(portal, stop=stop)
     assert waits == [900.0] and portal.calls == ["orgs"]                  # no second attempt after the stop
@@ -203,9 +225,32 @@ def test_sleep_wakes_early_when_stopped():
     assert time.monotonic() - t < 3
 
 
+def test_sleep_calls_its_heartbeat_while_waiting():
+    ticks = []
+    engine._sleep(1.3, tick=lambda: ticks.append(1), every=0.4)
+    assert 2 <= len(ticks) <= 4                                          # roughly every 0.4 s over 1.3 s
+
+
+def test_a_cooldown_keeps_writing_progress_so_it_is_not_reported_stale(monkeypatch):
+    from datetime import datetime, timezone
+    from crawler.run import staleness
+
+    stamps = []
+
+    def sleep(seconds, stop=None, tick=None, every=30.0):
+        for _ in range(3):
+            tick()                                                       # what _sleep does every `every` seconds
+
+    monkeypatch.setattr(engine, "_sleep", sleep)
+    crawl(FakePortal(throttle={"detail": 1}), progress=lambda snap: stamps.append(snap))
+    waiting = [s for s in stamps if s["phase"].startswith("cooling down until")]
+    assert len(waiting) >= 4                                             # the initial one + three heartbeats
+    assert staleness(waiting[-1], now=datetime.now(timezone.utc)) == ""
+
+
 def test_progress_shows_the_cooldown_while_waiting(monkeypatch):
     seen = []
-    monkeypatch.setattr(engine, "_sleep", lambda seconds, stop=None: None)
+    monkeypatch.setattr(engine, "_sleep", lambda seconds, stop=None, **_: None)
     st = crawl(FakePortal(throttle={"detail": 1}), progress=lambda snap: seen.append(snap["phase"]))
     assert any(p.startswith("cooling down until") for p in seen)
     assert seen[-1] == "finished" and st["ok"] is True                    # and the phase is restored afterwards

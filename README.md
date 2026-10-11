@@ -178,10 +178,14 @@ and a dropped connection. Then the source **cools down for 15 minutes** and retr
 (the organisation list, one organisation's listing, or one detail page), up to 4 cool-downs per operation
 (about an hour). Still throttled: the source gives up for this run, **keeps everything saved so far**
 (nothing is deactivated) and the next run resumes. Other sources keep crawling meanwhile, and a source in
-cool-down shows as `cooling down until HH:MM (throttled)` in `--show-progress`.
+cool-down shows as `cooling down until HH:MM (throttled)` in `--show-progress` (the wait writes a progress
+heartbeat every 30 s, so a long cool-down is never flagged `STALE`).
 
-A dead host (DNS failure, connection refused or timed out while connecting), a 404 or a 500 are ordinary
-errors with **no** cool-down. On nProcure each client is its own host, so a client that stays throttled
+A **host that does not exist** (DNS failure; nProcure still lists clients whose subdomain was removed) is
+not a crawl failure: that organisation is skipped with a warning, counted in the status as `orgs_unreachable`,
+the run stays `ok`, and the tenders already stored for it stay active (we cannot tell they were removed).
+Connection refused or timed out while connecting, a 404 or a 500 are ordinary errors with **no** cool-down.
+On nProcure each client is its own host, so a client that stays throttled
 is skipped after its cool-downs and the crawl continues; three in a row end the source for this run.
 Tune per source in `sources.yaml`: `throttle_cooldown_minutes` (default 15) and `throttle_max_cooldowns`
 (default 4). The status records how many cool-downs were taken (`throttled`) and whether it gave up (`gave_up`).

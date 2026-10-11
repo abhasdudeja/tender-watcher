@@ -28,7 +28,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Iterable, List, Optional
 
-from .http import Throttled
+from .http import HostNotFound, Throttled
 from .progress import Progress
 
 log = logging.getLogger("tenderwatch.engine")
@@ -60,14 +60,19 @@ def now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _sleep(seconds: float, stop=None) -> None:
-    """Sleep `seconds`, waking early (within a second) if `stop` is set."""
+def _sleep(seconds: float, stop=None, tick=None, every: float = 30.0) -> None:
+    """Sleep `seconds`, waking early (within a second) if `stop` is set; call `tick()` every `every`
+    seconds meanwhile (a heartbeat, so a long wait is not mistaken for a hung crawl)."""
     end = time.monotonic() + seconds
+    next_tick = time.monotonic() + every
     while True:
         left = end - time.monotonic()
         if left <= 0 or (stop is not None and stop.is_set()):
             return
         time.sleep(min(1.0, left))
+        if tick is not None and time.monotonic() >= next_tick:
+            next_tick += every
+            tick()
 
 
 def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int] = None,
@@ -124,7 +129,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     max_cooldowns = int(src.get("throttle_max_cooldowns", DEFAULT_MAX_COOLDOWNS))
 
     status = {"slug": slug, "name": src.get("name", slug), "ok": True, "started": now(),
-              "orgs": 0, "orgs_skipped": 0, "orgs_failed": 0, "listed": 0, "new": 0, "changed": 0,
+              "orgs": 0, "orgs_skipped": 0, "orgs_failed": 0, "orgs_unreachable": 0, "listed": 0, "new": 0, "changed": 0,
               "details_failed": 0, "details_fetched": 0, "throttled": 0, "gave_up": False, "errors": []}
     seen = set()
     rows_parsed = 0
@@ -157,7 +162,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                 previous = prog.fields.get("phase") if prog else None
                 if prog:
                     prog.update(phase=f"cooling down until {until} (throttled)", force=True, **counters())
-                _sleep(cooldown_s, stop)
+                _sleep(cooldown_s, stop, tick=(lambda: prog.update()) if prog else None)   # heartbeat: not "stuck"
                 if prog and previous:
                     prog.update(phase=previous, force=True)
                 if stop is not None and stop.is_set():
@@ -314,7 +319,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
             prog.finish_org(skipped=True)
             continue
         log.info("[%d/%d] %s (portal says %d)", i, len(orgs), name, org["count"])
-        gave_up = throttled_out = False
+        gave_up = throttled_out = unreachable = False
         for attempt in range(MAX_RESTARTS + 1):
             try:
                 walk_org(org)
@@ -342,13 +347,23 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                                                        if gave_up else "skipping this organisation"))
                 status["gave_up"] = status["gave_up"] or gave_up
                 break
+            except HostNotFound as e:
+                # the portal lists a site that no longer exists: not a crawl failure (the run stays ok),
+                # and we cannot tell whether its tenders were removed, so what we hold stays active
+                unreachable = True
+                status["orgs_unreachable"] += 1
+                seen.update(r["id"] for r in store.values() if r.get("org") == name and r.get("active"))
+                log.warning("%s: host does not exist (%s) - skipping; stored tenders are kept", name, e)
+                break
             except Exception as e:  # noqa: BLE001
                 error(f"{name}: {e}")
                 break
         if not throttled_out:
             gave_up_in_a_row = 0                  # this organisation did not give up: the streak is broken
         got = rows_parsed - before
-        if got == 0 and org["count"] > 0 and status["ok"]:
+        if unreachable:
+            pass
+        elif got == 0 and org["count"] > 0 and status["ok"]:
             error(f"{name}: portal lists {org['count']} tenders but 0 rows parsed (markup changed?)")
         elif got < org["count"]:
             log.warning("%s: got %d of %d tenders", name, got, org["count"])

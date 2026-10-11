@@ -61,6 +61,12 @@ class Throttled(Exception):
     A DNS failure, a 404 or a 500 is NOT throttling and stays an ordinary error."""
 
 
+class HostNotFound(RequestException):
+    """The host name does not resolve (curl 6) even after the retries: the portal lists a site that no
+    longer exists (nProcure still lists clients whose subdomain was removed). Not throttling, so no
+    cool-down; the crawl engine skips that organisation and keeps what it has stored for it."""
+
+
 class _ThrottleSignal(RequestException):
     """HTTP 429 / 503 seen by _request (internal: lets the retry loop classify the failure)."""
 
@@ -153,7 +159,7 @@ class PortalSession:
         if not self._allowed(url):
             raise RobotsDisallowed(url)
         last_err: Exception = RuntimeError("no attempt made")
-        throttled = False
+        throttled = unresolved = False
         for attempt in range(RETRIES):
             self._throttle()
             t0 = time.monotonic()
@@ -176,12 +182,15 @@ class PortalSession:
             except RequestException as e:
                 last_err = e
                 throttled = _looks_like_throttling(e)
+                unresolved = getattr(e, "code", None) == 6
                 log.warning("%s %s failed (attempt %d/%d): %s", method, label or url[:80], attempt + 1, RETRIES, e)
                 if attempt < RETRIES - 1:                   # no pointless wait after the last attempt
                     time.sleep(min(60, 5 * (attempt + 1)))
         else:
             if throttled:
                 raise Throttled(str(last_err)) from last_err
+            if unresolved:
+                raise HostNotFound(str(last_err)) from last_err
             raise last_err
         self._dump(html, label)
         if not _allow_stale and is_stale(html):
