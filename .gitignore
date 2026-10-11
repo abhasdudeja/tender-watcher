@@ -12,3 +12,4 @@ logs/
 data/.crawl.lock
 data/*.migrating/
 docs/data/progress.json
+docs/data/progress/

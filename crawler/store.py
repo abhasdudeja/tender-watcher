@@ -264,6 +264,9 @@ def _pid_alive(pid: int) -> bool:
         return False
 
 
+pid_alive = _pid_alive
+
+
 def acquire_crawl_lock(data_dir: Path) -> Path:
     """Mark the data dir as being written by a crawl. Raises CrawlActive if another one holds it."""
     path = Path(data_dir) / LOCK_FILE

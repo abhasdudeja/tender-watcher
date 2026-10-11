@@ -7,7 +7,7 @@ only counts tenders actually worked on (orgs skipped as fresh are "done" instant
 inflate it).
 
 A Progress logs a one-line summary (at most every LOG_EVERY seconds, always on org change)
-and hands a snapshot dict to `sink`, which run.py writes to docs/data/progress.json.
+and hands a snapshot dict to `sink`, which run.py writes to docs/data/progress/<slug>.json.
 """
 from __future__ import annotations
 

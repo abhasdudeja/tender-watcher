@@ -8,7 +8,8 @@ source reported problems, 2 if another crawl holds the data directory.
 
   --index-only      rebuild the site index from data/ without crawling (read-only on the data; alias --build-only)
   --no-index        crawl only, don't touch docs/data (CI matrix jobs; a publish job indexes)
-  --show-progress   print the live progress.json of a crawl running elsewhere
+  --show-progress   print the live per-source progress (docs/data/progress/<slug>.json) of a crawl running
+                    elsewhere, flagging entries whose process is gone or stuck
 
 Old data/<slug>.jsonl files are migrated to Parquet automatically on first use - but never while
 a crawl may be writing them (see crawler/migrate.py).
@@ -18,11 +19,13 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import yaml
 
@@ -31,41 +34,123 @@ from .progress import format_line
 
 ROOT = Path(__file__).resolve().parent.parent
 CRAWLERS = {"gepnic": gepnic.crawl_source, "nprocure": nprocure.crawl_source}
-PROGRESS_FILE = "progress.json"
+PROGRESS_FILE = "progress.json"     # the old single-file layout (still read, never written)
+STALE_AFTER_SECONDS = 600           # a running source with no update for this long is flagged
 STATUS_FILE = "_status.json"      # last crawl status of a source, kept next to its data
 
 log = logging.getLogger("tenderwatch")
 
 
 # ------------------------------------------------------------------ progress / status files
+def progress_dir(site_dir: Path) -> Path:
+    return site_dir / "progress"
+
+
+def _write_json_atomic(path: Path, doc: dict) -> None:
+    """tmp file + replace, retried a few times: on Windows the swap can fail for a moment while a reader has the file open."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    for attempt in range(5):
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.02 * (attempt + 1))
+
+
 def make_progress_sink(site_dir: Path):
-    """Sink for Progress snapshots: keeps every source's latest snapshot in site_dir/progress.json."""
-    state: dict = {}
-    lock = threading.Lock()              # one writer per source thread
-    path = site_dir / PROGRESS_FILE
+    """Sink for Progress snapshots: one file per source, site_dir/progress/<slug>.json, stamped with this
+    process's pid. Separate files mean a source's updates never rewrite another's, a stale file is
+    attributable to one source and one process, and several crawls can share a site folder."""
+    locks: dict = {}
+    pid = os.getpid()
 
     def sink(snap: dict) -> None:
+        lock = locks.setdefault(snap["slug"], threading.Lock())
         with lock:
-            state[snap["slug"]] = snap
-            doc = {"updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "sources": state}
-            site_dir.mkdir(parents=True, exist_ok=True)
-            tmp = path.with_suffix(".tmp")
-            tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
-            tmp.replace(path)
+            _write_json_atomic(progress_dir(site_dir) / f"{snap['slug']}.json", dict(snap, pid=pid))
 
     return sink
 
 
+def _read_json_retry(path: Path, tries: int = 4):
+    """Read a JSON file that may be mid-swap (Windows briefly refuses reads during a replace); None if gone."""
+    for attempt in range(tries):
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return None
+        except (OSError, ValueError):
+            if attempt == tries - 1:
+                raise
+            time.sleep(0.03 * (attempt + 1))
+
+
+def read_progress(site_dir: Path) -> list:
+    """Every source's latest snapshot: the per-source files, plus the old single progress.json if a crawl
+    started by an older version is still writing it. Each snapshot gets a "legacy" flag when it came from there."""
+    snaps = []
+    pdir = progress_dir(site_dir)
+    for f in sorted(pdir.glob("*.json")) if pdir.exists() else []:
+        doc = _read_json_retry(f)
+        if doc:
+            snaps.append(doc)
+    old = _read_json_retry(site_dir / PROGRESS_FILE)
+    if old:
+        have = {s["slug"] for s in snaps}
+        snaps += [dict(s, legacy=True) for s in old.get("sources", {}).values() if s["slug"] not in have]
+    return snaps
+
+
+def staleness(snap: dict, now: Optional[datetime] = None) -> str:
+    """"" for a live (or finished) source, else why the snapshot should not be trusted."""
+    if snap.get("state") == "finished":
+        return ""
+    pid = snap.get("pid")
+    if pid and not store.pid_alive(int(pid)):
+        return f"STALE: process {pid} is gone (killed or crashed)"
+    try:
+        age = ((now or datetime.now(timezone.utc)) - datetime.strptime(snap["updated"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)).total_seconds()
+    except (KeyError, ValueError):
+        return ""
+    if age > STALE_AFTER_SECONDS:
+        return f"STALE: no update for {int(age // 60)} min (stuck?)"
+    return ""
+
+
 def show_progress(site_dir: Path) -> int:
-    path = site_dir / PROGRESS_FILE
-    if not path.exists():
-        print("no crawl in progress (no progress.json)")
+    snaps = read_progress(site_dir)
+    if not snaps:
+        print("no crawl in progress (no progress files)")
         return 0
-    doc = json.loads(path.read_text(encoding="utf-8"))
-    print(f"progress as of {doc['updated']}")
-    for snap in doc["sources"].values():
-        print(format_line(snap))
+    newest = max(s.get("updated", "") for s in snaps)
+    print(f"progress as of {newest}")
+    for snap in snaps:
+        why = staleness(snap)
+        print(format_line(snap) + (f"  [{why}]" if why else ""))
     return 0
+
+
+def clear_progress(site_dir: Path, slugs=None, only_dead: bool = False) -> None:
+    """Remove progress files: those of `slugs` (or all), and with only_dead just those whose process is gone."""
+    pdir = progress_dir(site_dir)
+    for f in list(pdir.glob("*.json")) if pdir.exists() else []:
+        if slugs is not None and f.stem not in slugs:
+            continue
+        if only_dead:
+            try:
+                doc = _read_json_retry(f) or {}
+            except (OSError, ValueError):
+                doc = {}
+            if doc.get("pid") and store.pid_alive(int(doc["pid"])) and int(doc["pid"]) != os.getpid():
+                continue
+        f.unlink(missing_ok=True)
+    for tmp in list(pdir.glob("*.tmp")) if pdir.exists() else []:
+        tmp.unlink(missing_ok=True)
+    (site_dir / PROGRESS_FILE).unlink(missing_ok=True)    # the old single file, if one was left behind
 
 
 def write_source_status(data_dir: Path, slug: str, status: dict) -> None:
@@ -218,6 +303,7 @@ def main(argv=None) -> int:
     except store.CrawlActive as e:
         log.error("%s", e)
         return 2
+    clear_progress(site_dir, only_dead=True)        # leftovers of a crawl that was killed
     sink = make_progress_sink(site_dir)
     stop = threading.Event()
     results: List[dict] = []
@@ -238,7 +324,7 @@ def main(argv=None) -> int:
             if not args.no_index and len(stores) == len(sources):   # never index from a partial set of stores
                 rebuild_index(stores, sources, data_dir, site_dir)
         finally:
-            (site_dir / PROGRESS_FILE).unlink(missing_ok=True)   # transient: must not be committed
+            clear_progress(site_dir, slugs={s["slug"] for s in selected})   # transient: must not be committed
             store.release_crawl_lock(data_dir)
     if stop.is_set():
         return 130                                                 # interrupted (Ctrl-C), progress saved
