@@ -273,6 +273,10 @@ def parse_tender_detail(html: str) -> Dict:
 class NprocurePortal:
     """Adapter that lets crawler.engine drive an nProcure state portal (see the interface in engine.py)."""
 
+    # Each client is its own host, so one that stays throttled (or hung) is skipped after its cool-downs
+    # instead of ending the whole source; three in a row do end it (see engine.MAX_ORGS_GIVEN_UP_IN_A_ROW).
+    throttle_scope = "org"
+
     def __init__(self, sess: PortalSession, base: str):
         self.sess, self.base = sess, base.rstrip("/")
 

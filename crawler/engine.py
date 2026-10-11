@@ -24,14 +24,19 @@ Adapter interface
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Iterable, List, Optional
 
+from .http import Throttled
 from .progress import Progress
 
 log = logging.getLogger("tenderwatch.engine")
 
 MAX_RESTARTS = 5
+DEFAULT_COOLDOWN_MINUTES = 15   # how long to back off when a portal throttles us (src["throttle_cooldown_minutes"])
+DEFAULT_MAX_COOLDOWNS = 4       # cool-downs per operation before giving up on the source for this run
+MAX_ORGS_GIVEN_UP_IN_A_ROW = 3  # per-host portals (throttle_scope "org"): abort the source after this many in a row
 DETAIL_CHUNK = 50          # checkpoint after this many detail pages
 REFRESH_SLACK_HOURS = 1.0  # tolerance so a cron that fires a few minutes late doesn't skip yesterday's tenders
 IST = timezone(timedelta(hours=5, minutes=30))   # portal dates are IST wall-clock
@@ -53,6 +58,16 @@ class DetailsBlocked(Exception):
 
 def now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _sleep(seconds: float, stop=None) -> None:
+    """Sleep `seconds`, waking early (within a second) if `stop` is set."""
+    end = time.monotonic() + seconds
+    while True:
+        left = end - time.monotonic()
+        if left <= 0 or (stop is not None and stop.is_set()):
+            return
+        time.sleep(min(1.0, left))
 
 
 def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int] = None,
@@ -85,6 +100,12 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     crawl gets active=False, inactive_since, and status "closed" (its closing date had
     passed) or "removed" (it vanished before its deadline). If it reappears it is reactivated.
     Partial runs (limit_orgs / only_orgs) and runs with an organisation-level error never deactivate.
+
+    Throttling: when the portal keeps answering 429/503/timeouts (http.Throttled), the source cools
+    down for src["throttle_cooldown_minutes"] (default 15) and retries the same operation, up to
+    src["throttle_max_cooldowns"] (default 4) times per operation; if the portal still pushes back the
+    source gives up for this run (everything saved so far is kept, the next run resumes). Other
+    sources keep crawling meanwhile.
     """
     change_keys, listing_fields, detail_fields = tuple(change_keys), tuple(listing_fields), tuple(detail_fields)
     slug = src["slug"]
@@ -97,9 +118,14 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     detail_cutoff = ((datetime.now(timezone.utc) - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
                      if max_age_days > 0 else "")
 
+    cooldown_s = float(src.get("throttle_cooldown_minutes", DEFAULT_COOLDOWN_MINUTES)) * 60
+    org_scope = getattr(portal, "throttle_scope", "source") == "org"   # per-host portals: a hung client != the whole source
+    gave_up_in_a_row = 0
+    max_cooldowns = int(src.get("throttle_max_cooldowns", DEFAULT_MAX_COOLDOWNS))
+
     status = {"slug": slug, "name": src.get("name", slug), "ok": True, "started": now(),
               "orgs": 0, "orgs_skipped": 0, "orgs_failed": 0, "listed": 0, "new": 0, "changed": 0,
-              "details_failed": 0, "details_fetched": 0, "errors": []}
+              "details_failed": 0, "details_fetched": 0, "throttled": 0, "gave_up": False, "errors": []}
     seen = set()
     rows_parsed = 0
     prog: Optional[Progress] = None
@@ -115,6 +141,27 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
         status["orgs_failed"] += 1
         if len(status["errors"]) < 20:
             status["errors"].append(msg)
+
+    def cooled(fn, what: str):
+        """Run fn(); if the portal throttles us, cool down and retry it (max_cooldowns times), else re-raise."""
+        for n in range(max_cooldowns + 1):
+            try:
+                return fn()
+            except Throttled as e:
+                if n == max_cooldowns or (stop is not None and stop.is_set()):
+                    raise
+                status["throttled"] += 1
+                until = (datetime.now() + timedelta(seconds=cooldown_s)).strftime("%H:%M")
+                log.warning("%s: portal is throttling us (%s) - cooling down %g min, retrying at %s (%d/%d)",
+                            what, e, cooldown_s / 60, until, n + 1, max_cooldowns)
+                previous = prog.fields.get("phase") if prog else None
+                if prog:
+                    prog.update(phase=f"cooling down until {until} (throttled)", force=True, **counters())
+                _sleep(cooldown_s, stop)
+                if prog and previous:
+                    prog.update(phase=previous, force=True)
+                if stop is not None and stop.is_set():
+                    raise
 
     def want_details_off() -> None:
         nonlocal want_details
@@ -174,18 +221,27 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
         """Phase A: list the org and checkpoint it.
         Phase B: fetch details in chunks, checkpointing after each chunk, so a crash,
         Ctrl-C or the per-run detail cap never loses more than DETAIL_CHUNK pages."""
-        nonlocal rows_parsed
         name = org["name"]
         pending: List = []
-        listed_here = 0
-        for row in portal.walk_org(org):
-            rows_parsed += 1
-            listed_here += 1
-            seen.add(row["id"])
-            rec = upsert(row, name)
-            if want_details and row.get("detail_ref") is not None and details_stale(rec):
-                pending.append((rec, row))
-        if listed_here == 0:
+        listed_here = [0]
+
+        def collect() -> None:
+            """List the org. Restartable: a throttled retry starts over and the counters are reset
+            (rows already stored are simply upserted again)."""
+            nonlocal rows_parsed
+            rows_parsed -= listed_here[0]
+            listed_here[0] = 0
+            pending.clear()
+            for row in portal.walk_org(org):
+                rows_parsed += 1
+                listed_here[0] += 1
+                seen.add(row["id"])
+                rec = upsert(row, name)
+                if want_details and row.get("detail_ref") is not None and details_stale(rec):
+                    pending.append((rec, row))
+
+        cooled(collect, name)
+        if listed_here[0] == 0:
             log.warning("%s: listing parsed 0 rows", name)
         if checkpoint:
             checkpoint(name)
@@ -202,15 +258,15 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
             if stop is not None and stop.is_set():
                 return
             try:
-                fetched = portal.fetch_detail(org, row)
+                fetched = cooled(lambda: portal.fetch_detail(org, row), f"{name}: detail {rec['id']}")
                 for k in detail_fields:
                     rec.pop(k, None)
                 rec.update(fetched)
                 rec.pop("needs_details", None)
                 rec["details_fetched_at"] = now()
                 status["details_fetched"] += 1
-            except Restart:
-                raise  # restart + re-list; already-fetched tenders are skipped next time
+            except (Restart, Throttled):
+                raise  # restart + re-list (already-fetched tenders are skipped next time) / give up on the source
             except DetailsBlocked as e:
                 detail_failed(str(e))
                 want_details_off()
@@ -225,7 +281,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                 prog.update(org_frac=n / len(todo), **counters())
 
     try:
-        orgs = portal.list_orgs()
+        orgs = cooled(portal.list_orgs, "organisation list")
     except Exception as e:  # noqa: BLE001
         error(f"organisation list: {e}")
         status["finished"] = now()
@@ -258,6 +314,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
             prog.finish_org(skipped=True)
             continue
         log.info("[%d/%d] %s (portal says %d)", i, len(orgs), name, org["count"])
+        gave_up = throttled_out = False
         for attempt in range(MAX_RESTARTS + 1):
             try:
                 walk_org(org)
@@ -276,9 +333,20 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                 except Exception as e:  # noqa: BLE001
                     error(f"{name}: restart failed: {e}")
                     break
+            except Throttled as e:
+                throttled_out = True
+                gave_up_in_a_row += 1
+                gave_up = not org_scope or gave_up_in_a_row >= MAX_ORGS_GIVEN_UP_IN_A_ROW
+                error(f"{name}: portal keeps throttling us ({e}) after {max_cooldowns} cool-downs of "
+                      f"{cooldown_s / 60:g} min - " + (f"giving up on {slug} for this run (saved progress is kept)"
+                                                       if gave_up else "skipping this organisation"))
+                status["gave_up"] = status["gave_up"] or gave_up
+                break
             except Exception as e:  # noqa: BLE001
                 error(f"{name}: {e}")
                 break
+        if not throttled_out:
+            gave_up_in_a_row = 0                  # this organisation did not give up: the streak is broken
         got = rows_parsed - before
         if got == 0 and org["count"] > 0 and status["ok"]:
             error(f"{name}: portal lists {org['count']} tenders but 0 rows parsed (markup changed?)")
@@ -289,6 +357,8 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
             checkpoint(name)
         prog.update(**counters())
         prog.finish_org()
+        if gave_up:
+            break
 
     status["listed"] = len(seen)
     status["active"] = sum(1 for r in store.values() if r.get("active"))

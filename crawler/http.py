@@ -55,6 +55,32 @@ class StaleSession(Exception):
     """The portal says our session (and every sp= link in it) has expired."""
 
 
+class Throttled(Exception):
+    """The portal is pushing back (HTTP 429/503, timeouts, dropped connections) even after the short
+    retries in PortalSession. The crawl engine reacts by cooling down (default 15 min) and retrying.
+    A DNS failure, a 404 or a 500 is NOT throttling and stays an ordinary error."""
+
+
+class _ThrottleSignal(RequestException):
+    """HTTP 429 / 503 seen by _request (internal: lets the retry loop classify the failure)."""
+
+
+def _looks_like_throttling(exc: Exception) -> bool:
+    """Did the server answer 429/503, go silent after we connected, or hang up on us?
+
+    curl 28 is a timeout; "Connection timed out" is the connect phase (a dead or unroutable host, not
+    throttling) while "Operation timed out ... bytes received" means we connected and it stopped answering.
+    curl 52 (empty reply) and 56 (receive failure) are the server dropping the connection."""
+    if isinstance(exc, _ThrottleSignal):
+        return True
+    code = getattr(exc, "code", None)
+    if code in (52, 56):
+        return True
+    if code == 28 or type(exc).__name__ in ("Timeout", "ReadTimeout"):
+        return "Connection timed out" not in str(exc) and type(exc).__name__ != "ConnectTimeout"
+    return False
+
+
 class RobotsDisallowed(Exception):
     pass
 
@@ -127,6 +153,7 @@ class PortalSession:
         if not self._allowed(url):
             raise RobotsDisallowed(url)
         last_err: Exception = RuntimeError("no attempt made")
+        throttled = False
         for attempt in range(RETRIES):
             self._throttle()
             t0 = time.monotonic()
@@ -137,6 +164,8 @@ class PortalSession:
                 r = self._http.request(method, url, **kw)
                 self.requests_made += 1
                 log.debug("%s %s [%s] %.2fs", method, label or url[:80], r.status_code, time.monotonic() - t0)
+                if r.status_code in (429, 503):
+                    raise _ThrottleSignal(f"HTTP {r.status_code}")
                 if r.status_code >= 500:
                     raise RequestException(f"HTTP {r.status_code}")
                 r.raise_for_status()
@@ -146,9 +175,13 @@ class PortalSession:
                 break
             except RequestException as e:
                 last_err = e
+                throttled = _looks_like_throttling(e)
                 log.warning("%s %s failed (attempt %d/%d): %s", method, label or url[:80], attempt + 1, RETRIES, e)
-                time.sleep(min(60, 5 * (attempt + 1)))
+                if attempt < RETRIES - 1:                   # no pointless wait after the last attempt
+                    time.sleep(min(60, 5 * (attempt + 1)))
         else:
+            if throttled:
+                raise Throttled(str(last_err)) from last_err
             raise last_err
         self._dump(html, label)
         if not _allow_stale and is_stale(html):
