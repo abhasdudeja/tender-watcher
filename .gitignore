@@ -1,6 +1,14 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.venv/
 debug/
+logs/
+.claude/
 *.tmp
 .DS_Store
+
+# transient crawl state - never commit
+data/.crawl.lock
+data/*.migrating/
+docs/data/progress.json

@@ -75,6 +75,9 @@
   .card details dt { color: var(--muted); }
   .card details dd { margin: 0; overflow-wrap: anywhere; }
   .more { margin: 16px auto 0; display: block; font: inherit; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+  .card.gone { opacity: 0.75; border-style: dashed; }
+  .badge { font-size: 0.72rem; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn); vertical-align: middle; margin-right: 6px; }
+  .more[hidden], .notice[hidden] { display: none; }
   .empty { color: var(--muted); padding: 32px 0; text-align: center; }
   .notice { background: var(--warn-soft); color: var(--text); border: 1px solid var(--warn); border-radius: var(--radius); padding: 10px 12px; font-size: 0.88rem; margin: 10px 0; }
   .status { margin-top: 28px; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
@@ -117,6 +120,7 @@
         <option value="50000000-">Over ₹5 crore</option>
       </select>
       <button id="fNew" title="Only tenders first seen in the last 2 days">New</button>
+      <button id="fClosed" title="Also show tenders that are no longer on the portal (closed or removed)">Show closed</button>
       <button id="fClear">Clear</button>
     </div>
   </div>

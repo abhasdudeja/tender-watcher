@@ -8,6 +8,12 @@
 #                location...). Costs ~1 request per new tender; capped by
 #                max_detail_fetches per run so a bad day can't stall the crawl.
 #
+# refresh_after_hours: (default 48) an organisation is re-listed at most this often; it is
+#                skipped without any request if its listing is fresh, the portal's tender count
+#                equals our stored active count, and no tender needs details.
+# detail_max_age_days: (default 14) a tender's detail page is fetched when it is new, when its
+#                listing changed (closing date, title, ...), or - as a safety net - when older than this.
+#
 # Add a new GePNIC state by copying a block and changing slug/name/base_url.
 
 sources:
@@ -17,7 +23,9 @@ sources:
     base_url: https://etenders.kerala.gov.in/nicgep/app
     enabled: true
     fetch_details: true
-    max_detail_fetches: 1500
+    max_detail_fetches: 8000
+    refresh_after_hours: 48   # re-list an organisation at most this often
+    detail_max_age_days: 14   # safety net: re-fetch a tender's details if older than this (0 = never)
     delay_seconds: 1.0
 
   # Examples (disabled). Enable once Kerala is working.

@@ -1,16 +1,28 @@
 name: Crawl tenders
 
+# One crawl job per source, in parallel (each portal is still hit at its own polite pace),
+# then a single publish job that assembles the data, rebuilds the site index and commits once -
+# so parallel jobs never race each other on git push.
+
 on:
   schedule:
-    - cron: "17 */6 * * *"     # every 6 hours (UTC). GitHub may delay by minutes.
+    - cron: "17 1 * * *"       # daily 01:17 UTC = 06:47 IST. GitHub may delay by minutes.
   workflow_dispatch:
     inputs:
+      source:
+        description: "Only these source slugs, space separated (default: all enabled; a disabled source runs if named)"
+        required: false
+        default: ""
       limit_orgs:
         description: "Only first N organisations (smoke test)"
         required: false
         default: ""
       no_details:
         description: "Skip tender detail pages"
+        type: boolean
+        default: false
+      force_refresh:
+        description: "Ignore the freshness rules: re-list every org, re-fetch every detail page"
         type: boolean
         default: false
 
@@ -21,10 +33,41 @@ concurrency:
   group: crawl
   cancel-in-progress: false
 
+env:
+  TENDERWATCH_MIGRATE_MIN_IDLE: "0"   # fresh checkout: nothing is writing the data, so legacy JSONL may migrate
+
 jobs:
-  crawl:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    outputs:
+      sources: ${{ steps.plan.outputs.sources }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install PyYAML
+      - id: plan
+        env:
+          ONLY: ${{ github.event.inputs.source }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, yaml
+          want = os.environ.get("ONLY", "").split()
+          cfg = yaml.safe_load(open("sources.yaml", encoding="utf-8"))["sources"]
+          slugs = [s["slug"] for s in cfg if (s["slug"] in want if want else s.get("enabled", True))]
+          print("sources=" + json.dumps(slugs))
+          PY
+
+  crawl:
+    needs: plan
+    if: ${{ needs.plan.outputs.sources != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350            # GitHub's per-job limit is 360
+    strategy:
+      fail-fast: false              # one portal being down must not stop the others
+      matrix:
+        source: ${{ fromJSON(needs.plan.outputs.sources) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -35,12 +78,55 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Crawl
+      - name: Crawl ${{ matrix.source }}
         run: |
-          ARGS=""
+          ARGS="--source ${{ matrix.source }} --no-index"
           if [ -n "${{ github.event.inputs.limit_orgs }}" ]; then ARGS="$ARGS --limit-orgs ${{ github.event.inputs.limit_orgs }}"; fi
           if [ "${{ github.event.inputs.no_details }}" = "true" ]; then ARGS="$ARGS --no-details"; fi
-          python -m crawler.run $ARGS || echo "crawler exited non-zero; committing whatever was gathered"
+          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then ARGS="$ARGS --force-refresh"; fi
+          python -m crawler.run $ARGS || echo "crawler exited non-zero; publishing whatever was gathered"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: data-${{ matrix.source }}
+          path: data/${{ matrix.source }}
+          if-no-files-found: ignore
+          retention-days: 1
+
+  publish:
+    needs: [plan, crawl]
+    if: ${{ always() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: data-*
+          path: data-artifacts
+
+      - name: Assemble data
+        run: |
+          mkdir -p data/_legacy
+          for d in data-artifacts/data-*; do
+            [ -d "$d" ] || continue
+            slug="${d#data-artifacts/data-}"
+            rm -rf "data/$slug"
+            cp -r "$d" "data/$slug"
+            # a verified migration moved the old JSONL aside inside the crawl job; mirror that here
+            if [ -f "data/$slug.jsonl" ]; then mv "data/$slug.jsonl" "data/_legacy/$slug.jsonl"; fi
+          done
+
+      - name: Rebuild site index
+        run: python -m crawler.run --index-only
 
       - name: Commit data
         run: |
@@ -50,7 +136,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "no changes"
           else
-            ACTIVE=$(python -c "import json;print(len(json.load(open('docs/data/index.json'))['tenders']))")
+            ACTIVE=$(python -c "import json;print(sum(s['active'] for s in json.load(open('docs/data/index.json'))['sources']))")
             git commit -m "crawl: $(date -u +%Y-%m-%dT%H:%MZ) - $ACTIVE active tenders"
             git push
           fi
