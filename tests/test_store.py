@@ -165,3 +165,25 @@ def test_newer_format_is_refused(tmp_path):
     (tmp_path / "k" / "_meta.json").write_text(json.dumps({"format": S.FORMAT_VERSION + 1}))
     with pytest.raises(S.StoreError, match="newer"):
         S.open_source(tmp_path, "k")
+
+
+# ---------------------------------------------------------------- TLS: portals with an incomplete certificate chain
+def test_extra_ca_bundle_adds_the_intermediate_and_keeps_certifi_roots(tmp_path):
+    import certifi
+    from crawler.http import ca_bundle
+
+    assert ca_bundle(None) is None                              # nothing extra -> default verification, untouched
+    extra = Path(__file__).parent.parent / "certs" / "sectigo-ov-r36.pem"
+    path = ca_bundle(str(extra))
+    text = Path(path).read_text()
+    base = Path(certifi.where()).read_text()
+    assert text.count("BEGIN CERTIFICATE") == base.count("BEGIN CERTIFICATE") + 1   # roots kept + exactly one more
+    assert extra.read_text().strip() in text
+    assert ca_bundle(str(extra)) == path                         # cached by content hash, no rewrite each session
+
+
+def test_bundled_intermediate_is_one_pem_certificate_with_provenance_notes():
+    # (the chain to a trusted root was verified with `openssl verify`; see certs/README.md)
+    pem =Path(__file__).parent.parent / "certs" / "sectigo-ov-r36.pem"
+    assert pem.read_text().startswith("-----BEGIN CERTIFICATE-----") and pem.read_text().count("BEGIN CERTIFICATE") == 1
+    assert "Sectigo Public Server Authentication CA OV R36" in (Path(__file__).parent.parent / "certs" / "README.md").read_text()

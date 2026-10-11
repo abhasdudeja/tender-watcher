@@ -27,11 +27,13 @@ def main(argv=None) -> int:
     ap.add_argument("out_dir")
     ap.add_argument("--follow", type=int, default=0, help="also fetch up to N same-host links")
     ap.add_argument("--match", default="", help="only follow links whose href/text contains this")
+    ap.add_argument("--ca-cert", default=None, help="extra CA PEM for portals with an incomplete chain (see certs/README.md)")
     args = ap.parse_args(argv)
 
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    sess = PortalSession(args.url, delay_seconds=1.5, dump_dir=str(out), ignore_robots=True)
+    sess = PortalSession(args.url, delay_seconds=1.5, dump_dir=str(out), ignore_robots=True,
+                         extra_ca_certs=args.ca_cert)
     host = urlsplit(args.url).netloc
 
     html = sess.get(args.url, _allow_stale=True, label="start")

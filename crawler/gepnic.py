@@ -279,7 +279,8 @@ def crawl_source(src: Dict, store: Dict[str, Dict], limit_orgs: Optional[int] = 
     base = src["base_url"].rstrip("/")
     slug = src["slug"]
     sess = PortalSession(base, delay_seconds=float(src.get("delay_seconds", 1.0)),
-                         dump_dir=dump_dir, ignore_robots=bool(src.get("ignore_robots", False)))
+                         dump_dir=dump_dir, ignore_robots=bool(src.get("ignore_robots", False)),
+                         extra_ca_certs=src.get("extra_ca_certs"))
     want_details = bool(src.get("fetch_details")) and not no_details
     max_details = int(src.get("max_detail_fetches", 500))
     org_list_url = f"{base}?page=FrontEndTendersByOrganisation&service=page"

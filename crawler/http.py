@@ -5,15 +5,18 @@ source and `restart()` throws the cookies away when the portal reports a stale s
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 import re
+import tempfile
 import time
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 
+import certifi
 from curl_cffi import requests
 from curl_cffi.requests.exceptions import RequestException
 
@@ -33,6 +36,21 @@ RETRIES = 3
 log = logging.getLogger("tenderwatch.http")
 
 
+def ca_bundle(extra: Optional[str]) -> Optional[str]:
+    """Path of a CA bundle = certifi's roots + one extra PEM (a missing intermediate), or None.
+
+    Verification stays ON: some portals serve an incomplete chain, and the fix is to supply the
+    public intermediate (see certs/README.md), never to turn verification off."""
+    if not extra:
+        return None
+    extra_pem = Path(extra).read_bytes()
+    tag = hashlib.sha1(extra_pem).hexdigest()[:10]
+    out = Path(tempfile.gettempdir()) / f"tenderwatch-ca-{tag}.pem"
+    if not out.exists():
+        out.write_bytes(Path(certifi.where()).read_bytes() + b"\n" + extra_pem)
+    return str(out)
+
+
 class StaleSession(Exception):
     """The portal says our session (and every sp= link in it) has expired."""
 
@@ -45,7 +63,7 @@ class PortalSession:
     requests_made = 0
 
     def __init__(self, base_url: str, delay_seconds: float = 1.0, dump_dir: Optional[str] = None,
-                 ignore_robots: bool = False):
+                 ignore_robots: bool = False, extra_ca_certs: Optional[str] = None):
         self.base_url = base_url
         self.delay = max(0.0, float(delay_seconds))
         self.dump_dir = Path(dump_dir) if dump_dir else None
@@ -54,13 +72,13 @@ class PortalSession:
         self._dump_n = 0
         self._last = 0.0
         self._robots: Optional[RobotFileParser] = None
+        self.verify = ca_bundle(extra_ca_certs) or True
         self._http = self._new_http()
         if self.dump_dir:
             self.dump_dir.mkdir(parents=True, exist_ok=True)
 
-    @staticmethod
-    def _new_http() -> "requests.Session":
-        s = requests.Session(impersonate=IMPERSONATE)
+    def _new_http(self) -> "requests.Session":
+        s = requests.Session(impersonate=IMPERSONATE, verify=self.verify)
         s.headers["Accept-Language"] = "en-IN,en;q=0.9"
         s.headers["From"] = CONTACT
         return s
