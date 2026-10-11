@@ -43,8 +43,9 @@ sources:
   # tenders; Surat, Ahmedabad, Vadodara, Rajkot ... are clients of it (smctender.nprocure.com is
   # just Surat's view of the same data). Parser not written yet - see crawler/nprocure.py.
   # extra_ca_certs: the server omits its TLS intermediate (see certs/README.md).
-  # ignore_robots: true is the deliberate switch for public-notice portals (the site has no
-  # robots rules anyway: /robots.txt returns its HTML app shell).
+  # ignore_robots: true is the deliberate switch for public-notice portals. The site has no
+  # robots rules today (/robots.txt returns its HTML app shell). DECISION: leave it true, and
+  # flip it to false as soon as the portal publishes real robots.txt rules.
   - slug: gujarat
     name: Gujarat eProcurement (nProcure)
     type: nprocure
