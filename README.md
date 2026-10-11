@@ -183,8 +183,10 @@ page, raw. (`value` is absent when the portal says `NA`/`0`.)
 - **Gujarat state portal (nProcure)** — `tender.nprocure.com`, source `gujarat` (enabled, parser not
   written yet, so it reports "not implemented"). One portal for ~165 *clients* (departments, boards,
   municipal corporations, all Nagarpalikas) with ~4,000 active tenders and a per-client count up
-  front, which maps onto the per-organisation shards and skip rules. Surat, Ahmedabad, Vadodara,
-  Rajkot ... are clients of it; `smctender.nprocure.com` is just Surat's view of the same data.
+  front, which maps onto the per-organisation shards and skip rules. Each client has its own subdomain
+  (listed in the state home page's dropdown; e.g. Surat = `smctender.nprocure.com`), and that client
+  page is the authoritative per-client listing (its total equals the dropdown count; the state-level
+  table is ~35 tenders short), so the crawl goes client by client.
   Findings so far: no robots rules (`/robots.txt` returns the app's HTML); the public listing needs
   no login or CAPTCHA (that is only on sign-up); the server omits its TLS intermediate (handled by
   `extra_ca_certs`, see `certs/README.md`); the listing is `POST /beforeLoginTenderTableList`

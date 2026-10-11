@@ -7,11 +7,20 @@ from the portal's operator has not been obtained. Decide that before writing the
 
 What is known (see README "Roadmap"): the portal serves ~165 "clients" (departments, boards,
 municipal corporations, Nagarpalikas) with a tender count each in the Client dropdown.
-Choosing a client only offers "Go to subdomain" (e.g. smctender.nprocure.com); the state
-portal's own table already lists ALL ~4,058 tenders, each row naming its department
-("NAGARPALIKA-Gondal Nagar Seva Sadan", "DGVCL-City Division - Navsari").
+THE RIGHT WAY (confirmed): crawl per client, on the client's own subdomain. The state home
+page's Client dropdown carries, per <option>, the client id (value), the tender count (in the
+text) and the client's host (class "subDomainName_https://<host>:443"), e.g.
+Surat -> smctender.nprocure.com, Ahmedabad MC -> amctender, Rajkot MC -> rmctender,
+Roads and Buildings -> rnbtender. That is in the RAW html (no JavaScript needed): 165 clients,
+165 distinct hosts, 87 with tenders. Each host serves the same app and the same public table
+without login; its listing total equals the dropdown count (Surat 79 = 79, Rajkot 27 = 27),
+which is the portal count to compare with, as for Kerala's organisations.
+The state portal's own table (~4,058 rows) is NOT used: it is ~35 short of the clients' sum
+(4,093), and the Search button on the state page is not how a client's tenders are reached.
+All hosts share the *.nprocure.com certificate, so `extra_ca_certs` covers them all.
 
-CONFIRMED against the live portal (2026-10-12), plain HTTP, no browser:
+CONFIRMED against the live portal (2026-10-12), plain HTTP, no browser (on the state host and
+on the Surat and Rajkot client hosts; use the CLIENT host for a client's tenders):
 * Detail: `POST /view-nit-home` form fields `_csrf=token&tenderid=<id>` returns the full
   "View NIT" page (~36 KB: organisation, department, notice no, category, estimated cost,
   bid dates, remarks ...). No cookie, Referer or encryption is needed. Documents are
