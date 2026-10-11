@@ -1,9 +1,16 @@
-"""Stub for nProcure portals (e.g. smctender.nprocure.com).
+"""Stub for nProcure portals (the Gujarat state portal, tender.nprocure.com).
 
-NOT IMPLEMENTED. smctender.nprocure.com publishes a robots.txt that disallows
-automated access, and nProcure is a private platform ((n)Code Solutions).
-Obtain permission or an API from the municipal corporation / nProcure before
-writing a parser here.
+NOT IMPLEMENTED. nProcure is a private platform ((n)Code Solutions). Its public tender
+listing needs no login or CAPTCHA and the site has no robots rules (/robots.txt returns the
+app's HTML), but the page's JavaScript encrypts the listing request, and permission or an API
+from the portal's operator has not been obtained. Decide that before writing the parser.
+
+What is known (see README "Roadmap"): the portal serves ~165 "clients" (departments, boards,
+municipal corporations, Nagarpalikas) with a tender count each in the Client dropdown;
+listing = POST /beforeLoginTenderTableList (DataTables, 10/50/100/150 rows per page);
+details = POST /view-nit-home (tender id), documents /view-nit-document, corrigenda
+/view-nit-amendment. TLS: the server omits its intermediate certificate; use the source's
+`extra_ca_certs` (certs/README.md).
 
 To implement, mirror crawler/gepnic.py:
 

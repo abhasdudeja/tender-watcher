@@ -38,18 +38,20 @@ sources:
   #   max_detail_fetches: 500
   #   delay_seconds: 1.5
   #
-  # ROADMAP: Surat Municipal Corporation on nProcure (government portal run by
-  # (n)Code Solutions). Parser not written yet - the site serves a robots.txt
-  # that blocks the cloud fetcher, so capture pages from your own machine with
-  #   python -m crawler.capture https://smctender.nprocure.com/ tests/fixtures/nprocure
-  # and then implement crawler/nprocure.py against those files.
-  # ignore_robots: true is the deliberate switch for public-notice portals.
-  - slug: surat-smc
-    name: Surat Municipal Corporation (nProcure)
+  # ROADMAP: Gujarat state portal on nProcure (run by (n)Code Solutions). One portal for ~165
+  # "clients" (departments, boards, municipal corporations, all Nagarpalikas), ~4,000 active
+  # tenders; Surat, Ahmedabad, Vadodara, Rajkot ... are clients of it (smctender.nprocure.com is
+  # just Surat's view of the same data). Parser not written yet - see crawler/nprocure.py.
+  # extra_ca_certs: the server omits its TLS intermediate (see certs/README.md).
+  # ignore_robots: true is the deliberate switch for public-notice portals (the site has no
+  # robots rules anyway: /robots.txt returns its HTML app shell).
+  - slug: gujarat
+    name: Gujarat eProcurement (nProcure)
     type: nprocure
-    base_url: https://smctender.nprocure.com
+    base_url: https://tender.nprocure.com
     enabled: true
     ignore_robots: true
+    extra_ca_certs: certs/sectigo-ov-r36.pem
     fetch_details: true
-    max_detail_fetches: 300
+    max_detail_fetches: 6000
     delay_seconds: 2.0

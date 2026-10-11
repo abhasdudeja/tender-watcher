@@ -180,12 +180,17 @@ page, raw. (`value` is absent when the portal says `NA`/`0`.)
 
 ## Roadmap
 
-- **Surat Municipal Corporation (nProcure)** — `smctender.nprocure.com`. Public government notices
-  on a vendor-run platform. Its robots.txt blocks generic crawlers, so the cloud build environment
-  could not fetch pages to write the parser. To do it:
-  `python -m crawler.capture https://smctender.nprocure.com/ tests/fixtures/nprocure --follow 10`
-  from your own machine, then implement `crawler/nprocure.py` against those files and set
-  `enabled: true` (the block already has `ignore_robots: true`).
+- **Gujarat state portal (nProcure)** — `tender.nprocure.com`, source `gujarat` (enabled, parser not
+  written yet, so it reports "not implemented"). One portal for ~165 *clients* (departments, boards,
+  municipal corporations, all Nagarpalikas) with ~4,000 active tenders and a per-client count up
+  front, which maps onto the per-organisation shards and skip rules. Surat, Ahmedabad, Vadodara,
+  Rajkot ... are clients of it; `smctender.nprocure.com` is just Surat's view of the same data.
+  Findings so far: no robots rules (`/robots.txt` returns the app's HTML); the public listing needs
+  no login or CAPTCHA (that is only on sign-up); the server omits its TLS intermediate (handled by
+  `extra_ca_certs`, see `certs/README.md`); the listing is `POST /beforeLoginTenderTableList`
+  (DataTables, up to 150 rows per page) whose request body the page's JavaScript encrypts; tender
+  details are `POST /view-nit-home`. The open question is how to produce that request (re-implement
+  the encryption vs drive a headless browser) and whether to ask the operator for permission first.
 - CPPP (`eprocure.gov.in/eprocure/app`) and other state GePNIC portals: config only. Before adding
   many, read each portal's organisation-list page (one request, shows tender counts up front) to size
   the work: at ~1.2 s per detail page, lakhs of tenders only stay practical with change-driven detail

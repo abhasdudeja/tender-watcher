@@ -8,7 +8,7 @@ A source opts in with `extra_ca_certs: certs/<file>.pem` in `sources.yaml`.
 
 | file | needed by | what it is |
 |---|---|---|
-| `sectigo-ov-r36.pem` | smctender.nprocure.com (`*.nprocure.com`) | Sectigo Public Server Authentication CA OV R36, signed by "Sectigo Public Server Authentication Root R46" (already trusted via `certifi`) |
+| `sectigo-ov-r36.pem` | tender.nprocure.com and smctender.nprocure.com (`*.nprocure.com`) | Sectigo Public Server Authentication CA OV R36, signed by "Sectigo Public Server Authentication Root R46" (already trusted via `certifi`) |
 
 Provenance of `sectigo-ov-r36.pem`: downloaded on 2026-10-12 from the "CA Issuers" URL in the server's own
 certificate (`http://crt.sectigo.com/SectigoPublicServerAuthenticationCAOVR36.crt`, 1,616 bytes), converted DER to PEM,

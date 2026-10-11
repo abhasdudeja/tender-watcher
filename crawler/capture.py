@@ -1,6 +1,6 @@
 """Save pages from a portal to disk so a parser can be written against real HTML.
 
-    python -m crawler.capture https://smctender.nprocure.com/ tests/fixtures/nprocure
+    python -m crawler.capture https://tender.nprocure.com/ tests/fixtures/nprocure --ca-cert certs/sectigo-ov-r36.pem
     python -m crawler.capture "https://etenders.kerala.gov.in/nicgep/app?page=FrontEndTendersByOrganisation&service=page" tests/fixtures/kerala --follow 3
 
 Fetches the URL, then (with --follow N) up to N same-host links from it, in one
