@@ -1,0 +1,47 @@
+# Tender sources. One block per portal.
+#
+# type: gepnic   -> NIC GePNIC eProcurement portals (etenders.kerala.gov.in,
+#                   eprocure.gov.in/eprocure/app, most state portals).
+#                   The crawler appends GePNIC page names to base_url.
+#
+# fetch_details: also open each new tender's detail page (value, category,
+#                location...). Costs ~1 request per new tender; capped by
+#                max_detail_fetches per run so a bad day can't stall the crawl.
+#
+# Add a new GePNIC state by copying a block and changing slug/name/base_url.
+
+sources:
+  - slug: kerala
+    name: Kerala eTenders
+    type: gepnic
+    base_url: https://etenders.kerala.gov.in/nicgep/app
+    enabled: true
+    fetch_details: true
+    max_detail_fetches: 1500
+    delay_seconds: 1.0
+
+  # Examples (disabled). Enable once Kerala is working.
+  # - slug: cppp
+  #   name: Central Public Procurement Portal
+  #   type: gepnic
+  #   base_url: https://eprocure.gov.in/eprocure/app
+  #   enabled: false
+  #   fetch_details: false
+  #   max_detail_fetches: 500
+  #   delay_seconds: 1.5
+  #
+  # ROADMAP: Surat Municipal Corporation on nProcure (government portal run by
+  # (n)Code Solutions). Parser not written yet - the site serves a robots.txt
+  # that blocks the cloud fetcher, so capture pages from your own machine with
+  #   python -m crawler.capture https://smctender.nprocure.com/ tests/fixtures/nprocure
+  # and then implement crawler/nprocure.py against those files.
+  # ignore_robots: true is the deliberate switch for public-notice portals.
+  - slug: surat-smc
+    name: Surat Municipal Corporation (nProcure)
+    type: nprocure
+    base_url: https://smctender.nprocure.com
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 300
+    delay_seconds: 2.0

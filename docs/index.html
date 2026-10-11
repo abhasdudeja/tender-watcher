@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TenderWatch</title>
+<meta name="description" content="Search active government procurement tenders collected from public portals.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<style>
+  :root {
+    --bg: #f6f7f4; --surface: #ffffff; --text: #1b1f1a; --muted: #5f665c;
+    --line: #dde1d8; --accent: #1f6f43; --accent-ink: #ffffff; --soft: #e8f1ea;
+    --warn: #b4571a; --warn-soft: #fbeee3; --radius: 10px;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141714; --surface: #1d211d; --text: #e9ece6; --muted: #a2a99e;
+      --line: #2e342e; --accent: #5fbf84; --accent-ink: #0d1a11; --soft: #203328;
+      --warn: #e8955a; --warn-soft: #3a2a1c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141714; --surface: #1d211d; --text: #e9ece6; --muted: #a2a99e;
+    --line: #2e342e; --accent: #5fbf84; --accent-ink: #0d1a11; --soft: #203328;
+    --warn: #e8955a; --warn-soft: #3a2a1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+  body { line-height: 1.45; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 20px 0 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.35rem; margin: 0; letter-spacing: -0.01em; }
+  header .meta { color: var(--muted); font-size: 0.85rem; }
+  .search { position: sticky; top: 0; background: var(--bg); padding: 8px 0 10px; z-index: 5; }
+  .search input[type=search] {
+    width: 100%; font: inherit; font-size: 1.05rem; padding: 12px 14px; border: 1px solid var(--line);
+    border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none;
+  }
+  .search input[type=search]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--soft); }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .filters select, .filters button {
+    font: inherit; font-size: 0.9rem; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); color: var(--text); max-width: 100%;
+  }
+  .filters select { flex: 1 1 150px; min-width: 0; }
+  .filters button { cursor: pointer; }
+  .filters button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .count { color: var(--muted); font-size: 0.85rem; margin: 10px 0 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .count select { font: inherit; font-size: 0.85rem; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+    display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; align-items: start;
+  }
+  .card .title { font-weight: 600; margin: 0; font-size: 0.98rem; grid-column: 1; }
+  .card .org { color: var(--muted); font-size: 0.85rem; grid-column: 1; }
+  .card .tags { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+  .card .tags span { background: var(--soft); color: var(--text); padding: 2px 7px; border-radius: 999px; }
+  .card .when { grid-column: 2; grid-row: 1 / span 3; text-align: right; font-size: 0.85rem; min-width: 118px; }
+  .card .when .d { font-weight: 600; display: block; }
+  .card .when .soon { color: var(--warn); }
+  .card .when .val { color: var(--muted); display: block; margin-top: 4px; }
+  .card .actions { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px; font-size: 0.85rem; }
+  .card .actions button, .card .actions a.btn {
+    font: inherit; font-size: 0.82rem; padding: 5px 10px; border-radius: 7px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--text); cursor: pointer; text-decoration: none;
+  }
+  .card .actions a.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .card .actions .id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); font-size: 0.78rem; }
+  .card details { grid-column: 1 / -1; font-size: 0.85rem; }
+  .card details summary { cursor: pointer; color: var(--muted); }
+  .card details dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 12px; margin: 8px 0 0; }
+  .card details dt { color: var(--muted); }
+  .card details dd { margin: 0; overflow-wrap: anywhere; }
+  .more { margin: 16px auto 0; display: block; font: inherit; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+  .empty { color: var(--muted); padding: 32px 0; text-align: center; }
+  .notice { background: var(--warn-soft); color: var(--text); border: 1px solid var(--warn); border-radius: var(--radius); padding: 10px 12px; font-size: 0.88rem; margin: 10px 0; }
+  .status { margin-top: 28px; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+  .status table { border-collapse: collapse; width: 100%; }
+  .status td, .status th { text-align: left; padding: 3px 8px 3px 0; vertical-align: top; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  @media (max-width: 560px) {
+    .card { grid-template-columns: 1fr; }
+    .card .when { grid-column: 1; grid-row: auto; text-align: left; display: flex; gap: 10px; flex-wrap: wrap; }
+    .card .when .val { margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TenderWatch</h1>
+    <div class="meta" id="meta">Loading…</div>
+  </header>
+
+  <div class="search">
+    <input type="search" id="q" placeholder="Search title, organisation, reference, tender ID… (e.g. electric bus, Kozhikode, PWD)" autocomplete="off" autofocus>
+    <div class="filters">
+      <select id="fSource" title="Source portal"><option value="">All sources</option></select>
+      <select id="fOrg" title="Organisation"><option value="">All organisations</option></select>
+      <select id="fCat" title="Tender category"><option value="">Works / Goods / Services</option></select>
+      <select id="fClose" title="Closing within">
+        <option value="">Any closing date</option>
+        <option value="1">Closing today / tomorrow</option>
+        <option value="7">Closing within 7 days</option>
+        <option value="15">Closing within 15 days</option>
+        <option value="30">Closing within 30 days</option>
+      </select>
+      <select id="fValue" title="Estimated value">
+        <option value="">Any value</option>
+        <option value="0-500000">Under ₹5 lakh</option>
+        <option value="500000-5000000">₹5 lakh – ₹50 lakh</option>
+        <option value="5000000-50000000">₹50 lakh – ₹5 crore</option>
+        <option value="50000000-">Over ₹5 crore</option>
+      </select>
+      <button id="fNew" title="Only tenders first seen in the last 2 days">New</button>
+      <button id="fClear">Clear</button>
+    </div>
+  </div>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <div class="count">
+    <span id="count"></span>
+    <label>Sort <select id="sort">
+      <option value="close">Closing soonest</option>
+      <option value="pub">Newest published</option>
+      <option value="value">Highest value</option>
+      <option value="org">Organisation</option>
+    </select></label>
+  </div>
+
+  <div class="list" id="list"></div>
+  <button class="more" id="more" hidden>Show more</button>
+
+  <div class="status" id="status"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
