@@ -9,29 +9,27 @@ The portal returns ALL of an organisation's tenders in a single response (paging
 client-side only), so there is normally no Next link; _find_next is a fallback in case
 a portal version paginates server-side.
 
-Parsers are pure functions over HTML so they can be tested against saved fixtures.
+Parsers are pure functions over HTML so they can be tested against saved fixtures. The crawl
+loop itself (refresh policy, retention, checkpoints, progress) lives in crawler/engine.py and is
+shared with the other portal types; this module only provides the GePNIC adapter for it.
 """
 from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional
+from datetime import datetime
+from typing import Dict, Iterator, List, Optional
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
+from . import engine
+from .engine import now as _now  # noqa: F401  (re-exported: tests and callers use gepnic._now)
 from .http import PortalSession, StaleSession  # noqa: F401  (StaleSession re-exported)
-from .progress import Progress
 
 log = logging.getLogger("tenderwatch.gepnic")
 
-MAX_RESTARTS = 5
 MAX_PAGES_PER_ORG = 3000
-DETAIL_CHUNK = 50          # checkpoint after this many detail pages
-CHANGE_KEYS = ("close", "open", "title", "ref", "pub")   # listing fields whose change means "re-fetch details"
-REFRESH_SLACK_HOURS = 1.0  # tolerance so a cron that fires a few minutes late doesn't skip yesterday's tenders
-IST = timezone(timedelta(hours=5, minutes=30))   # portal dates are IST wall-clock
 # Keys filled in from the detail page; wiped before a refresh so a field the portal
 # dropped doesn't linger from an older fetch.
 DETAIL_FIELDS = ("category", "product_category", "value", "emd", "location", "pincode", "bid_end",
@@ -244,8 +242,49 @@ def looks_like_captcha_wall(html: str) -> bool:
 
 
 # ---------------------------------------------------------------- crawl
-def _now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+class GepnicPortal:
+    """Adapter that lets crawler.engine drive a GePNIC portal (see the interface in engine.py)."""
+
+    def __init__(self, sess: PortalSession, base: str):
+        self.sess, self.base = sess, base
+        self.org_list_url = f"{base}?page=FrontEndTendersByOrganisation&service=page"
+
+    def list_orgs(self) -> List[Dict]:
+        return parse_org_list(self.sess.get(self.org_list_url, label="orgs"), self.base)
+
+    def walk_org(self, org: Dict) -> Iterator[Dict]:
+        url, visited, pages = org["url"], set(), 0
+        while url and url not in visited and pages < MAX_PAGES_PER_ORG:
+            visited.add(url)
+            pages += 1
+            try:
+                page = parse_tender_list(self.sess.get(url, label="list"), self.base)
+            except StaleSession as e:
+                raise engine.Restart(str(e)) from e
+            for row in page["rows"]:
+                row["detail_ref"] = row.pop("detail_url", None)
+                yield row
+            url = page["next_url"]
+
+    def fetch_detail(self, org: Dict, row: Dict) -> Dict:
+        try:
+            html = self.sess.get(row["detail_ref"], label="detail")
+        except StaleSession as e:
+            raise engine.Restart(str(e)) from e
+        if looks_like_captcha_wall(html):
+            raise engine.DetailsBlocked("detail pages appear CAPTCHA-gated; skipping details for the rest of this run")
+        fetched = parse_tender_detail(html)
+        if not fetched.get("details"):
+            raise engine.DetailFailed(f"detail {row['id']}: no caption/value pairs parsed (markup changed?)")
+        return fetched
+
+    def restart_org(self, org: Dict) -> Optional[Dict]:
+        self.sess.restart()
+        fresh = {o["name"]: o for o in self.list_orgs()}
+        return fresh.get(org["name"])
+
+    def requests_made(self) -> int:
+        return getattr(self.sess, "requests_made", 0)
 
 
 def crawl_source(src: Dict, store: Dict[str, Dict], limit_orgs: Optional[int] = None,
@@ -254,254 +293,13 @@ def crawl_source(src: Dict, store: Dict[str, Dict], limit_orgs: Optional[int] = 
                  force_refresh: bool = False, stop=None) -> Dict:
     """Crawl one GePNIC portal into `store` (id -> record). Returns a status dict.
 
-    checkpoint(org_name): called after each org's listing, every DETAIL_CHUNK detail pages and after
-    each org, with the org in flight so the store can rewrite just that org's shard; the caller
-    does a full save afterwards (deactivations touch many orgs).
-    progress(snapshot): optional sink for the per-source progress counter (see crawler/progress.py).
-    stop: optional threading.Event; when set the crawl winds down after its current request
-    (the run is then flagged not-ok, so nothing is deactivated).
-
-    Refresh policy (force_refresh ignores all of it):
-      * a tender's detail page is fetched when it is new, when its LISTING changed since we last
-        saw it (closing/opening date, title, ref, publish date - flagged needs_details so an
-        interrupted run still picks it up), or as a safety net when the details are older than
-        src["detail_max_age_days"] (default 14, 0 = never). Otherwise it is left alone;
-      * an organisation is re-listed at most every src["refresh_after_hours"] (default 48), and is
-        skipped outright (no listing request) when its listing is fresh, the portal's tender count
-        equals our stored active count, and no tender needs details. A count mismatch forces a
-        re-list even inside the window.
-    Retention: nothing is ever deleted. A tender missing from a complete, error-free full
-    crawl gets active=False, inactive_since, and status "closed" (its closing date had
-    passed) or "removed" (it vanished before its deadline). If it reappears it is reactivated.
-    Records missing from a complete, error-free full crawl are marked inactive;
-    partial runs (limit_orgs / only_orgs) never deactivate.
+    The policy (refresh rules, retention, checkpoints, progress, stop) is documented on
+    crawler.engine.crawl; this only builds the session and the GePNIC adapter.
     """
     base = src["base_url"].rstrip("/")
-    slug = src["slug"]
     sess = PortalSession(base, delay_seconds=float(src.get("delay_seconds", 1.0)),
                          dump_dir=dump_dir, ignore_robots=bool(src.get("ignore_robots", False)),
                          extra_ca_certs=src.get("extra_ca_certs"))
-    want_details = bool(src.get("fetch_details")) and not no_details
-    max_details = int(src.get("max_detail_fetches", 500))
-    org_list_url = f"{base}?page=FrontEndTendersByOrganisation&service=page"
-    refresh_hours = float(src.get("refresh_after_hours", 48))     # how often an org is re-listed
-    cutoff = (datetime.now(timezone.utc) - timedelta(hours=refresh_hours - REFRESH_SLACK_HOURS)
-              ).strftime("%Y-%m-%dT%H:%M:%SZ")
-    max_age_days = float(src.get("detail_max_age_days", 14))      # safety net only; 0 disables
-    detail_cutoff = ((datetime.now(timezone.utc) - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
-                     if max_age_days > 0 else "")
-
-    status = {"slug": slug, "name": src.get("name", slug), "ok": True, "started": _now(),
-              "orgs": 0, "orgs_skipped": 0, "orgs_failed": 0, "listed": 0, "new": 0, "changed": 0,
-              "details_failed": 0, "details_fetched": 0, "errors": []}
-    seen = set()
-    rows_parsed = 0
-    prog: Optional[Progress] = None
-
-    def counters() -> Dict:
-        return dict(listed=len(seen), new=status["new"], details_fetched=status["details_fetched"],
-                    errors=len(status["errors"]))
-
-    def error(msg: str) -> None:
-        """An organisation-level failure: the listing is incomplete, so the run is not ok and nothing is deactivated."""
-        log.error(msg)
-        status["ok"] = False
-        status["orgs_failed"] += 1
-        if len(status["errors"]) < 20:
-            status["errors"].append(msg)
-
-    def want_details_off() -> None:
-        nonlocal want_details
-        want_details = False
-
-    def detail_failed(msg: str) -> None:
-        """One detail page failed: counted and reported, but the listing is intact so the run stays ok."""
-        log.warning(msg)
-        status["details_failed"] += 1
-        if len(status["errors"]) < 20:
-            status["errors"].append(msg)
-
-    def load_orgs() -> List[Dict]:
-        return parse_org_list(sess.get(org_list_url, label="orgs"), base)
-
-    def upsert(row: Dict, org: str) -> Dict:
-        now = _now()
-        rec = store.get(row["id"])
-        if rec is None:
-            rec = {"id": row["id"], "source": slug, "first_seen": now}
-            store[row["id"]] = rec
-            status["new"] += 1
-        elif "details_fetched_at" in rec and any(
-                row.get(k) and rec.get(k) and row[k] != rec[k] for k in CHANGE_KEYS):
-            rec["needs_details"] = True      # e.g. closing date extended / corrigendum: refresh its details
-            status["changed"] += 1
-        for k in ("ref", "title", "chain", "pub", "close", "open"):
-            if row.get(k):
-                rec[k] = row[k]
-        rec.update(org=org, last_seen=now, active=True, status="active")
-        rec.pop("inactive_since", None)   # reappeared after having dropped off
-        return rec
-
-    def details_stale(rec: Dict) -> bool:
-        fetched = rec.get("details_fetched_at", "")
-        return bool(force_refresh or not fetched or rec.get("needs_details")
-                    or (detail_cutoff and fetched < detail_cutoff))
-
-    def fresh_org_ids(name: str, count: int):
-        """Ids of an org's stored tenders if it can be skipped this run, else None."""
-        if force_refresh:
-            return None
-        recs = [r for r in store.values() if r.get("org") == name and r.get("active")]
-        if not recs or len(recs) != count:          # new org, or portal count != our count
-            return None
-        if max(r.get("last_seen", "") for r in recs) < cutoff:
-            return None                             # listing older than the refresh window
-        if want_details and any(details_stale(r) for r in recs):
-            return None
-        return [r["id"] for r in recs]
-
-    def mark_inactive(rec: Dict) -> None:
-        now_ist = datetime.now(IST).strftime("%Y-%m-%dT%H:%M")
-        rec["active"] = False
-        rec["last_seen_active"] = rec.get("last_seen")
-        rec["inactive_since"] = _now()
-        rec["status"] = "closed" if rec.get("close") and rec["close"] <= now_ist else "removed"
-
-    def walk_org(name: str, url: str) -> None:
-        """Phase A: list the org (normally one big response) and checkpoint it.
-        Phase B: fetch details in chunks, checkpointing after each chunk, so a crash,
-        Ctrl-C or the per-run detail cap never loses more than DETAIL_CHUNK pages."""
-        nonlocal rows_parsed
-        visited = set()
-        pending: List[Dict] = []
-        pages = 0
-        while url and url not in visited and pages < MAX_PAGES_PER_ORG:
-            visited.add(url)
-            pages += 1
-            page = parse_tender_list(sess.get(url, label="list"), base)
-            if not page["rows"] and pages == 1:
-                log.warning("%s: first page parsed 0 rows", name)
-            for row in page["rows"]:
-                rows_parsed += 1
-                seen.add(row["id"])
-                rec = upsert(row, name)
-                if want_details and row.get("detail_url") and details_stale(rec):
-                    pending.append((rec, row["detail_url"]))
-            url = page["next_url"]
-        if checkpoint:
-            checkpoint(name)
-        if prog:
-            prog.update(phase="details", org_frac=0.0, force=True, **counters())
-        if not pending:
-            return
-        # never-detailed tenders first, then changed/oldest ones; newest published first within each
-        pending.sort(key=lambda p: p[0].get("pub") or "", reverse=True)
-        pending.sort(key=lambda p: p[0].get("details_fetched_at", ""))
-        todo = pending[: max(0, max_details - status["details_fetched"])]
-        log.info("%s: %d need details, fetching %d this run", name, len(pending), len(todo))
-        for n, (rec, durl) in enumerate(todo, 1):
-            if stop is not None and stop.is_set():
-                return
-            try:
-                html = sess.get(durl, label="detail")
-                if looks_like_captcha_wall(html):
-                    detail_failed("detail pages appear CAPTCHA-gated; skipping details for the rest of this run")
-                    want_details_off()
-                    return
-                fetched = parse_tender_detail(html)
-                if not fetched.get("details"):
-                    detail_failed(f"detail {rec['id']}: no caption/value pairs parsed (markup changed?)")
-                    continue
-                for k in DETAIL_FIELDS:
-                    rec.pop(k, None)
-                rec.update(fetched)
-                rec.pop("needs_details", None)
-                rec["details_fetched_at"] = _now()
-                status["details_fetched"] += 1
-            except StaleSession:
-                raise  # restart + re-list; already-fetched tenders are skipped next time
-            except Exception as e:  # noqa: BLE001
-                detail_failed(f"detail {rec['id']}: {e.__class__.__name__}: {e}"[:200])
-            if checkpoint and n % DETAIL_CHUNK == 0:
-                checkpoint(name)
-            if prog and (n % 10 == 0 or n == len(todo)):
-                prog.update(org_frac=n / len(todo), **counters())
-
-    try:
-        orgs = load_orgs()
-    except Exception as e:  # noqa: BLE001
-        error(f"organisation list: {e}")
-        status["finished"] = _now()
-        status["requests"] = getattr(sess, "requests_made", 0)
-        return status
-    if not orgs:
-        error("organisation list parsed empty")
-    full_run = not limit_orgs and not only_orgs
-    if only_orgs:
-        wanted = {o.lower() for o in only_orgs}
-        orgs = [o for o in orgs if o["name"].lower() in wanted]
-    if limit_orgs:
-        orgs = orgs[:limit_orgs]
-
-    prog = Progress(slug, status["name"], len(orgs), sum(o["count"] for o in orgs), sink=progress)
-    for i, org in enumerate(orgs, 1):
-        if stop is not None and stop.is_set():
-            error("interrupted before all organisations were crawled")
-            break
-        name, url = org["name"], org["url"]
-        before = rows_parsed
-        prog.start_org(name, org["count"])
-        skip_ids = fresh_org_ids(name, org["count"])
-        if skip_ids is not None:
-            log.info("%s: unchanged (%d tenders, fresh within %gh) - skipped", name, len(skip_ids), refresh_hours)
-            seen.update(skip_ids)          # still on the portal, so don't deactivate them below
-            status["orgs"] += 1
-            status["orgs_skipped"] += 1
-            prog.update(**counters())
-            prog.finish_org(skipped=True)
-            continue
-        log.info("[%d/%d] %s (portal says %d)", i, len(orgs), name, org["count"])
-        for attempt in range(MAX_RESTARTS + 1):
-            try:
-                walk_org(name, url)
-                break
-            except StaleSession:
-                if attempt == MAX_RESTARTS:
-                    error(f"{name}: session kept going stale")
-                    break
-                log.info("%s: stale session, restarting (%d)", name, attempt + 1)
-                try:
-                    sess.restart()
-                    fresh = {o["name"]: o["url"] for o in load_orgs()}
-                    if name not in fresh:
-                        error(f"{name}: missing from organisation list after restart")
-                        break
-                    url = fresh[name]
-                except Exception as e:  # noqa: BLE001
-                    error(f"{name}: restart failed: {e}")
-                    break
-            except Exception as e:  # noqa: BLE001
-                error(f"{name}: {e}")
-                break
-        got = rows_parsed - before
-        if got == 0 and org["count"] > 0 and status["ok"]:
-            error(f"{name}: portal lists {org['count']} tenders but 0 rows parsed (markup changed?)")
-        elif got < org["count"]:
-            log.warning("%s: got %d of %d tenders", name, got, org["count"])
-        status["orgs"] += 1
-        if checkpoint:
-            checkpoint(name)
-        prog.update(**counters())
-        prog.finish_org()
-
-    status["listed"] = len(seen)
-    status["active"] = sum(1 for r in store.values() if r.get("active"))
-    if full_run and status["ok"] and orgs:
-        for tid, rec in store.items():
-            if tid not in seen and rec.get("active"):
-                mark_inactive(rec)
-    status["finished"] = _now()
-    status["requests"] = getattr(sess, "requests_made", 0)
-    prog.update(**counters())
-    prog.finish()
-    return status
+    return engine.crawl(src, store, GepnicPortal(sess, base), limit_orgs=limit_orgs, only_orgs=only_orgs,
+                        no_details=no_details, checkpoint=checkpoint, progress=progress,
+                        force_refresh=force_refresh, stop=stop, detail_fields=DETAIL_FIELDS)

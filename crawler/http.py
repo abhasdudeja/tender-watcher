@@ -12,7 +12,7 @@ import re
 import tempfile
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 
@@ -71,7 +71,7 @@ class PortalSession:
         self.requests_made = 0
         self._dump_n = 0
         self._last = 0.0
-        self._robots: Optional[RobotFileParser] = None
+        self._robots: Dict[str, RobotFileParser] = {}     # per host
         self.verify = ca_bundle(extra_ca_certs) or True
         self._http = self._new_http()
         if self.dump_dir:
@@ -93,19 +93,20 @@ class PortalSession:
     def _allowed(self, url: str) -> bool:
         if self.ignore_robots:
             return True
-        if self._robots is None:
-            parts = urlsplit(url)
+        parts = urlsplit(url)
+        rp = self._robots.get(parts.netloc)
+        if rp is None:
             rp = RobotFileParser()
             try:
                 r = self._http.get(f"{parts.scheme}://{parts.netloc}/robots.txt", timeout=TIMEOUT)
                 if r.status_code == 200:
-                    rp.parse(r.text.splitlines())
+                    rp.parse(r.content.decode("utf-8", errors="replace").splitlines())
                 else:
                     rp.parse([])  # no robots.txt -> everything allowed
             except RequestException:
                 rp.parse([])
-            self._robots = rp
-        return self._robots.can_fetch("*", url) and self._robots.can_fetch("tenderwatch", url)
+            self._robots[parts.netloc] = rp
+        return rp.can_fetch("*", url) and rp.can_fetch("tenderwatch", url)
 
     def _throttle(self) -> None:
         wait = self._last + self.delay - time.monotonic()
@@ -115,6 +116,14 @@ class PortalSession:
 
     # ---- fetch ----
     def get(self, url: str, _allow_stale: bool = False, label: str = "") -> str:
+        return self._request("GET", url, _allow_stale=_allow_stale, label=label)
+
+    def post(self, url: str, data=None, headers: Optional[Dict[str, str]] = None, label: str = "") -> str:
+        """POST a form (dict) or a raw body (str, e.g. JSON); returns the decoded response text."""
+        return self._request("POST", url, data=data, headers=headers, label=label)
+
+    def _request(self, method: str, url: str, data=None, headers: Optional[Dict[str, str]] = None,
+                 _allow_stale: bool = False, label: str = "") -> str:
         if not self._allowed(url):
             raise RobotsDisallowed(url)
         last_err: Exception = RuntimeError("no attempt made")
@@ -122,19 +131,22 @@ class PortalSession:
             self._throttle()
             t0 = time.monotonic()
             try:
-                r = self._http.get(url, timeout=LIST_TIMEOUT if label == "list" else TIMEOUT)
+                kw = {"timeout": LIST_TIMEOUT if label == "list" else TIMEOUT}
+                if method == "POST":
+                    kw.update(data=data, headers=headers)
+                r = self._http.request(method, url, **kw)
                 self.requests_made += 1
-                log.debug("GET %s [%s] %.2fs", label or url[:80], r.status_code, time.monotonic() - t0)
+                log.debug("%s %s [%s] %.2fs", method, label or url[:80], r.status_code, time.monotonic() - t0)
                 if r.status_code >= 500:
                     raise RequestException(f"HTTP {r.status_code}")
                 r.raise_for_status()
-                if "charset" not in r.headers.get("Content-Type", "").lower():
-                    r.encoding = "utf-8"
-                html = r.text
+                # decode ourselves: some portals send a stray non-UTF-8 byte despite charset=UTF-8,
+                # which must not make the whole page (or JSON listing) unreadable
+                html = r.content.decode(_charset(r.headers.get("Content-Type", "")), errors="replace")
                 break
             except RequestException as e:
                 last_err = e
-                log.warning("GET %s failed (attempt %d/%d): %s", label or url[:80], attempt + 1, RETRIES, e)
+                log.warning("%s %s failed (attempt %d/%d): %s", method, label or url[:80], attempt + 1, RETRIES, e)
                 time.sleep(min(60, 5 * (attempt + 1)))
         else:
             raise last_err
@@ -148,7 +160,19 @@ class PortalSession:
             return
         self._dump_n += 1
         safe = re.sub(r"[^A-Za-z0-9]+", "_", label or "page")[:40]
-        (self.dump_dir / f"{self._dump_n:03d}_{safe}.html").write_text(html, encoding="utf-8")
+        ext = "json" if html.lstrip()[:1] in "{[" else "html"
+        (self.dump_dir / f"{self._dump_n:03d}_{safe}.{ext}").write_text(html, encoding="utf-8")
+
+
+def _charset(content_type: str) -> str:
+    """The charset named in a Content-Type header, defaulting to UTF-8 (and to UTF-8 if unknown)."""
+    m = re.search(r"charset=([\w\-]+)", content_type, re.I)
+    name = m.group(1) if m else "utf-8"
+    try:
+        "".encode(name)
+    except LookupError:
+        return "utf-8"
+    return name
 
 
 def is_stale(html: str) -> bool:

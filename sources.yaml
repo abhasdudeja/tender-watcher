@@ -38,10 +38,10 @@ sources:
   #   max_detail_fetches: 500
   #   delay_seconds: 1.5
   #
-  # ROADMAP: Gujarat state portal on nProcure (run by (n)Code Solutions). One portal for ~165
-  # "clients" (departments, boards, municipal corporations, all Nagarpalikas), ~4,000 active
-  # tenders; Surat, Ahmedabad, Vadodara, Rajkot ... are clients of it (smctender.nprocure.com is
-  # just Surat's view of the same data). Parser not written yet - see crawler/nprocure.py.
+  # Gujarat state portal on nProcure (run by (n)Code Solutions). One portal for ~165 "clients"
+  # (departments, boards, municipal corporations, all Nagarpalikas), ~4,000 active tenders;
+  # Surat, Ahmedabad, Vadodara, Rajkot ... are clients of it (smctender.nprocure.com is just
+  # Surat's view of the same data). Crawled client by client: see crawler/nprocure.py.
   # extra_ca_certs: the server omits its TLS intermediate (see certs/README.md).
   # ignore_robots: true is the deliberate switch for public-notice portals. The site has no
   # robots rules today (/robots.txt returns its HTML app shell). DECISION: leave it true, and

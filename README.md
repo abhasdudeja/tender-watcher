@@ -72,8 +72,11 @@ GePNIC (NIC) portals — eprocure.gov.in and most state eTenders sites — need 
     delay_seconds: 1.0
 ```
 
-Other platforms need a parser module exposing `crawl_source(src, store, ...)` (see
-`crawler/nprocure.py` for the contract) and a line in `crawler/run.py:CRAWLERS`.
+Other platforms need a small adapter for the shared crawl loop (`crawler/engine.py` documents the
+interface: list organisations, walk one, fetch a detail) plus a `crawl_source` and a line in
+`crawler/run.py:CRAWLERS`. `crawler/gepnic.py` and `crawler/nprocure.py` are the two examples; the
+refresh policy, retention, checkpoints and progress all come from the engine, identically for every
+portal type.
 
 ### How the GePNIC crawl works
 
@@ -94,6 +97,27 @@ loses little and a re-run carries on where it stopped.
 Because deep links expire, the site cannot link straight to a tender. **Open portal** opens the
 portal home and **Copy Tender ID** puts the ID on the clipboard; the portal's *Search with ID*
 box takes it.
+
+### How the nProcure crawl works (Gujarat state portal)
+
+`tender.nprocure.com` is one portal for ~165 *clients* (departments, boards, municipal corporations,
+all Nagarpalikas), ~4,000 active tenders. A client plays the role of a GePNIC organisation:
+
+1. **Client list** — the state home page's dropdown carries, per client, its id, its tender count and
+   its own subdomain (e.g. Surat → `smctender.nprocure.com`); clients with 0 tenders are skipped.
+2. **Listing** — per client, on its own host: `POST /beforeLoginTenderTableList`, 150 rows per page.
+   That page's total equals the dropdown count (the state-level table is ~35 tenders short, so it is
+   not used). The request body is encrypted by the portal's own JavaScript with a key it sends in the
+   same body (obfuscation, not access control); `crawler/nprocure.py` reproduces it exactly and a test
+   pins it to a vector the portal's own CryptoJS decrypts and re-encrypts byte for byte.
+3. **Detail** — `POST /view-nit-home` (`_csrf=token&tenderid=<id>`): a plain form, no session needed.
+
+Records match the GePNIC ones (`org` = client, `chain` = `Client||Department`, `value`, `emd`,
+`category`, `pub`, `bid_end`, `documents`, …). The detail page also contains a bidder's digital-signature
+certificate (a person's name); that table is never stored. The `*.nprocure.com` certificate's
+intermediate is missing from the server's chain, so the source sets `extra_ca_certs` (`certs/README.md`).
+Cost: ~88 requests for all listings plus one per tender (~4,100 at the 2 s delay ≈ 2.3 h the first time,
+then only new/changed tenders). Needs the `cryptography` package for AES.
 
 ### Parallel crawling
 
@@ -180,19 +204,11 @@ page, raw. (`value` is absent when the portal says `NA`/`0`.)
 
 ## Roadmap
 
-- **Gujarat state portal (nProcure)** — `tender.nprocure.com`, source `gujarat` (enabled, parser not
-  written yet, so it reports "not implemented"). One portal for ~165 *clients* (departments, boards,
-  municipal corporations, all Nagarpalikas) with ~4,000 active tenders and a per-client count up
-  front, which maps onto the per-organisation shards and skip rules. Each client has its own subdomain
-  (listed in the state home page's dropdown; e.g. Surat = `smctender.nprocure.com`), and that client
-  page is the authoritative per-client listing (its total equals the dropdown count; the state-level
-  table is ~35 tenders short), so the crawl goes client by client.
-  Findings so far: no robots rules (`/robots.txt` returns the app's HTML); the public listing needs
-  no login or CAPTCHA (that is only on sign-up); the server omits its TLS intermediate (handled by
-  `extra_ca_certs`, see `certs/README.md`); the listing is `POST /beforeLoginTenderTableList`
-  (DataTables, up to 150 rows per page) whose request body the page's JavaScript encrypts; tender
-  details are `POST /view-nit-home`. The open question is how to produce that request (re-implement
-  the encryption vs drive a headless browser) and whether to ask the operator for permission first.
+- **nProcure (Gujarat)**: the first full crawl of the `gujarat` source is still to be run (a single
+  small client was crawled live and verified; see "How the nProcure crawl works"). Open items:
+  whether to ask the operator for permission, and corrigenda (the listing shows a corrigendum link per
+  tender but its format is not captured yet, so for now a revised closing date or estimate, or the
+  14-day safety net, triggers the detail refresh). Other states on nProcure would be config only.
 - CPPP (`eprocure.gov.in/eprocure/app`) and other state GePNIC portals: config only. Before adding
   many, read each portal's organisation-list page (one request, shows tender counts up front) to size
   the work: at ~1.2 s per detail page, lakhs of tenders only stay practical with change-driven detail
