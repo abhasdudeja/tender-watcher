@@ -43,6 +43,7 @@ MAX_EVENTS = 300                # throttle telemetry kept per run
 MAX_DETAIL_WORKERS = 8          # upper bound for src["detail_workers"]
 MAX_ORGS_GIVEN_UP_IN_A_ROW = 3  # per-host portals (throttle_scope "org"): abort the source after this many in a row
 DETAIL_CHUNK = 50          # checkpoint after this many detail pages
+PROGRESS_EVERY = 5         # parallel details: refresh the progress counter after this many pages
 REFRESH_SLACK_HOURS = 1.0  # tolerance so a cron that fires a few minutes late doesn't skip yesterday's tenders
 IST = timezone(timedelta(hours=5, minutes=30))   # portal dates are IST wall-clock
 DEFAULT_CHANGE_KEYS = ("close", "open", "title", "ref", "pub")   # listing fields whose change means "re-fetch details"
@@ -304,28 +305,32 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                         hit.set()
                         raise
 
+                retry, last, applied = [], None, 0
                 with ThreadPoolExecutor(max_workers=workers) as pool:
                     futures = [(item, pool.submit(task, item)) for item in chunk]
-                retry, last = [], None
-                for item, fut in futures:                  # results are applied in order, on this thread
-                    rec = item[0]
-                    try:
-                        apply_detail(rec, fut.result())
-                    except _Skip:
-                        retry.append(item)
-                    except Throttled as e:
-                        retry.append(item)
-                        last = e
-                    except Restart:
-                        raise
-                    except DetailsBlocked as e:
-                        detail_failed(str(e))
-                        want_details_off()
-                        return
-                    except DetailFailed as e:
-                        detail_failed(str(e))
-                    except Exception as e:  # noqa: BLE001
-                        detail_failed(f"detail {rec['id']}: {e.__class__.__name__}: {e}"[:200])
+                    # results are applied in order, on this thread, as each page completes
+                    for item, fut in futures:                  # results are applied in order, on this thread
+                        rec = item[0]
+                        try:
+                            apply_detail(rec, fut.result())
+                        except _Skip:
+                            retry.append(item)
+                        except Throttled as e:
+                            retry.append(item)
+                            last = e
+                        except Restart:
+                            raise
+                        except DetailsBlocked as e:
+                            detail_failed(str(e))
+                            want_details_off()
+                            return
+                        except DetailFailed as e:
+                            detail_failed(str(e))
+                        except Exception as e:  # noqa: BLE001
+                            detail_failed(f"detail {rec['id']}: {e.__class__.__name__}: {e}"[:200])
+                        applied += 1
+                        if prog and applied % PROGRESS_EVERY == 0:
+                            prog.update(org_frac=min(1.0, (lo + applied) / len(todo)), **counters())
                 if checkpoint:
                     checkpoint(name)
                 if prog:
