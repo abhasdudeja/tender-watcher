@@ -61,7 +61,6 @@ sources:
     delay_seconds: 1.0
     detail_workers: 2
 
-  # robots.txt (mahatenders.gov.in) says "User-agent: * / Disallow: /"; ignored on purpose (owner's decision).
   - slug: maharashtra
     name: Maharashtra State PP
     type: gepnic
@@ -92,6 +91,84 @@ sources:
     name: Rajasthan
     type: gepnic
     base_url: https://eproc.rajasthan.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: uttarpradesh
+    name: Uttar Pradesh
+    type: gepnic
+    base_url: https://etender.up.nic.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: punjab
+    name: Punjab
+    type: gepnic
+    base_url: https://eproc.punjab.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: haryana
+    name: Haryana
+    type: gepnic
+    base_url: http://etenders.hry.nic.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+    
+  - slug: jk
+    name: Jammu & Kashmir
+    type: gepnic
+    base_url: https://jktenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: uttrakhand
+    name: Uttrakhand
+    type: gepnic
+    base_url: https://uktenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: himachal
+    name: Himachal Pradesh
+    type: gepnic
+    base_url: https://hptenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: true
     fetch_details: true
