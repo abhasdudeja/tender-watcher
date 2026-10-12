@@ -13,9 +13,11 @@
 #                equals our stored active count, and no tender needs details.
 # detail_max_age_days: (default 14) a tender's detail page is fetched when it is new, when its
 #                listing changed (closing date, title, ...), or - as a safety net - when older than this.
-# detail_workers: (nProcure only, default 1) detail pages fetched at once; GePNIC ignores it.
-# ignore_robots: leave it out (robots.txt is honoured) unless the portal's robots.txt has no real
-#                rules; see the gujarat block. Flip it back to false when rules appear.
+# detail_workers: detail pages fetched at once (default 1). nProcure does this for real; GePNIC portals
+#                log 'ignored' and fetch one at a time for now (one portal session per source).
+# ignore_robots: true skips the portal's robots.txt. Set per portal on purpose: gujarat has no real rules;
+#                maharashtra publishes 'Disallow: /' and the owner decided to crawl it anyway.
+#                Flip a source back to false when its robots.txt starts to matter.
 #
 # Add a new GePNIC state by copying a block and changing slug/name/base_url.
 
@@ -30,6 +32,7 @@ sources:
     refresh_after_hours: 48   # re-list an organisation at most this often
     detail_max_age_days: 14   # safety net: re-fetch a tender's details if older than this (0 = never)
     delay_seconds: 1.0
+    detail_workers: 2
 
   - slug: gujarat
     name: Gujarat eProcurement (nProcure)
@@ -45,49 +48,55 @@ sources:
     detail_workers: 2
     delay_seconds: 2.0
 
-  # Every GePNIC state below uses the same tuning as kerala: copy it for the next one.
   - slug: govIndia
     name: Govt of India - CPPP
     type: gepnic
     base_url: https://etenders.gov.in/eprocure/app
     enabled: true
+    ignore_robots: true
     fetch_details: true
-    max_detail_fetches: 8000
+    max_detail_fetches: 6000
     refresh_after_hours: 48
     detail_max_age_days: 14
     delay_seconds: 1.0
+    detail_workers: 2
 
-  # NOTE: https://mahatenders.gov.in/robots.txt says "User-agent: * / Disallow: /". Robots are honoured
-  # (as for kerala), so a crawl of this source is refused until the portal changes that or you decide otherwise.
+  # robots.txt (mahatenders.gov.in) says "User-agent: * / Disallow: /"; ignored on purpose (owner's decision).
   - slug: maharashtra
     name: Maharashtra State PP
     type: gepnic
     base_url: https://mahatenders.gov.in/nicgep/app
     enabled: true
+    ignore_robots: true
     fetch_details: true
-    max_detail_fetches: 8000
+    max_detail_fetches: 6000
     refresh_after_hours: 48
     detail_max_age_days: 14
     delay_seconds: 1.0
+    detail_workers: 2
 
   - slug: madhyapradesh
     name: Madhya Pradesh
     type: gepnic
     base_url: https://mptenders.gov.in/nicgep/app
     enabled: true
+    ignore_robots: true
     fetch_details: true
-    max_detail_fetches: 8000
+    max_detail_fetches: 6000
     refresh_after_hours: 48
     detail_max_age_days: 14
     delay_seconds: 1.0
+    detail_workers: 2
 
   - slug: rajasthan
     name: Rajasthan
     type: gepnic
     base_url: https://eproc.rajasthan.gov.in/nicgep/app
     enabled: true
-    fetch_details: true
-    max_detail_fetches: 8000
+    ignore_robots: true
+    fetch_details: false
+    max_detail_fetches: 6000
     refresh_after_hours: 48
     detail_max_age_days: 14
     delay_seconds: 1.0
+    detail_workers: 2
