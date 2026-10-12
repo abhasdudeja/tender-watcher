@@ -301,8 +301,8 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
                         raise _Skip()
                     try:
                         return portal.fetch_detail(org, item[1])
-                    except Throttled:
-                        hit.set()
+                    except (Throttled, Restart):
+                        hit.set()                          # the others stop starting requests: stale / throttled
                         raise
 
                 retry, last, applied = [], None, 0

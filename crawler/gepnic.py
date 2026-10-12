@@ -245,6 +245,11 @@ def looks_like_captcha_wall(html: str) -> bool:
 class GepnicPortal:
     """Adapter that lets crawler.engine drive a GePNIC portal (see the interface in engine.py)."""
 
+    # Detail pages are plain GETs of links from the listing, so several can be in flight (src["detail_workers"]);
+    # a Stale Session in one stops the others and restarts the org (engine.fetch_parallel). The shared
+    # PortalSession still caps the start rate at 1/delay_seconds.
+    parallel_details = True
+
     def __init__(self, sess: PortalSession, base: str):
         self.sess, self.base = sess, base
         self.org_list_url = f"{base}?page=FrontEndTendersByOrganisation&service=page"

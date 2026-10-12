@@ -80,6 +80,32 @@ def test_a_portal_that_keeps_throttling_makes_the_source_give_up_after_the_usual
     assert len(store) == 12                                     # the listing is kept; only details are missing
 
 
+def test_a_stale_session_stops_the_other_workers_and_the_org_is_restarted_once(sleeps):
+    class Stale(ParallelPortal):
+        def __init__(self, *a, **kw):
+            super().__init__(*a, **kw)
+            self.fetches, self.restarts, self.broken = 0, 0, True
+
+        def fetch_detail(self, org, row):
+            with self.lock:
+                self.fetches += 1
+                n = self.fetches
+            if self.broken and n == 4:
+                self.broken = False
+                raise engine.Restart("Stale Session")
+            return super().fetch_detail(org, row)
+
+        def restart_org(self, org):
+            self.restarts += 1
+            return org
+
+    portal, store = Stale(rows=12), {}
+    st = crawl(portal, store, src=src(3))
+    assert portal.restarts == 1 and st["ok"] is True and st["details_fetched"] == 12
+    assert portal.fetches <= 12 + 3                 # at most the requests already in flight were wasted
+    assert all(r.get("details") for r in store.values())
+
+
 def test_a_failed_detail_does_not_stop_the_others(sleeps):
     class Flaky(ParallelPortal):
         def fetch_detail(self, org, row):
