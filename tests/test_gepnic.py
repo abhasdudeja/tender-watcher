@@ -14,6 +14,20 @@ def test_org_list():
     assert orgs[0]["url"].startswith(BASE + "?component=")
 
 
+def test_org_list_skips_announcement_rows_that_look_like_organisations():
+    # Uttarakhand's page also holds an announcements table: same three-cell shape, but the link is page=WebAnnouncements
+    html = (
+        "<table>"
+        "<tr><td>1</td><td>« STANDARD BIDDING DOCUMENT FOR PROCUREMENT OF OF GOODS</td>"
+        "<td><a href='https://x.test/nicgep/app?page=WebAnnouncements&service=page#212'>10</a></td></tr>"
+        "<tr><td>2</td><td>CGM (Drinking Water) Jal Sansthan</td>"
+        "<td><a href='https://x.test/nicgep/app?component=%24DirectLink&page=FrontEndTendersByOrganisation"
+        "&service=direct&session=T&sp=S9nWAOBAD2MB2mhgCDg9jAQ%3D%3D'>13</a></td></tr>"
+        "</table>")
+    orgs = gepnic.parse_org_list(html, "https://x.test/nicgep/app")
+    assert [(o["name"], o["count"]) for o in orgs] == [("CGM (Drinking Water) Jal Sansthan", 13)]
+
+
 def test_tender_list():
     page = gepnic.parse_tender_list((FIX / "gepnic_tender_list.html").read_text(), BASE)
     rows = page["rows"]

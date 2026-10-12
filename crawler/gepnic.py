@@ -19,7 +19,7 @@ import logging
 import re
 from datetime import datetime
 from typing import Dict, Iterator, List, Optional
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlsplit
 
 from bs4 import BeautifulSoup
 
@@ -82,7 +82,9 @@ def _text(el) -> str:
 
 
 def parse_org_list(html: str, base_url: str) -> List[Dict]:
-    """Rows of 'Tenders by Organisation': [{name, count, url}]. Orgs without a link are skipped."""
+    """Rows of 'Tenders by Organisation': [{name, count, url}]. Orgs without a link are skipped, and so are
+    rows whose link is not an organisation listing (Uttarakhand's page also carries an announcements table
+    whose rows have the same shape but link to page=WebAnnouncements)."""
     soup = BeautifulSoup(html, "lxml")
     orgs = []
     for tr in soup.find_all("tr"):
@@ -96,6 +98,9 @@ def parse_org_list(html: str, base_url: str) -> List[Dict]:
         name = _text(tds[-2])
         if not digits or not name:
             continue
+        target = parse_qs(urlsplit(a["href"]).query).get("page")
+        if target and "FrontEndTendersByOrganisation" not in target:
+            continue                                  # a link to some other page, not an organisation
         orgs.append({"name": name, "count": int(digits), "url": urljoin(base_url, a["href"])})
     return orgs
 
