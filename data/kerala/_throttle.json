@@ -1,0 +1,27 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-11T23:35:54Z",
+   "recoveries_s": [
+    60
+   ],
+   "events": [
+    {
+     "t": "2026-10-11T23:38:10Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-11T23:39:13Z",
+     "kind": "recovered",
+     "what": "organisation list",
+     "waited_s": 60,
+     "attempts": 1
+    }
+   ]
+  }
+ ]
+}

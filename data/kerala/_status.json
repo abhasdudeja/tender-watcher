@@ -1,0 +1,24 @@
+{
+ "slug": "kerala",
+ "name": "Kerala eTenders",
+ "ok": true,
+ "started": "2026-10-11T23:35:54Z",
+ "orgs": 125,
+ "orgs_skipped": 125,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 7033,
+ "new": 0,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 0,
+ "throttled": 1,
+ "throttle_recoveries": [
+  60
+ ],
+ "gave_up": false,
+ "errors": [],
+ "active": 7033,
+ "finished": "2026-10-11T23:39:14Z",
+ "requests": 1
+}

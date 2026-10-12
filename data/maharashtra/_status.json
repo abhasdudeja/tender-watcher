@@ -1,0 +1,22 @@
+{
+ "slug": "maharashtra",
+ "name": "Maharashtra State PP",
+ "ok": true,
+ "started": "2026-10-11T23:35:54Z",
+ "orgs": 134,
+ "orgs_skipped": 134,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 2923,
+ "new": 0,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 0,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "active": 2923,
+ "finished": "2026-10-11T23:35:55Z",
+ "requests": 1
+}

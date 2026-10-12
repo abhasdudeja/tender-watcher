@@ -1,0 +1,22 @@
+{
+ "slug": "gujarat",
+ "name": "Gujarat eProcurement (nProcure)",
+ "ok": true,
+ "started": "2026-10-11T23:40:52Z",
+ "orgs": 87,
+ "orgs_skipped": 54,
+ "orgs_failed": 0,
+ "orgs_unreachable": 2,
+ "listed": 4042,
+ "new": 1768,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 1994,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "active": 4042,
+ "finished": "2026-10-12T00:59:51Z",
+ "requests": 2038
+}
