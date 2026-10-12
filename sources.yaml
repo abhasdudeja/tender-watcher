@@ -13,6 +13,9 @@
 #                equals our stored active count, and no tender needs details.
 # detail_max_age_days: (default 14) a tender's detail page is fetched when it is new, when its
 #                listing changed (closing date, title, ...), or - as a safety net - when older than this.
+# detail_workers: (nProcure only, default 1) detail pages fetched at once; GePNIC ignores it.
+# ignore_robots: leave it out (robots.txt is honoured) unless the portal's robots.txt has no real
+#                rules; see the gujarat block. Flip it back to false when rules appear.
 #
 # Add a new GePNIC state by copying a block and changing slug/name/base_url.
 
@@ -28,24 +31,6 @@ sources:
     detail_max_age_days: 14   # safety net: re-fetch a tender's details if older than this (0 = never)
     delay_seconds: 1.0
 
-  # Examples (disabled). Enable once Kerala is working.
-  # - slug: cppp
-  #   name: Central Public Procurement Portal
-  #   type: gepnic
-  #   base_url: https://eprocure.gov.in/eprocure/app
-  #   enabled: false
-  #   fetch_details: false
-  #   max_detail_fetches: 500
-  #   delay_seconds: 1.5
-  #
-  # Gujarat state portal on nProcure (run by (n)Code Solutions). One portal for ~165 "clients"
-  # (departments, boards, municipal corporations, all Nagarpalikas), ~4,000 active tenders;
-  # Surat, Ahmedabad, Vadodara, Rajkot ... are clients of it (smctender.nprocure.com is just
-  # Surat's view of the same data). Crawled client by client: see crawler/nprocure.py.
-  # extra_ca_certs: the server omits its TLS intermediate (see certs/README.md).
-  # ignore_robots: true is the deliberate switch for public-notice portals. The site has no
-  # robots rules today (/robots.txt returns its HTML app shell). DECISION: leave it true, and
-  # flip it to false as soon as the portal publishes real robots.txt rules.
   - slug: gujarat
     name: Gujarat eProcurement (nProcure)
     type: nprocure
@@ -55,24 +40,54 @@ sources:
     extra_ca_certs: certs/sectigo-ov-r36.pem
     fetch_details: true
     max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    detail_workers: 2
     delay_seconds: 2.0
 
+  # Every GePNIC state below uses the same tuning as kerala: copy it for the next one.
   - slug: govIndia
     name: Govt of India - CPPP
     type: gepnic
     base_url: https://etenders.gov.in/eprocure/app
     enabled: true
-    ignore_robots: true
-    fetch_details: false
-    max_detail_fetches: 6000
-    delay_seconds: 2.0
+    fetch_details: true
+    max_detail_fetches: 8000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
 
+  # NOTE: https://mahatenders.gov.in/robots.txt says "User-agent: * / Disallow: /". Robots are honoured
+  # (as for kerala), so a crawl of this source is refused until the portal changes that or you decide otherwise.
   - slug: maharashtra
     name: Maharashtra State PP
     type: gepnic
     base_url: https://mahatenders.gov.in/nicgep/app
     enabled: true
-    ignore_robots: true
-    fetch_details: false
-    max_detail_fetches: 6000
-    delay_seconds: 2.0
+    fetch_details: true
+    max_detail_fetches: 8000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+
+  - slug: madhyapradesh
+    name: Madhya Pradesh
+    type: gepnic
+    base_url: https://mptenders.gov.in/nicgep/app
+    enabled: true
+    fetch_details: true
+    max_detail_fetches: 8000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+
+  - slug: rajasthan
+    name: Rajasthan
+    type: gepnic
+    base_url: https://eproc.rajasthan.gov.in/nicgep/app
+    enabled: true
+    fetch_details: true
+    max_detail_fetches: 8000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
