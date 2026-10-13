@@ -3,6 +3,9 @@
 # type: gepnic   -> NIC GePNIC eProcurement portals (etenders.kerala.gov.in,
 #                   eprocure.gov.in/eprocure/app, most state portals).
 #                   The crawler appends GePNIC page names to base_url.
+# type: nprocure -> Gujarat's nProcure portal and its client sites.
+# type: epsv2    -> Beltron/mjunction "eProc 2.0" portals (Bihar): base_url is the open-area tender listing page;
+#                   the crawler reads the same JSON API that page uses. Needs extra_ca_certs (see certs/README.md).
 #
 # fetch_details: also open each new tender's detail page (value, category,
 #                location...). Costs ~1 request per new tender; capped by
@@ -13,8 +16,8 @@
 #                equals our stored active count, and no tender needs details.
 # detail_max_age_days: (default 14) a tender's detail page is fetched when it is new, when its
 #                listing changed (closing date, title, ...), or - as a safety net - when older than this.
-# detail_workers: detail pages fetched at once (default 1). nProcure does this for real; GePNIC portals
-#                log 'ignored' and fetch one at a time for now (one portal session per source).
+# detail_workers: detail pages fetched at once (default 1, max 8). The request rate is still capped at
+#                1/delay_seconds per source, so extra workers only overlap the portal's response time.
 # ignore_robots: true skips the portal's robots.txt. Set per portal on purpose: gujarat has no real rules;
 #                maharashtra publishes 'Disallow: /' and the owner decided to crawl it anyway.
 #                Flip a source back to false when its robots.txt starts to matter.
@@ -169,6 +172,164 @@ sources:
     name: Himachal Pradesh
     type: gepnic
     base_url: https://hptenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: chandigarh
+    name: Chandigarh
+    type: gepnic
+    base_url: https://etenders.chd.nic.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: delhi
+    name: NCT of Delhi
+    type: gepnic
+    base_url: https://govtprocurement.delhi.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: bihar
+    name: Bihar
+    type: epsv2
+    base_url: https://eproc2.bihar.gov.in/EPSV2Web/openarea/tenderListingPage.action
+    enabled: true
+    ignore_robots: true
+    extra_ca_certs: certs/sectigo-ov-r36.pem
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: assam
+    name: Assam
+    type: gepnic
+    base_url: https://assamtenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: sikkim
+    name: Sikkin
+    type: gepnic
+    base_url: https://sikkimtender.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: meghalaya
+    name: Meghalaya
+    type: gepnic
+    base_url: https://meghalayatenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: arunachalpradesh
+    name: Arunachal Pradesh
+    type: gepnic
+    base_url: https://arunachaltenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: nagaland
+    name: Nagaland
+    type: gepnic
+    base_url: https://nagalandtenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: manipur
+    name: Manipur
+    type: gepnic
+    base_url: https://manipurtenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: tripura
+    name: Tripura
+    type: gepnic
+    base_url: https://tripuratenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+  - slug: mizoram
+    name: Mizoram
+    type: gepnic
+    base_url: https://mizoramtenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: true
+    fetch_details: true
+    max_detail_fetches: 6000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+    detail_workers: 2
+
+
+  - slug: westbengal
+    name: West Bengal
+    type: gepnic
+    base_url: https://wbtenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: true
     fetch_details: true

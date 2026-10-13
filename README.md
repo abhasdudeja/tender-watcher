@@ -74,7 +74,7 @@ GePNIC (NIC) portals — eprocure.gov.in and most state eTenders sites — need 
 
 Other platforms need a small adapter for the shared crawl loop (`crawler/engine.py` documents the
 interface: list organisations, walk one, fetch a detail) plus a `crawl_source` and a line in
-`crawler/run.py:CRAWLERS`. `crawler/gepnic.py` and `crawler/nprocure.py` are the two examples; the
+`crawler/run.py:CRAWLERS`. `crawler/gepnic.py`, `crawler/nprocure.py` and `crawler/epsv2.py` are the examples; the
 refresh policy, retention, checkpoints and progress all come from the engine, identically for every
 portal type.
 
@@ -118,6 +118,26 @@ certificate (a person's name); that table is never stored. The `*.nprocure.com` 
 intermediate is missing from the server's chain, so the source sets `extra_ca_certs` (`certs/README.md`).
 Cost: ~88 requests for all listings plus one per tender (~4,100 at the 2 s delay ≈ 2.3 h the first time,
 then only new/changed tenders). Needs the `cryptography` package for AES.
+
+### How the Bihar crawl works (EPSV2 portal)
+
+`eproc2.bihar.gov.in` runs Beltron/mjunction's "eProc 2.0" (EPSV2). Its open-area tender list is an
+AngularJS page; the tenders come from the portal's own JSON API, called with the anonymous guest token that
+the page embeds in itself (a ~15 minute JWT, no login). `crawler/epsv2.py` makes the same calls the page does:
+
+1. **Page** — `GET /EPSV2Web/openarea/tenderListingPage.action`: the guest token and the portal's org id.
+   The token is renewed automatically when it has under 2.5 minutes left.
+2. **Listing** — one `POST /rest/openarea/getTenderList` returns *every* live tender (no paging; ~800 tenders,
+   1.3 MB), plus the department and tender-type/category name tables. A **department** plays the role of a GePNIC
+   organisation. The id shown on the site is `currentOrgTenderId`; the detail call needs the internal id.
+3. **Detail** — `POST /rest/tender/previewTenderByTenderId`: estimated value, EMD, fees, bid/opening/pre-bid
+   dates, attachment names (~200 KB of JSON per tender, of which only the useful fields are kept).
+
+Officers' names, contact details and the digital-signature strings in the detail JSON are never stored (the
+`authority` field holds the issuing authority's designation). The server omits its certificate's intermediate,
+so the source sets `extra_ca_certs: certs/sectigo-ov-r36.pem` (the same one Gujarat uses). Not crawled (yet):
+cancelled tenders, the corrigendum list and past tenders; a changed deadline in the listing already triggers a
+detail refresh.
 
 ### Parallel crawling
 
@@ -173,8 +193,7 @@ step in `store.migrate_if_needed`; data written by a *newer* format than the cod
 
 The first crawl of a big source is dominated by detail pages (nProcure answers each one in about 3 s, so
 one at a time is ~17 tenders a minute). `detail_workers: N` in a source of `sources.yaml` fetches N detail
-pages at once (1 = off, the default; at most 8; only nProcure supports it, other types ignore it with a
-warning, because GePNIC details depend on one browser-like session). Safety:
+pages at once (1 = off, the default; at most 8; every portal type supports it). Safety:
 
 * The session's `delay_seconds` still caps the **start rate** across all workers (1.0 = at most one new
   request a second), so workers only overlap the waiting; they never make the portal see a faster request rate.

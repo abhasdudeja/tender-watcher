@@ -1,0 +1,50 @@
+{
+ "rfqTypeList": [
+  {
+   "rfqtypeId": 100,
+   "description": "Limited Tender"
+  },
+  {
+   "rfqtypeId": 101,
+   "description": "Open Tender"
+  },
+  {
+   "rfqtypeId": 120,
+   "description": "Short Tender"
+  },
+  {
+   "rfqtypeId": 121,
+   "description": "E-Auction"
+  }
+ ],
+ "procCatList": [
+  {
+   "proccatId": 999,
+   "description": "ITMRATE"
+  },
+  {
+   "proccatId": 1522,
+   "description": "ELECTRICAL"
+  },
+  {
+   "proccatId": 1554,
+   "description": "GENERAL"
+  },
+  {
+   "proccatId": 1556,
+   "description": "MECHANICAL"
+  },
+  {
+   "proccatId": 1557,
+   "description": "CIVIL"
+  },
+  {
+   "proccatId": 1558,
+   "description": "IT-Related-works"
+  },
+  {
+   "proccatId": 1559,
+   "description": "eAuction-Mining"
+  }
+ ]
+}

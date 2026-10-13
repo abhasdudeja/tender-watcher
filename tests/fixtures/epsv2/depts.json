@@ -1,0 +1,17 @@
+[
+ {
+  "organizationId": 538,
+  "parentId": 0,
+  "organizationName": "Government of Bihar"
+ },
+ {
+  "organizationId": 800,
+  "parentId": 538,
+  "organizationName": "Urban Development and Housing Department"
+ },
+ {
+  "organizationId": 1943,
+  "parentId": 538,
+  "organizationName": "MINES & Geology Department"
+ }
+]

@@ -29,11 +29,11 @@ from typing import Dict, List, Optional
 
 import yaml
 
-from . import gepnic, index, nprocure, store
+from . import epsv2, gepnic, index, nprocure, store
 from .progress import format_line
 
 ROOT = Path(__file__).resolve().parent.parent
-CRAWLERS = {"gepnic": gepnic.crawl_source, "nprocure": nprocure.crawl_source}
+CRAWLERS = {"gepnic": gepnic.crawl_source, "nprocure": nprocure.crawl_source, "epsv2": epsv2.crawl_source}
 PROGRESS_FILE = "progress.json"     # the old single-file layout (still read, never written)
 STALE_AFTER_SECONDS = 600           # a running source with no update for this long is flagged
 STATUS_FILE = "_status.json"      # last crawl status of a source, kept next to its data

@@ -1,0 +1,336 @@
+{
+ "tenderid": 140352,
+ "tenderrefno": "02/2026-27 Group-1",
+ "orgid": 538,
+ "deptid": 2838,
+ "tendertypeid": 101,
+ "proccatid": 999,
+ "pacamt": 11047900.0,
+ "description": "Design, Build, Construct, Install and commissioning of Material Recovery Facility (MR\nF) of 05 TPD for dry waste along with operation and maintenance of the plant for 5 year\ns",
+ "orgtenderid": 140157,
+ "publishdate": 1789974226000,
+ "rankingsequence": "L1",
+ "offerValidity": 180,
+ "tenderPreviewMap": {
+  "tenderType": "Open Tender",
+  "procCat": "ITMRATE"
+ },
+ "tenderIssuingAuthority": {
+  "tenderIssuingAuthorityName": "Test Officer",
+  "tenderIssuingAuthorityDesignation": "Executive Officer",
+  "organizationName": "UD&HD"
+ },
+ "templates": [
+  {
+   "shortName": "rfqdate",
+   "subProcessName": "Date Schedule",
+   "templateFieldList": [
+    {
+     "code": "bid_start_date",
+     "longName": "Bid Submission Start Date",
+     "value": "1790053200000"
+    },
+    {
+     "code": "bid_end_date",
+     "longName": "Bid Submission Due Date",
+     "value": "1791883800000"
+    },
+    {
+     "code": "bid_open_date",
+     "longName": "Bid Open Date",
+     "value": "1792144800000"
+    },
+    {
+     "code": "doc_sub_date",
+     "longName": "Physical doc Submission End Date as allowed in the tender document",
+     "value": "1792143000000"
+    }
+   ]
+  },
+  {
+   "shortName": "prebiddiscussion",
+   "subProcessName": "Pre-bid Discussion",
+   "templateFieldList": [
+    {
+     "code": "discussion_type",
+     "longName": "Pre-Bid Discussion Type",
+     "value": "OFFLINE"
+    },
+    {
+     "code": "meeting_start_date",
+     "longName": "Pre-Bid Meeting Start Date",
+     "value": "1791178202000"
+    },
+    {
+     "code": "meeting_end_date",
+     "longName": "Pre-Bid Meeting End Date",
+     "value": "1791185400000"
+    },
+    {
+     "code": "venue",
+     "longName": "Venue Details",
+     "value": "NAGAR PANCHAYAT GHOSHI OFFICE"
+    },
+    {
+     "code": "remarks",
+     "longName": "Remarks",
+     "value": null
+    }
+   ]
+  },
+  {
+   "shortName": "rfqpayment",
+   "subProcessName": "Payment",
+   "templateFieldList": [
+    {
+     "code": "payment_type",
+     "longName": "Payment Type",
+     "value": "EMD"
+    },
+    {
+     "code": "amount",
+     "longName": "Amount",
+     "value": "221000"
+    },
+    {
+     "code": "payment_mode",
+     "longName": "Payment Mode",
+     "value": "Internet Payment Gateway(IPG),Challan|Bank Guarantee"
+    },
+    {
+     "code": "payment_currency",
+     "longName": "Payment Currency",
+     "value": "INR"
+    },
+    {
+     "code": "exemption_flag",
+     "longName": "Exemption Allowed/Disallowed",
+     "value": "N"
+    },
+    {
+     "code": "supporting_doc",
+     "longName": "Exemption Reason",
+     "value": ""
+    }
+   ]
+  },
+  {
+   "shortName": "rfqpayment",
+   "subProcessName": "Payment",
+   "templateFieldList": [
+    {
+     "code": "payment_type",
+     "longName": "Payment Type",
+     "value": "Tender Fee"
+    },
+    {
+     "code": "amount",
+     "longName": "Amount",
+     "value": "10000"
+    },
+    {
+     "code": "payment_mode",
+     "longName": "Payment Mode",
+     "value": "Internet Payment Gateway(IPG),Challan|"
+    },
+    {
+     "code": "payment_currency",
+     "longName": "Payment Currency",
+     "value": "INR"
+    },
+    {
+     "code": "exemption_flag",
+     "longName": "Exemption Allowed/Disallowed",
+     "value": "N"
+    },
+    {
+     "code": "supporting_doc",
+     "longName": "Exemption Reason",
+     "value": ""
+    }
+   ]
+  },
+  {
+   "shortName": "rfqpayment",
+   "subProcessName": "Payment",
+   "templateFieldList": [
+    {
+     "code": "payment_type",
+     "longName": "Payment Type",
+     "value": "Tender Processing Fee"
+    },
+    {
+     "code": "amount",
+     "longName": "Amount",
+     "value": "5900"
+    },
+    {
+     "code": "payment_mode",
+     "longName": "Payment Mode",
+     "value": "Internet Payment Gateway(IPG),Challan|"
+    },
+    {
+     "code": "payment_currency",
+     "longName": "Payment Currency",
+     "value": "INR"
+    },
+    {
+     "code": "exemption_flag",
+     "longName": "Exemption Allowed/Disallowed",
+     "value": "N"
+    },
+    {
+     "code": "supporting_doc",
+     "longName": "Exemption Reason",
+     "value": ""
+    }
+   ]
+  },
+  {
+   "shortName": "rfqattachment",
+   "subProcessName": "Attachments",
+   "templateFieldList": [
+    {
+     "code": "label",
+     "longName": "Label",
+     "value": "NIT"
+    },
+    {
+     "code": "file_name",
+     "longName": "File Name",
+     "value": "DocScanner 08-Sept-2026 1-16?pm (1).pdf"
+    },
+    {
+     "code": "attach_file",
+     "longName": "Attach File",
+     "value": "33437/1789972915865_DocScanner 08-Sept-2026 1-16?pm (1).pdf|122122|DocScanner 08-Sept-2026 1-16?pm (1).pdf"
+    }
+   ]
+  },
+  {
+   "shortName": "rfqattachment",
+   "subProcessName": "Attachments",
+   "templateFieldList": [
+    {
+     "code": "label",
+     "longName": "Label",
+     "value": "BOQ"
+    },
+    {
+     "code": "file_name",
+     "longName": "File Name",
+     "value": "mrf 01.pdf"
+    },
+    {
+     "code": "attach_file",
+     "longName": "Attach File",
+     "value": "33437/1789972922974_mrf 01.pdf|19173277|mrf 01.pdf"
+    }
+   ]
+  },
+  {
+   "shortName": "rfqattachment",
+   "subProcessName": "Attachments",
+   "templateFieldList": [
+    {
+     "code": "label",
+     "longName": "Label",
+     "value": "Modal RFP"
+    },
+    {
+     "code": "file_name",
+     "longName": "File Name",
+     "value": "rfp01.pdf"
+    },
+    {
+     "code": "attach_file",
+     "longName": "Attach File",
+     "value": "33437/1789973967937_rfp01.pdf|1534418|rfp01.pdf"
+    }
+   ]
+  },
+  {
+   "shortName": "rfqattachment",
+   "subProcessName": "Attachments",
+   "templateFieldList": [
+    {
+     "code": "label",
+     "longName": "Label",
+     "value": "paper cutting"
+    },
+    {
+     "code": "file_name",
+     "longName": "File Name",
+     "value": "DocScanner 18 Sept 2026 14-26 (1).pdf"
+    },
+    {
+     "code": "attach_file",
+     "longName": "Attach File",
+     "value": "33437/1789973958713_DocScanner 18 Sept 2026 14-26 (1).pdf|123312|DocScanner 18 Sept 2026 14-26 (1).pdf"
+    }
+   ]
+  },
+  {
+   "shortName": "requiredbidderattachment",
+   "subProcessName": "Required Attachment from Bidder",
+   "templateFieldList": [
+    {
+     "code": "supporting_doc",
+     "longName": "Supporting Document",
+     "value": "Acknowledgement of RFP Do cument (Appendix-I)"
+    },
+    {
+     "code": "mandatory_flag",
+     "longName": "Mandatory",
+     "value": "Y"
+    },
+    {
+     "code": "exemption_flag",
+     "longName": "Allow Exemption",
+     "value": "N"
+    },
+    {
+     "code": "attachment_group",
+     "longName": "Attachement Group",
+     "value": "Others"
+    },
+    {
+     "code": "evaluation_type",
+     "longName": "Evaluation Type",
+     "value": "BidPart1"
+    }
+   ]
+  },
+  {
+   "shortName": "requiredbidderattachment",
+   "subProcessName": "Required Attachment from Bidder",
+   "templateFieldList": [
+    {
+     "code": "supporting_doc",
+     "longName": "Supporting Document",
+     "value": "Covering Letter Cum Project  Undertaking (Appendix-II)"
+    },
+    {
+     "code": "mandatory_flag",
+     "longName": "Mandatory",
+     "value": "Y"
+    },
+    {
+     "code": "exemption_flag",
+     "longName": "Allow Exemption",
+     "value": "N"
+    },
+    {
+     "code": "attachment_group",
+     "longName": "Attachement Group",
+     "value": "Others"
+    },
+    {
+     "code": "evaluation_type",
+     "longName": "Evaluation Type",
+     "value": "BidPart1"
+    }
+   ]
+  }
+ ]
+}
