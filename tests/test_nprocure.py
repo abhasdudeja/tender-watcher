@@ -264,6 +264,7 @@ def test_tender_that_leaves_the_portal_is_kept_and_marked_after_a_full_run():
     st = crawl(fake, store, no_details=True)                        # a full run: no only_orgs / limit_orgs
     assert st["ok"] is True
     assert store["OLD1"]["active"] is False and store["OLD1"]["status"] == "closed" and "OLD1" in store    # kept, not deleted
+    assert st["deactivated"] == 1 and st["active"] == sum(1 for r in store.values() if r["active"])    # status counts after retention
     assert store["OLD1"]["last_seen_active"] == "2020-01-01T00:00:00Z"
 
 

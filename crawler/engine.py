@@ -506,11 +506,13 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
             break
 
     status["listed"] = len(seen)
-    status["active"] = sum(1 for r in store.values() if r.get("active"))
+    status["deactivated"] = 0
     if full_run and status["ok"] and (orgs or may_be_empty):
         for tid, rec in store.items():
             if tid not in seen and rec.get("active"):
                 mark_inactive(rec)
+                status["deactivated"] += 1
+    status["active"] = sum(1 for r in store.values() if r.get("active"))      # after retention: what the store really holds
     status["finished"] = now()
     status["requests"] = portal.requests_made()
     prog.update(**counters())
