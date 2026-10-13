@@ -4,6 +4,7 @@
 #                   eprocure.gov.in/eprocure/app, most state portals).
 #                   The crawler appends GePNIC page names to base_url.
 # type: nprocure -> Gujarat's nProcure portal and its client sites.
+# type: mizoram  -> the Mizoram e-Tender notice board (tender.mizoram.gov.in): listing pages only, no detail pages.
 # type: epsv2    -> Beltron/mjunction "eProc 2.0" portals (Bihar): base_url is the open-area tender listing page;
 #                   the crawler reads the same JSON API that page uses. Needs extra_ca_certs (see certs/README.md).
 #
@@ -312,11 +313,13 @@ sources:
     delay_seconds: 1.0
     detail_workers: 2
 
+  # NIC's Mizoram portal puts a CAPTCHA in front of every tender list, so it cannot be crawled; the state's own
+  # e-Tender notice board (mizoram-etender, below) is used instead.
   - slug: mizoram
-    name: Mizoram
+    name: Mizoram (NIC)
     type: gepnic
     base_url: https://mizoramtenders.gov.in/nicgep/app
-    enabled: true
+    enabled: false
     ignore_robots: true
     fetch_details: true
     max_detail_fetches: 6000
@@ -324,7 +327,6 @@ sources:
     detail_max_age_days: 14
     delay_seconds: 1.0
     detail_workers: 2
-
 
   - slug: westbengal
     name: West Bengal
@@ -338,3 +340,26 @@ sources:
     detail_max_age_days: 14
     delay_seconds: 1.0
     detail_workers: 2
+    
+  # - slug: chhattisgarh
+  #   name: Chhattisgarh
+  #   type: gepnic
+  #   base_url: https://wbtenders.gov.in/nicgep/app
+  #   enabled: true
+  #   ignore_robots: true
+  #   fetch_details: true
+  #   max_detail_fetches: 6000
+  #   refresh_after_hours: 48
+  #   detail_max_age_days: 14
+  #   delay_seconds: 1.0
+  #   detail_workers: 2
+
+  - slug: mizoram-etender
+    name: Mizoram e-Tender
+    type: mizoram
+    base_url: https://tender.mizoram.gov.in/home
+    enabled: true
+    ignore_robots: false
+    fetch_details: false
+    refresh_after_hours: 48
+    delay_seconds: 1.0

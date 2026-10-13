@@ -139,6 +139,20 @@ so the source sets `extra_ca_certs: certs/sectigo-ov-r36.pem` (the same one Guja
 cancelled tenders, the corrigendum list and past tenders; a changed deadline in the listing already triggers a
 detail refresh.
 
+### How the Mizoram crawl works (state e-Tender notice board)
+
+NIC's Mizoram portal (`mizoramtenders.gov.in`) puts a CAPTCHA in front of every tender list, so it is
+disabled in `sources.yaml` and cannot be crawled. The state also runs its own e-Tender notice board,
+`tender.mizoram.gov.in` (source `mizoram-etender`, type `mizoram`): a paged list (`/home?page=N`, 15 cards a page,
+~51 pages, expired notices included). Each card has a reference, department, notice type, description,
+attachment names and three dates (issue, opening, last date); there is no detail page and no value or EMD.
+
+`crawler/mizoram.py` reads every page (~1 minute), keeps only notices whose last date is still ahead, and groups
+them by department (a department plays the role of an organisation). Notices that expire stay in the store, marked
+closed, like on every other source. At the moment only a handful of notices are open at any time. A board with no open
+notice is a valid result (`may_be_empty` in the adapter), whereas a first page without any card (markup changed) fails
+the run and deactivates nothing.
+
 ### Parallel crawling
 
 Sources are independent portals, so they run concurrently: one thread each locally, one matrix

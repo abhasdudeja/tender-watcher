@@ -20,6 +20,9 @@ Adapter interface
                               Restart (session/links went stale)
     restart_org(org)       -> a fresh org dict to retry with, or None if it vanished
     requests_made()        -> int (for the status dict)
+Optional adapter attributes: parallel_details (detail_workers is honoured), throttle_scope ("org" for
+per-host portals), may_be_empty (an empty organisation list is a valid answer: tenders that are gone
+are then marked closed instead of the run failing).
 """
 from __future__ import annotations
 
@@ -143,6 +146,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
     probe_s = min(cooldown_s, float(src.get("throttle_probe_minutes", DEFAULT_PROBE_MINUTES)) * 60)
     org_scope = getattr(portal, "throttle_scope", "source") == "org"   # per-host portals: a hung client != the whole source
     gave_up_in_a_row = 0
+    may_be_empty = bool(getattr(portal, "may_be_empty", False))   # e.g. a notice board with nothing open: valid, not a parse failure
     max_cooldowns = int(src.get("throttle_max_cooldowns", DEFAULT_MAX_COOLDOWNS))
     patience_s = max_cooldowns * cooldown_s                  # total waiting per operation before giving up
     workers = max(1, min(MAX_DETAIL_WORKERS, int(src.get("detail_workers", 1))))
@@ -418,7 +422,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
         status["finished"] = now()
         status["requests"] = portal.requests_made()
         return status
-    if not orgs:
+    if not orgs and not may_be_empty:
         error("organisation list parsed empty")
     full_run = not limit_orgs and not only_orgs
     if only_orgs:
@@ -503,7 +507,7 @@ def crawl(src: Dict, store: Dict[str, Dict], portal, *, limit_orgs: Optional[int
 
     status["listed"] = len(seen)
     status["active"] = sum(1 for r in store.values() if r.get("active"))
-    if full_run and status["ok"] and orgs:
+    if full_run and status["ok"] and (orgs or may_be_empty):
         for tid, rec in store.items():
             if tid not in seen and rec.get("active"):
                 mark_inactive(rec)
