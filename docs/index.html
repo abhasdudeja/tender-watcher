@@ -40,14 +40,19 @@
   }
   .search input[type=search]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--soft); }
   .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .filters select, .filters button {
+  .views { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .views[hidden], .hint[hidden], .filters button[hidden] { display: none; }
+  .views button { flex: 0 1 auto; }
+  .views button .n { opacity: 0.75; font-variant-numeric: tabular-nums; margin-left: 2px; }
+  .filters select, .filters button, .views button, .hint button {
     font: inherit; font-size: 0.9rem; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px;
     background: var(--surface); color: var(--text); max-width: 100%;
   }
   .filters select { flex: 1 1 150px; min-width: 0; }
-  .filters button { cursor: pointer; }
-  .filters button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .filters button, .views button, .hint button { cursor: pointer; }
+  .filters button.active, .views button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   .count { color: var(--muted); font-size: 0.85rem; margin: 10px 0 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 8px; display: flex; gap: 6px 10px; flex-wrap: wrap; align-items: center; }
   .count select { font: inherit; font-size: 0.85rem; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); }
   .list { display: flex; flex-direction: column; gap: 8px; }
   .card {
@@ -86,6 +91,9 @@
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
   @media (max-width: 560px) {
+    .views { flex-wrap: nowrap; gap: 6px; }
+    .views button { flex: 1 1 0; padding: 6px 4px; font-size: 0.82rem; line-height: 1.25; }
+    .views button .n { display: block; margin: 0; }
     .card { grid-template-columns: 1fr; }
     .card .when { grid-column: 1; grid-row: auto; text-align: left; display: flex; gap: 10px; flex-wrap: wrap; }
     .card .when .val { margin: 0; }
@@ -100,28 +108,33 @@
   </header>
 
   <div class="search">
-    <input type="search" id="q" placeholder="Search title, organisation, reference, tender ID… (e.g. electric bus, Kozhikode, PWD)" autocomplete="off" autofocus>
+    <input type="search" id="q" placeholder="Search title, organisation, reference, tender ID… (e.g. electric bus, Kozhikode, PWD)" autocomplete="off" autofocus aria-label="Search tenders">
+    <div class="views" id="views" role="group" aria-label="View" hidden>
+      <button type="button" data-view="new" aria-pressed="true">New</button>
+      <button type="button" data-view="closing" aria-pressed="false">Closing soon</button>
+      <button type="button" data-view="all" aria-pressed="false">All tenders</button>
+    </div>
     <div class="filters">
-      <select id="fSource" title="Source portal"><option value="">All sources</option></select>
-      <select id="fOrg" title="Organisation"><option value="">All organisations</option></select>
-      <select id="fCat" title="Tender category"><option value="">Works / Goods / Services</option></select>
-      <select id="fClose" title="Closing within">
+      <select id="fSource" title="Source portal" aria-label="Source portal"><option value="">All sources</option></select>
+      <select id="fOrg" title="Organisation" aria-label="Organisation"><option value="">All organisations</option></select>
+      <select id="fCat" title="Tender category" aria-label="Tender category"><option value="">Works / Goods / Services</option></select>
+      <select id="fClose" title="Closing within" aria-label="Closing within">
         <option value="">Any closing date</option>
         <option value="1">Closing today / tomorrow</option>
         <option value="7">Closing within 7 days</option>
         <option value="15">Closing within 15 days</option>
         <option value="30">Closing within 30 days</option>
       </select>
-      <select id="fValue" title="Estimated value">
+      <select id="fValue" title="Estimated value" aria-label="Estimated value">
         <option value="">Any value</option>
         <option value="0-500000">Under ₹5 lakh</option>
         <option value="500000-5000000">₹5 lakh – ₹50 lakh</option>
         <option value="5000000-50000000">₹50 lakh – ₹5 crore</option>
         <option value="50000000-">Over ₹5 crore</option>
       </select>
-      <button id="fNew" title="Only tenders first seen in the last 2 days">New</button>
-      <button id="fClosed" title="Also show tenders that are no longer on the portal (closed or removed)">Show closed</button>
-      <button id="fClear">Clear</button>
+      <button id="fNew" type="button" aria-pressed="false" title="Only tenders first seen in the last 2 days">New</button>
+      <button id="fClosed" type="button" aria-pressed="false" title="Also show tenders that are no longer on the portal (closed or removed)">Show closed</button>
+      <button id="fClear" type="button">Clear</button>
     </div>
   </div>
 
@@ -136,6 +149,8 @@
       <option value="org">Organisation</option>
     </select></label>
   </div>
+
+  <div class="hint" id="hint" hidden></div>
 
   <div class="list" id="list"></div>
   <button class="more" id="more" hidden>Show more</button>
