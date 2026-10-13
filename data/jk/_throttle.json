@@ -1,0 +1,27 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-13T10:33:55Z",
+   "recoveries_s": [
+    60
+   ],
+   "events": [
+    {
+     "t": "2026-10-13T10:36:05Z",
+     "kind": "wait",
+     "what": "DC-PDD: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-13T10:37:21Z",
+     "kind": "recovered",
+     "what": "DC-PDD: details",
+     "waited_s": 60,
+     "attempts": 1
+    }
+   ]
+  }
+ ]
+}
