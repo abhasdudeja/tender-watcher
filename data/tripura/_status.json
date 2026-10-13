@@ -1,0 +1,22 @@
+{
+ "slug": "tripura",
+ "name": "Tripura",
+ "ok": true,
+ "started": "2026-10-13T08:59:51Z",
+ "orgs": 36,
+ "orgs_skipped": 0,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 566,
+ "new": 566,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 566,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "active": 566,
+ "finished": "2026-10-13T09:10:21Z",
+ "requests": 603
+}
