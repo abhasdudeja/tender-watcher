@@ -189,7 +189,7 @@ def rebuild_index(stores: Dict[str, dict], sources: List[dict], data_dir: Path, 
     idx = index.build_index(stores, sources, site_dir)
     statuses = statuses_from_disk(data_dir, sources)
     if statuses:
-        index.write_status(statuses, site_dir)
+        index.write_status(statuses, site_dir, replace=True)   # statuses_from_disk covers every configured source
     n = sum(s["active"] for s in idx["sources"])
     log.info("index: %d active (+%d closed/removed) tenders in %d chunk files -> %s", n,
              sum(s["inactive"] for s in idx["sources"]), sum(len(s["chunks"]) for s in idx["sources"]), site_dir)

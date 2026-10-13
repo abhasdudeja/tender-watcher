@@ -12,7 +12,7 @@ data/<slug>/_meta.json            storage format version of that source
 data/<slug>/_status.json          outcome of that source's last crawl
 data/_legacy/<slug>.jsonl         pre-Parquet data, kept after a verified migration
 docs/                             the static site (GitHub Pages serves this folder)
-docs/data/index.json              manifest: per source its counts and chunk files
+docs/data/index.json              manifest: per source its counts and chunk files (+ orgs.json and presets/, see "The site")
 docs/data/index/<slug>-live-N.json    active tenders, loaded lazily by the site
 docs/data/index/<slug>-closed-N.json  closed / removed tenders, loaded only on "Show closed"
 docs/data/status.json             last crawl status per source (shown at the bottom of the site)
@@ -269,11 +269,21 @@ the listing is intact. The site hides closed tenders by default; **Show closed**
 
 ## The site: lazy loading
 
-`docs/data/index.json` is a small manifest. The page loads it first (source list, counts), then
-fetches only the chunk files the current view needs — the selected source's, or every source's in
-the background for *All sources* (with a loading percentage) — and the **closed** chunks only once
-*Show closed* is switched on. Chunks hold ≤ 20,000 rows, organisations packed together, so adding a
-tender only changes its own organisation's chunk. Search is still entirely client-side.
+The first paint needs about 200 KB (gzipped) instead of every tender. The crawler's last step
+(`crawler/index.py`, also `python -m crawler.run --index-only`) writes, under `docs/data/`:
+
+| file | what it is |
+|---|---|
+| `index.json` | manifest: per source its counts, `stats` (full counts of new / closing soon / recently closed) and chunk files; where the presets and `orgs.json` are |
+| `orgs.json` | every organisation (~1,200) with its active / closed counts and the chunk files holding its rows, and the category counts: all filters can be drawn without any tender data |
+| `presets/new.json`, `closing.json`, `closed-recent.json` | the landing views, at most 2,000 rows each, most relevant first: published in the last 2 days, deadline in the next 3 days, dropped off the portal in the last 7 days (`truncated` holds the full count when a file was cut) |
+| `index/<slug>-live-<n>.json`, `-closed-<n>.json` | the tenders, ≤ 3,000 rows per chunk, organisations kept together so a new tender only changes its own organisation's chunk |
+| `status.json` | last crawl status per source |
+
+The page loads the manifest and `orgs.json`, paints a preset, and fetches chunks only when a view needs
+them: an organisation's files, a source's live chunks, or every live chunk for *All tenders* or a search
+(with a loading percentage). Closed chunks load only when *Show closed* is on. Search is client-side over
+the rows that are loaded. The windows and caps are constants at the top of `crawler/index.py`.
 
 ## Record fields
 
