@@ -1,0 +1,22 @@
+{
+ "slug": "uttrakhand",
+ "name": "Uttrakhand",
+ "ok": true,
+ "started": "2026-10-13T06:53:26Z",
+ "orgs": 68,
+ "orgs_skipped": 53,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 651,
+ "new": 42,
+ "changed": 18,
+ "details_failed": 0,
+ "details_fetched": 60,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "active": 696,
+ "finished": "2026-10-13T06:54:46Z",
+ "requests": 76
+}

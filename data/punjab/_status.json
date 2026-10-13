@@ -1,0 +1,22 @@
+{
+ "slug": "punjab",
+ "name": "Punjab",
+ "ok": true,
+ "started": "2026-10-13T06:53:26Z",
+ "orgs": 31,
+ "orgs_skipped": 16,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 3306,
+ "new": 174,
+ "changed": 263,
+ "details_failed": 0,
+ "details_fetched": 437,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "active": 3635,
+ "finished": "2026-10-13T07:01:56Z",
+ "requests": 453
+}
