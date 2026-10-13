@@ -37,7 +37,8 @@ def session(responses, monkeypatch):
     return sess, calls, sleeps
 
 
-@pytest.mark.parametrize("failure", [503, 429, E.Timeout(OPERATION_TIMEOUT, 28), E.Timeout("x", 52), E.Timeout("x", 56)])
+@pytest.mark.parametrize("failure", [503, 429, E.Timeout(OPERATION_TIMEOUT, 28), E.Timeout("x", 52), E.Timeout("x", 56),
+                                     E.SSLError("Failed to perform, curl: (35) Recv failure: Connection was reset.", 35)])
 def test_signs_of_throttling_raise_throttled_after_the_short_retries(failure, monkeypatch):
     sess, calls, sleeps = session([failure], monkeypatch)
     with pytest.raises(Throttled):
@@ -46,7 +47,8 @@ def test_signs_of_throttling_raise_throttled_after_the_short_retries(failure, mo
     assert sleeps == [5, 10]                       # backs off between attempts, but not after the last one
 
 
-@pytest.mark.parametrize("failure", [E.DNSError(DNS, 6), E.Timeout(CONNECT_TIMEOUT, 28), E.ConnectTimeout(CONNECT_TIMEOUT, 28), 500, 404])
+@pytest.mark.parametrize("failure", [E.DNSError(DNS, 6), E.Timeout(CONNECT_TIMEOUT, 28), E.ConnectTimeout(CONNECT_TIMEOUT, 28), 500, 404,
+                                     E.SSLError("Failed to perform, curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to x:443", 35)])
 def test_dead_hosts_and_ordinary_errors_are_not_throttling(failure, monkeypatch):
     sess, calls, _ = session([failure], monkeypatch)
     with pytest.raises(Exception) as ei:

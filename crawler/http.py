@@ -130,11 +130,15 @@ def _looks_like_throttling(exc: Exception) -> bool:
 
     curl 28 is a timeout; "Connection timed out" is the connect phase (a dead or unroutable host, not
     throttling) while "Operation timed out ... bytes received" means we connected and it stopped answering.
-    curl 52 (empty reply) and 56 (receive failure) are the server dropping the connection."""
+    curl 52 (empty reply) and 56 (receive failure) are the server dropping the connection, and so is curl 35
+    "Recv failure: Connection was reset" (reported as an SSLError; wbtenders.gov.in does this when it has had enough
+    of us). A plain TLS handshake failure is also code 35 but says nothing about a reset, so it is not throttling."""
     if isinstance(exc, _ThrottleSignal):
         return True
     code = getattr(exc, "code", None)
     if code in (52, 56):
+        return True
+    if code == 35 and re.search(r"recv failure|connection (was )?reset", str(exc), re.I):
         return True
     if code == 28 or type(exc).__name__ in ("Timeout", "ReadTimeout"):
         return "Connection timed out" not in str(exc) and type(exc).__name__ != "ConnectTimeout"
