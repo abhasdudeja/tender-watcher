@@ -1,23 +1,23 @@
 {
  "slug": "gujarat",
  "name": "Gujarat eProcurement (nProcure)",
- "ok": true,
- "started": "2026-10-13T10:33:55Z",
- "orgs": 86,
- "orgs_skipped": 65,
- "orgs_failed": 0,
- "orgs_unreachable": 6,
- "listed": 3486,
- "new": 7,
- "changed": 9,
+ "ok": false,
+ "started": "2026-10-14T06:07:55Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
+ "orgs_unreachable": 0,
+ "listed": 0,
+ "new": 0,
+ "changed": 0,
  "details_failed": 0,
- "details_fetched": 16,
+ "details_fetched": 0,
  "throttled": 0,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 18,
- "active": 3486,
- "finished": "2026-10-13T10:38:06Z",
- "requests": 38
+ "errors": [
+  "organisation list: Failed to perform, curl: (28) Connection timed out after 40001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-10-14T06:10:10Z",
+ "requests": 0
 }
