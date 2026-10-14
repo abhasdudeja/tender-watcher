@@ -101,6 +101,14 @@
   .tabs button[hidden] { display: none; }
   .tabs a { margin-left: auto; font-size: 0.85rem; padding: 9px 4px; }
   [role="tabpanel"][hidden] { display: none; }
+  .statebar { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; margin: 0 0 4px; }
+  .statebar[hidden], .stateinfo[hidden] { display: none; }
+  .statebar .back { font: inherit; font-size: 0.9rem; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
+  .statebar .back:hover { border-color: var(--accent); }
+  .statebar .back:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .stateinfo { display: flex; align-items: baseline; gap: 2px 12px; flex-wrap: wrap; min-width: 0; }
+  .stateinfo h2 { font-size: 1.2rem; margin: 0; letter-spacing: -0.01em; }
+  .stateinfo .sub { color: var(--muted); font-size: 0.85rem; overflow-wrap: anywhere; }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
   /* ---- India map panel (shown only when the manifest carries per-source "state" fields) ---- */
@@ -210,6 +218,10 @@
   </div>
 
   <div id="tendersView" role="tabpanel" aria-labelledby="tabTenders" hidden>
+  <div class="statebar" id="stateBar">
+    <button type="button" class="back" id="backToMap">&larr; Back to map</button>
+    <div class="stateinfo" id="stateInfo" hidden><h2 id="stateName"></h2><span class="sub" id="stateSub"></span></div>
+  </div>
   <div class="search">
     <input type="search" id="q" placeholder="Search title, organisation, reference, tender ID… (e.g. electric bus, Kozhikode, PWD)" autocomplete="off" autofocus aria-label="Search tenders">
     <div class="views" id="views" role="group" aria-label="View" hidden>

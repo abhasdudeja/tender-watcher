@@ -284,7 +284,7 @@ The first paint needs about 200 KB (gzipped) instead of every tender. The crawle
 
 The site has two tabs. **Map** is the landing tab and needs only the manifest and `status.json` (plus the map
 outline): no tender rows are fetched until someone opens **Tenders** (a click on a state opens it, filtered to
-that state's source). The address says which tab: `?tab=tenders&...` for the list, a clean address for the map;
+that state's source; the list then has a heading with the state, its portal and a "Back to map" button). The address says which tab: `?tab=tenders&...` for the list, a clean address for the map;
 links with list filters but no `tab=` still open the list. Crawl status is its own page, `docs/status.html` (one
 row per source: result, last crawl, active / listed / new / details, errors), linked from the tab bar; the main
 page only shows a banner when a source's last crawl failed.

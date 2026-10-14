@@ -11,7 +11,7 @@
     q: $("q"), source: $("fSource"), org: $("fOrg"), cat: $("fCat"), close: $("fClose"),
     value: $("fValue"), isNew: $("fNew"), closed: $("fClosed"), clear: $("fClear"), sort: $("sort"),
     list: $("list"), more: $("more"), count: $("count"), meta: $("meta"), views: $("views"), hint: $("hint"),
-    notice: $("notice"), toast: $("toast"), tabs: $("tabs"), mapView: $("mapView"), tendersView: $("tendersView"),
+    notice: $("notice"), toast: $("toast"), tabs: $("tabs"), stateBar: $("stateBar"), stateInfo: $("stateInfo"), stateName: $("stateName"), stateSub: $("stateSub"), back: $("backToMap"), mapView: $("mapView"), tendersView: $("tendersView"),
   };
 
   const track = (name) => { if (window.twTrack) window.twTrack(name); };   // analytics.js; fixed event names only, never typed text
@@ -215,7 +215,20 @@
     return `${base} + ${capped ? C + " of " + fmtN(pc.truncated) : C} closed${narrowed || f.fullClosed ? "/removed" : " in the last " + plural(presetDays("closed_recent"), "day")}`;
   }
 
+  // The heading above the list: which state (and portal) it is showing, with the way back to the map
+  function updateStateBar() {
+    const src = sources[els.source.value];
+    els.stateBar.hidden = els.tabs.querySelector('button[data-tab="map"]').hidden && !src;   // no map in this index: only a heading
+    els.back.hidden = els.tabs.querySelector('button[data-tab="map"]').hidden;
+    els.stateInfo.hidden = !src;
+    if (!src) return;
+    const host = (() => { try { return new URL(src.base_url).hostname; } catch (e) { return ""; } })();
+    els.stateName.textContent = (src.state && mapUI.nameOf(src.state)) || src.name || src.slug;
+    els.stateSub.textContent = [src.name, host].filter(Boolean).join(" · ");
+  }
+
   function apply() {
+    updateStateBar();
     const toks = tokens(els.q.value.trim());
     const src = els.source.value, org = els.org.value, cat = els.cat.value;
     const closeDays = els.close.value ? +els.close.value : null;
@@ -865,7 +878,7 @@
       sync();
     }
     function setStatus(rows) { for (const s of rows || []) if (s && s.slug) finished[s.slug] = s.finished; }
-    return { init, show, sync, setStatus };
+    return { init, show, sync, setStatus, nameOf };
   })();
 
   // ---------- init ----------
@@ -975,6 +988,7 @@
     ensureLoaded(); apply(); els.q.focus();
   });
   els.more.addEventListener("click", () => renderMore());
+  els.back.addEventListener("click", () => setTab("map", true));
   els.tabs.addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (b) setTab(b.dataset.tab, true); });
   els.tabs.addEventListener("keydown", (e) => {   // arrow keys move between the two tabs
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
