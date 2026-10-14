@@ -92,6 +92,8 @@
   .empty { color: var(--muted); padding: 32px 0; text-align: center; }
   .notice { background: var(--warn-soft); color: var(--text); border: 1px solid var(--warn); border-radius: var(--radius); padding: 10px 12px; font-size: 0.88rem; margin: 10px 0; }
   .status { margin-top: 28px; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+  .privacy { margin: 14px 0 0; font-size: 0.78rem; color: var(--muted); }
+  .privacy a { color: inherit; }
   .status table { border-collapse: collapse; width: 100%; }
   .status td, .status th { text-align: left; padding: 3px 8px 3px 0; vertical-align: top; }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
@@ -248,9 +250,11 @@
   <button class="more" id="more" hidden>Show more</button>
 
   <div class="status" id="status"></div>
+  <p class="privacy" id="privacyNote" hidden>This site counts visits and a few clicks anonymously with <a href="https://www.goatcounter.com" rel="noopener">GoatCounter</a>: no cookies, no personal data, nothing you type. It is off if your browser sends Do Not Track.</p>
 </div>
 <div class="toast" id="toast"></div>
 <div class="maptip" id="mapTip" role="presentation" hidden></div>
+<script src="analytics.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

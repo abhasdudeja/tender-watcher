@@ -313,6 +313,30 @@ be clicked, and a tile-grid style is the phone, keyboard and screen-reader alter
   India requires the official depiction of its external boundary: check the north and north-east of the map
   (J&K, Ladakh, Arunachal Pradesh) against the official map whenever the boundary file is replaced.
 
+## Visit counting (GoatCounter)
+
+`docs/analytics.js` counts visits and a few clicks with [GoatCounter](https://www.goatcounter.com): no cookies, no
+personal data, no consent banner needed. It does nothing until you put your site code in the `SITE` line at the top
+of that file (the part before `.goatcounter.com`; it is public, not a secret). Then the page loads GoatCounter's
+`count.js` and shows a one-line privacy note in the footer. It stays off for browsers that send Do Not Track or
+Global Privacy Control, on `localhost`, and when blocked by an ad blocker. A visitor can also opt out with
+`localStorage.setItem("skipgc", "t")`.
+
+Visits are counted against the page path only (not `?q=...`). Events have fixed names and never carry typed text:
+
+| Event | When |
+|---|---|
+| `view/new`, `view/closing`, `view/all` | the view switcher |
+| `source/<slug>` | the Source dropdown |
+| `map/state/IN-KL` (`central` for the all-India chip) | a state, marker or tile clicked on the map (also for states not covered yet) |
+| `map/metric/active`, `map/metric/new`, `map/metric/closing` | the map's number toggle |
+| `map/style/map`, `map/style/tiles` | the Map / Tiles switch |
+| `map/open`, `map/close` | the map panel toggle |
+| `search` | the search box used, once per page load |
+
+In GoatCounter these show up under *Events* (set a path/event filter). Add an event by calling `track("name")` in
+`docs/app.js`; names may use letters, digits and `/ _ . -` only.
+
 ## Record fields
 
 Listing (always): `id`, `source`, `ref`, `title`, `org`, `chain`, `pub`, `close`, `open`,

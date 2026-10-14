@@ -14,6 +14,8 @@
     notice: $("notice"), status: $("status"), toast: $("toast"),
   };
 
+  const track = (name) => { if (window.twTrack) window.twTrack(name); };   // analytics.js; fixed event names only, never typed text
+
   const PAGE = 50;
   let all = [];           // tenders loaded so far
   let sources = {};       // slug -> source meta
@@ -474,6 +476,7 @@
   }
   function setView(v) {
     if (v === view) return;
+    track("view/" + v);
     view = v; fullScope = false;
     updateViewButtons();
     rebuildOptions();
@@ -778,6 +781,7 @@
     }
     function pick(k) {
       hideTip();
+      track("map/state/" + k);   // also counted for states we do not cover yet: shows where the demand is
       const m = agg.get(k);
       if (!m) { setMsg(`${nameOf(k)}: ${BLOCKED[k] || "not on TenderWatch yet."}`); return; }
       if (!selectSource(m.best.slug)) return;
@@ -788,7 +792,7 @@
       open = v;
       e.toggle.setAttribute("aria-expanded", v);
       e.body.hidden = !v;
-      if (persist) store.set(v ? "1" : "0");
+      if (persist) { store.set(v ? "1" : "0"); track(v ? "map/open" : "map/close"); }
       if (!v) hideTip();
       render();
     }
@@ -815,8 +819,8 @@
       ready = true;
 
       e.toggle.addEventListener("click", () => setOpen(!open, true));
-      e.metricG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b) { metric = b.dataset.m; render(); } });
-      e.styleG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b && !b.hidden) { style = b.dataset.v; render(); } });
+      e.metricG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b) { metric = b.dataset.m; track("map/metric/" + metric); render(); } });
+      e.styleG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b && !b.hidden) { style = b.dataset.v; track("map/style/" + style); render(); } });
       e.panel.addEventListener("click", (ev) => { const t = ev.target.closest("[data-k]"); if (t) pick(t.dataset.k); });
       e.panel.addEventListener("keydown", (ev) => {
         if (ev.key === "Escape") {
@@ -894,7 +898,11 @@
   }
 
   let timer;
-  els.q.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(apply, 120); });
+  let searched = false;   // count "a search was used" once per page load, not once per keystroke
+  els.q.addEventListener("input", () => {
+    if (!searched && els.q.value.trim()) { searched = true; track("search"); }
+    clearTimeout(timer); timer = setTimeout(apply, 120);
+  });
   for (const k of ["cat", "close", "value", "sort"]) els[k].addEventListener("change", apply);
   els.org.addEventListener("change", () => { ensureLoaded(); apply(); });
   function onSourceChange() {
@@ -907,6 +915,7 @@
     ensureLoaded(); apply();
   }
   els.source.addEventListener("change", onSourceChange);
+  els.source.addEventListener("change", () => { if (els.source.value) track("source/" + els.source.value); });   // the dropdown only; the map reports its own click
   // Same as choosing the source in the dropdown, but from the map: show that source's full list ("All tenders"),
   // drop the organisation filter (search text and the other filters stay).
   function selectSource(slug) {
