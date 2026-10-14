@@ -12,11 +12,13 @@ data/<slug>/_meta.json            storage format version of that source
 data/<slug>/_status.json          outcome of that source's last crawl
 data/_legacy/<slug>.jsonl         pre-Parquet data, kept after a verified migration
 docs/                             the static site (GitHub Pages serves this folder)
-docs/data/index.json              manifest: per source its counts and chunk files (+ orgs.json and presets/, see "The site")
+docs/data/index.json              manifest: per source its counts, state, stats and chunk files (+ orgs.json and presets/, see "The site")
 docs/data/index/<slug>-live-N.json    active tenders, loaded lazily by the site
 docs/data/index/<slug>-closed-N.json  closed / removed tenders, loaded only on "Show closed"
 docs/data/status.json             last crawl status per source (shown at the bottom of the site)
-tests/                            parser, storage, migration, index and crawl-flow tests
+docs/map/india-states.json        state boundaries for the map panel (see "The map")
+tools/build_map.py                regenerates that file from a boundary GeoJSON
+tests/                            parser, storage, migration, index, map-build and crawl-flow tests
 ```
 
 ## Run it locally first
@@ -284,6 +286,32 @@ The page loads the manifest and `orgs.json`, paints a preset, and fetches chunks
 them: an organisation's files, a source's live chunks, or every live chunk for *All tenders* or a search
 (with a loading percentage). Closed chunks load only when *Show closed* is on. Search is client-side over
 the rows that are loaded. The windows and caps are constants at the top of `crawler/index.py`.
+
+## The map
+
+The site has a map of India: each state or UT is coloured by its active tenders (or new tenders, or those
+closing within 48 hours); hovering shows active, new (2 days), closing within 48 hours, the number of
+organisations and when it was last crawled; clicking opens that state's tender list. Small places (Delhi,
+Chandigarh, Goa, Puducherry, Dadra & Nagar Haveli and Daman & Diu, Lakshadweep) get round markers so they can
+be clicked, and a tile-grid style is the phone, keyboard and screen-reader alternative.
+
+* **Which source is which state** comes from the `state:` key of each block in `sources.yaml` (an ISO 3166-2 code
+  such as `IN-KL`, or `central` for the all-India source). The index carries it, so the page hard-codes no slugs;
+  a new state source only needs its `state:`. Several sources may share one state (their numbers are summed).
+  States without a source are drawn as "not on TenderWatch yet"; Chhattisgarh is hatched (its portal needs a CAPTCHA).
+* **Numbers** are in `docs/data/index.json` (`sources[].stats`: `new`, `closing`, `closing48`, `orgs`; `closing48` is
+  the deadline within 48 hours, `orgs` the organisations with an active tender).
+* **Boundaries** are `docs/map/india-states.json`: simplified SVG paths, 36 units, about 72 KB (25 KB gzipped),
+  fetched only when the map is shown. They come from **geoBoundaries India ADM1** (data from DataMeet / the Election
+  Commission of India, **CC BY 2.5 India**; the page shows the attribution). Some state lines may predate the latest
+  delimitation. Regenerate with the stdlib-only tool, from a downloaded copy of the "simplified" GeoJSON:
+
+  ```bash
+  python -I -X utf8 tools/build_map.py geoBoundaries-IND-ADM1_simplified.geojson docs/map/india-states.json
+  ```
+
+  India requires the official depiction of its external boundary: check the north and north-east of the map
+  (J&K, Ladakh, Arunachal Pradesh) against the official map whenever the boundary file is replaced.
 
 ## Record fields
 

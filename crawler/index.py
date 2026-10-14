@@ -1,6 +1,6 @@
 """Build the compact search index the static site loads - lazily, in pieces.
 
-docs/data/index.json                  manifest: per source its counts, stats and chunk files, plus where the presets and orgs are
+docs/data/index.json                  manifest: per source its counts, state (for the map), stats and chunk files, plus where the presets and orgs are
 docs/data/orgs.json                   every organisation with its active / closed counts and the chunk files holding its rows,
                                       and the category counts - enough to draw all filters without loading a single tender
 docs/data/presets/new.json            tenders published in the last NEW_DAYS days                 {"tenders": [...]}
@@ -33,6 +33,7 @@ IST = timezone(timedelta(hours=5, minutes=30))   # portal dates are IST wall-clo
 NEW_DAYS = 2           # "new" preset: published within this many days (~4-5k tenders are published a day across the sources)
 CLOSING_DAYS = 3       # "closing soon" preset: deadline within this many days
 CLOSED_DAYS = 7        # "recently closed" preset: dropped off the portal within this many days
+CLOSING_HOURS = 48     # stats.closing48: deadline within this many hours (shown on the map)
 FRESH_SOURCE_DAYS = 7  # a source first crawled more recently than this has no meaningful "first seen" signal
 PRESET_MAX = 2000      # rows kept per preset file (the most relevant first): a first paint of ~150 KB gzipped
 
@@ -168,6 +169,7 @@ def build_index(stores: Dict[str, Dict[str, Dict]], sources: List[Dict], out_dir
             "slug": slug, "name": src.get("name", slug), "type": src.get("type"), "base_url": src["base_url"],
             "enabled": bool(src.get("enabled", True)), "active": len(live), "inactive": len(gone),
             "total_seen": len(store), "chunks": chunk_meta,
+            **({"state": src["state"]} if src.get("state") else {}),     # ISO 3166-2 code, or "central"; the map reads it
         })
 
     presets = _presets(rows_by_src, now)
@@ -185,6 +187,13 @@ def build_index(stores: Dict[str, Dict[str, Dict]], sources: List[Dict], out_dir
             per_source[r.get("s")] = per_source.get(r.get("s"), 0) + 1
         for sm in src_meta:
             sm.setdefault("stats", {})[key] = per_source.get(sm["slug"], 0)
+
+    now_ist = now.astimezone(IST)
+    now_str = now_ist.strftime("%Y-%m-%dT%H:%M")
+    end_str = (now_ist + timedelta(hours=CLOSING_HOURS)).strftime("%Y-%m-%dT%H:%M")
+    for sm in src_meta:                                  # full per-source numbers for the map's tooltip
+        sm["stats"]["closing48"] = sum(1 for r in rows_by_src[sm["slug"]] if "st" not in r and r.get("d") and now_str <= r["d"] <= end_str)
+        sm["stats"]["orgs"] = sum(1 for (slug, _), (live_n, _c) in org_counts.items() if slug == sm["slug"] and live_n > 0)
 
     orgs = [{"s": slug, "o": org, "n": org_counts[(slug, org)][0], "c": org_counts[(slug, org)][1],
              "files": sorted(org_files.get((slug, org), ()))} for slug, org in sorted(org_counts)]

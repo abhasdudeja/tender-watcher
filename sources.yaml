@@ -8,6 +8,9 @@
 # type: epsv2    -> Beltron/mjunction "eProc 2.0" portals (Bihar): base_url is the open-area tender listing page;
 #                   the crawler reads the same JSON API that page uses. Needs extra_ca_certs (see certs/README.md).
 #
+# state:        ISO 3166-2 code of the state or UT the source covers (IN-KL, IN-DL ...), or 'central' for the all-India
+#                portal. The site's map reads it from the index; several sources may share one state.
+#
 # fetch_details: also open each new tender's detail page (value, category,
 #                location...). Costs ~1 request per new tender; capped by
 #                max_detail_fetches per run so a bad day can't stall the crawl.
@@ -28,6 +31,7 @@
 sources:
   - slug: kerala
     name: Kerala eTenders
+    state: IN-KL
     type: gepnic
     base_url: https://etenders.kerala.gov.in/nicgep/app
     enabled: true
@@ -40,6 +44,7 @@ sources:
 
   - slug: gujarat
     name: Gujarat eProcurement (nProcure)
+    state: IN-GJ
     type: nprocure
     base_url: https://tender.nprocure.com
     enabled: true
@@ -54,6 +59,7 @@ sources:
 
   - slug: govIndia
     name: Govt of India - CPPP
+    state: central
     type: gepnic
     base_url: https://etenders.gov.in/eprocure/app
     enabled: true
@@ -67,6 +73,7 @@ sources:
 
   - slug: maharashtra
     name: Maharashtra State PP
+    state: IN-MH
     type: gepnic
     base_url: https://mahatenders.gov.in/nicgep/app
     enabled: true
@@ -80,6 +87,7 @@ sources:
 
   - slug: madhyapradesh
     name: Madhya Pradesh
+    state: IN-MP
     type: gepnic
     base_url: https://mptenders.gov.in/nicgep/app
     enabled: true
@@ -93,6 +101,7 @@ sources:
 
   - slug: rajasthan
     name: Rajasthan
+    state: IN-RJ
     type: gepnic
     base_url: https://eproc.rajasthan.gov.in/nicgep/app
     enabled: true
@@ -106,6 +115,7 @@ sources:
 
   - slug: uttarpradesh
     name: Uttar Pradesh
+    state: IN-UP
     type: gepnic
     base_url: https://etender.up.nic.in/nicgep/app
     enabled: true
@@ -119,6 +129,7 @@ sources:
 
   - slug: punjab
     name: Punjab
+    state: IN-PB
     type: gepnic
     base_url: https://eproc.punjab.gov.in/nicgep/app
     enabled: true
@@ -132,6 +143,7 @@ sources:
 
   - slug: haryana
     name: Haryana
+    state: IN-HR
     type: gepnic
     base_url: http://etenders.hry.nic.in/nicgep/app
     enabled: true
@@ -145,6 +157,7 @@ sources:
     
   - slug: jk
     name: Jammu & Kashmir
+    state: IN-JK
     type: gepnic
     base_url: https://jktenders.gov.in/nicgep/app
     enabled: true
@@ -158,6 +171,7 @@ sources:
 
   - slug: uttrakhand
     name: Uttrakhand
+    state: IN-UT
     type: gepnic
     base_url: https://uktenders.gov.in/nicgep/app
     enabled: true
@@ -171,6 +185,7 @@ sources:
 
   - slug: himachal
     name: Himachal Pradesh
+    state: IN-HP
     type: gepnic
     base_url: https://hptenders.gov.in/nicgep/app
     enabled: true
@@ -184,6 +199,7 @@ sources:
 
   - slug: chandigarh
     name: Chandigarh
+    state: IN-CH
     type: gepnic
     base_url: https://etenders.chd.nic.in/nicgep/app
     enabled: true
@@ -197,6 +213,7 @@ sources:
 
   - slug: delhi
     name: NCT of Delhi
+    state: IN-DL
     type: gepnic
     base_url: https://govtprocurement.delhi.gov.in/nicgep/app
     enabled: true
@@ -210,6 +227,7 @@ sources:
 
   - slug: bihar
     name: Bihar
+    state: IN-BR
     type: epsv2
     base_url: https://eproc2.bihar.gov.in/EPSV2Web/openarea/tenderListingPage.action
     enabled: true
@@ -224,6 +242,7 @@ sources:
 
   - slug: assam
     name: Assam
+    state: IN-AS
     type: gepnic
     base_url: https://assamtenders.gov.in/nicgep/app
     enabled: true
@@ -237,6 +256,7 @@ sources:
 
   - slug: sikkim
     name: Sikkin
+    state: IN-SK
     type: gepnic
     base_url: https://sikkimtender.gov.in/nicgep/app
     enabled: true
@@ -250,6 +270,7 @@ sources:
 
   - slug: meghalaya
     name: Meghalaya
+    state: IN-ML
     type: gepnic
     base_url: https://meghalayatenders.gov.in/nicgep/app
     enabled: true
@@ -263,6 +284,7 @@ sources:
 
   - slug: arunachalpradesh
     name: Arunachal Pradesh
+    state: IN-AR
     type: gepnic
     base_url: https://arunachaltenders.gov.in/nicgep/app
     enabled: true
@@ -276,6 +298,7 @@ sources:
 
   - slug: nagaland
     name: Nagaland
+    state: IN-NL
     type: gepnic
     base_url: https://nagalandtenders.gov.in/nicgep/app
     enabled: true
@@ -289,6 +312,7 @@ sources:
 
   - slug: manipur
     name: Manipur
+    state: IN-MN
     type: gepnic
     base_url: https://manipurtenders.gov.in/nicgep/app
     enabled: true
@@ -302,6 +326,7 @@ sources:
 
   - slug: tripura
     name: Tripura
+    state: IN-TR
     type: gepnic
     base_url: https://tripuratenders.gov.in/nicgep/app
     enabled: true
@@ -317,6 +342,7 @@ sources:
   # e-Tender notice board (mizoram-etender, below) is used instead.
   - slug: mizoram
     name: Mizoram (NIC)
+    state: IN-MZ
     type: gepnic
     base_url: https://mizoramtenders.gov.in/nicgep/app
     enabled: false
@@ -330,6 +356,7 @@ sources:
 
   - slug: westbengal
     name: West Bengal
+    state: IN-WB
     type: gepnic
     base_url: https://wbtenders.gov.in/nicgep/app
     enabled: true
@@ -343,6 +370,7 @@ sources:
     
   # - slug: chhattisgarh
   #   name: Chhattisgarh
+  #   state: IN-CT
   #   type: gepnic
   #   base_url: https://wbtenders.gov.in/nicgep/app
   #   enabled: true
@@ -356,6 +384,7 @@ sources:
 
   - slug: mizoram-etender
     name: Mizoram e-Tender
+    state: IN-MZ
     type: mizoram
     base_url: https://tender.mizoram.gov.in/home
     enabled: true

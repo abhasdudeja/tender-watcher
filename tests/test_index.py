@@ -192,7 +192,7 @@ def test_stale_preset_and_chunk_files_are_removed_and_format3_is_deterministic(t
 
 def test_a_source_without_data_still_has_stats_and_the_presets_exist(tmp_path):
     m = index.build_index({}, SRC, tmp_path, now=NOW)
-    assert m["sources"][0]["stats"] == {"new": 0, "closing": 0, "closed_recent": 0}
+    assert m["sources"][0]["stats"] == {"new": 0, "closing": 0, "closed_recent": 0, "closing48": 0, "orgs": 0}
     assert all((tmp_path / p["file"]).exists() for p in m["presets"].values()) and (tmp_path / "orgs.json").exists()
 
 
@@ -204,3 +204,20 @@ def test_write_status_merges_by_default_and_can_replace(tmp_path):
     index.write_status([{"slug": "a", "ok": True}], tmp_path, replace=True)         # replace: only what is passed
     st = json.loads((tmp_path / "status.json").read_text(encoding="utf-8"))["sources"]
     assert [s["slug"] for s in st] == ["a"]
+
+
+def test_manifest_carries_the_state_and_the_map_stats(tmp_path):
+    recs = {r["id"]: r for r in [
+        _rec("a", "Alpha", close="2026-10-14T10:00"),                       # within 48 h of NOW (13 Oct 11:30 IST)
+        _rec("b", "Alpha", close="2026-10-15T10:00"),                       # 46.5 h away: inside
+        _rec("c", "Beta", close="2026-10-15T14:00"),                        # 50.5 h away: outside
+        _rec("d", "Beta", close="2026-10-12T10:00"),                        # already past
+        _rec("g", "Gamma", active=False, status="closed", close="2026-10-14T10:00", inactive_since="2026-10-12T00:00:00Z"),
+    ]}
+    sources = [dict(SRC[0], state="IN-KL"), {"slug": "u", "name": "U", "type": "gepnic", "base_url": "https://y"}]
+    m = index.build_index({"t": recs}, sources, tmp_path, now=NOW)
+    t, u = m["sources"]
+    assert t["state"] == "IN-KL" and "state" not in u                         # only sources that declare one
+    assert t["stats"]["closing48"] == 2                                      # closed tenders and past deadlines do not count
+    assert t["stats"]["orgs"] == 2                                           # Alpha and Beta have active tenders; Gamma only a closed one
+    assert u["stats"]["closing48"] == 0 and u["stats"]["orgs"] == 0
