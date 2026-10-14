@@ -276,6 +276,7 @@
     els.count.textContent = txt;
     renderHint(prog.pending, !!(toks.length || cat || closeDays != null || vmin != null || narrowSO));
     writeState();
+    mapUI.sync();
   }
 
   // In New / Closing soon only that preset is searched; offer the full search when it comes up (nearly) empty.
@@ -582,6 +583,7 @@
       const r = await fetch("data/status.json", { cache: "no-cache" });
       if (!r.ok) return;
       const st = await r.json();
+      mapUI.setStatus(st.sources);
       const rows = st.sources.map((s) => {
         const ok = s.ok ? "✓" : "✗";
         const when = s.finished ? fmtDate(s.finished) : "—";
@@ -596,6 +598,249 @@
       }
     } catch (e) { /* status is optional */ }
   }
+
+  // ---------- India map panel ----------
+  // Shown only when the manifest carries per-source "state" fields (ISO 3166-2 code, or "central"). Everything it
+  // shows is aggregated from the manifest (state / active / stats) and status.json (crawl time); boundaries come from
+  // map/india-states.json, fetched only while the panel is open in "Map" style. A click selects that state's source
+  // in the ordinary source filter (selectSource), so URL state and lazy chunk loading behave exactly as for the dropdown.
+  const mapUI = (function () {
+    const pre = (o) => { const r = {}; for (const k of Object.keys(o)) r["IN-" + k] = o[k]; return r; };
+    const CODE = pre({ AN: "AN", AP: "AP", AR: "AR", AS: "AS", BR: "BR", CH: "CH", CT: "CG", DL: "DL", DH: "DD", GA: "GA", GJ: "GJ", HR: "HR", HP: "HP", JK: "JK", JH: "JH",
+      KA: "KA", KL: "KL", LA: "LA", LD: "LD", MP: "MP", MH: "MH", MN: "MN", ML: "ML", MZ: "MZ", NL: "NL", OR: "OD", PY: "PY", PB: "PB", RJ: "RJ", SK: "SK", TN: "TN",
+      TG: "TS", TR: "TR", UP: "UP", UT: "UK", WB: "WB" });                // ISO code -> the abbreviation people use
+    const NAMES = pre({ AN: "Andaman & Nicobar Islands", AP: "Andhra Pradesh", AR: "Arunachal Pradesh", AS: "Assam", BR: "Bihar", CH: "Chandigarh", CT: "Chhattisgarh",
+      DL: "Delhi", DH: "Dadra & Nagar Haveli and Daman & Diu", GA: "Goa", GJ: "Gujarat", HR: "Haryana", HP: "Himachal Pradesh", JK: "Jammu & Kashmir", JH: "Jharkhand",
+      KA: "Karnataka", KL: "Kerala", LA: "Ladakh", LD: "Lakshadweep", MP: "Madhya Pradesh", MH: "Maharashtra", MN: "Manipur", ML: "Meghalaya", MZ: "Mizoram",
+      NL: "Nagaland", OR: "Odisha", PY: "Puducherry", PB: "Punjab", RJ: "Rajasthan", SK: "Sikkim", TN: "Tamil Nadu", TG: "Telangana", TR: "Tripura",
+      UP: "Uttar Pradesh", UT: "Uttarakhand", WB: "West Bengal" });
+    const TILE = pre({ LA: [0, 2], JK: [1, 2], HP: [2, 3], PB: [3, 2], CH: [3, 3], UT: [3, 4], SK: [3, 7], AR: [3, 9], HR: [4, 3], DL: [4, 4], UP: [4, 5], BR: [4, 6], WB: [4, 7],
+      AS: [4, 8], NL: [4, 9], RJ: [5, 2], MP: [5, 4], CT: [5, 5], JH: [5, 6], ML: [5, 8], MN: [5, 9], GJ: [6, 1], MH: [6, 3], TG: [6, 5], OR: [6, 6], TR: [6, 8], MZ: [6, 9],
+      DH: [7, 1], GA: [7, 2], KA: [7, 3], AP: [7, 5], LD: [8, 1], KL: [8, 3], TN: [8, 4], PY: [9, 5], AN: [9, 8] });   // [row, column]
+    const MARKER = pre({ CH: [-32, -18], DL: [-32, 6], DH: [-24, 8], GA: [-22, 6], LD: [-10, 18], PY: [14, 14] });     // marker offsets from the real position
+    const BLOCKED = pre({ CT: "Its portal asks for a CAPTCHA before listing tenders, so it cannot be crawled." });
+    const LIMITED = pre({ MZ: "Only the state e-Tender notice board is crawled (a handful of open notices)." });
+    const STEPS = { active: [0, 100, 1000, 3000, 6000], new: [0, 20, 100, 300, 800], closing48: [0, 20, 100, 300, 800] };
+    const LABEL = { active: "active tenders", new: "new tenders in the last 2 days", closing48: "tenders closing within 48 hours" };
+    const KEY = "tenderwatch.mapOpen";
+    const store = {
+      get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
+      set(v) { try { localStorage.setItem(KEY, v); } catch (e) { /* storage may be unavailable */ } },
+    };
+    const plain = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const num = (n) => fmtN(n || 0);
+    const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const e = {};          // elements, resolved in init()
+    const agg = new Map(); // "IN-KL" | "central" -> { active, new, closing48, orgs, srcs, best }
+    const finished = {};   // source slug -> last crawl finish (status.json)
+    let ready = false, open = false, metric = "active", style = innerWidth < 640 ? "tiles" : "map", selected = null;
+    let geo = null, geoState = "idle";   // "idle" | "loading" | "ok" | "error"
+
+    function buildModel() {
+      for (const x of manifest.sources) {
+        if (!x.state || !(x.enabled || x.active > 0)) continue;   // only sources the source dropdown offers
+        let m = agg.get(x.state);
+        if (!m) agg.set(x.state, m = { active: 0, new: 0, closing48: 0, orgs: 0, srcs: [], best: null });
+        const st = x.stats || {};
+        m.active += x.active || 0; m.new += st.new || 0; m.closing48 += st.closing48 || 0; m.orgs += st.orgs || 0;
+        m.srcs.push(x);
+      }
+      for (const m of agg.values()) {   // the source a click opens: an enabled one with the most active tenders
+        const pool = m.srcs.some((x) => x.enabled) ? m.srcs.filter((x) => x.enabled) : m.srcs;
+        m.best = pool.reduce((a, b) => ((b.active || 0) > (a.active || 0) ? b : a));
+      }
+    }
+
+    const nameOf = (k) => k === "central" ? "Central / all-India" : NAMES[k] || (geo && geo.units[k] ? plain(geo.units[k].name) : k);
+    const codeOf = (k) => CODE[k] || k.slice(3);
+    const kind = (k) => agg.has(k) ? "ok" : BLOCKED[k] ? "blocked" : "none";
+    const bucket = (n) => { const t = STEPS[metric]; if (!n) return 0; let b = 1; for (let i = 1; i < t.length; i++) if (n >= t[i]) b = i + 1; return b; };
+    const cls = (k) => (kind(k) === "ok" ? "b" + bucket(agg.get(k)[metric]) : kind(k));
+    const label = (k) => {
+      const m = agg.get(k);
+      return m ? `${nameOf(k)}: ${num(m[metric])} ${LABEL[metric]}. Open the list.`
+        : `${nameOf(k)}: ${BLOCKED[k] ? "cannot be crawled (CAPTCHA)" : "not on TenderWatch yet"}`;
+    };
+    const ago = (iso) => {
+      const t = iso ? Date.parse(iso) : NaN;
+      if (isNaN(t)) return "";
+      const h = (Date.now() - t) / 3600000;
+      return h < 1 ? "under an hour ago" : h < 48 ? `${Math.round(h)} h ago` : `${Math.round(h / 24)} days ago`;
+    };
+    const hostOf = (u) => { try { return new URL(u).hostname; } catch (err) { return ""; } };
+    const setMsg = (t) => { e.msg.textContent = t || ""; };
+
+    // ----- drawing -----
+    function drawMap() {
+      const U = geo.units, p = [`<svg viewBox="0 0 ${geo.w} ${geo.h}" role="group" aria-label="Map of India by state">`,
+        `<defs><pattern id="mapHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--warn-soft)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--warn)" stroke-width="1.6"/></pattern></defs>`];
+      const keys = Object.keys(U);
+      for (const k of keys) {
+        const ok = kind(k) === "ok";
+        p.push(`<path class="st ${cls(k)}" data-k="${k}" d="${esc(U[k].d)}" fill-rule="evenodd" tabindex="${ok ? 0 : -1}" role="${ok ? "link" : "img"}" aria-label="${esc(label(k))}"></path>`);
+      }
+      for (const k of keys) {
+        if (U[k].marker) continue;
+        const c = cls(k);
+        p.push(`<text class="lab ${/^b[345]$/.test(c) ? "dk" : ""}${c === "none" || c === "blocked" ? " mt" : ""}" x="${U[k].cx}" y="${U[k].cy}">${esc(codeOf(k))}</text>`);
+      }
+      for (const k of keys) {
+        const u = U[k]; if (!u.marker) continue;
+        const [dx, dy] = MARKER[k] || [-20, 10], x = u.cx + dx, y = u.cy + dy, ok = kind(k) === "ok";
+        p.push(`<line x1="${u.cx}" y1="${u.cy}" x2="${x}" y2="${y}" stroke="var(--muted)" stroke-width=".6"/>`);
+        p.push(`<circle class="mk ${cls(k)}" data-k="${k}" cx="${x}" cy="${y}" r="6.4" tabindex="${ok ? 0 : -1}" role="${ok ? "link" : "img"}" aria-label="${esc(label(k))}"></circle>`);
+        p.push(`<text class="mlab" x="${x + (dx < 0 ? -9 : 9)}" y="${y}" text-anchor="${dx < 0 ? "end" : "start"}" dominant-baseline="central">${esc(codeOf(k))}</text>`);
+      }
+      p.push("</svg>");
+      e.box.className = "mapbox";
+      e.box.innerHTML = p.join("");
+    }
+    function drawTiles() {
+      const frag = document.createDocumentFragment();
+      for (const [k, [r, c]] of Object.entries(TILE)) {
+        const m = agg.get(k), b = document.createElement("button");
+        b.type = "button"; b.className = "tile " + cls(k); b.dataset.k = k; b.style.gridRow = r + 1; b.style.gridColumn = c + 1;
+        b.setAttribute("role", "listitem"); b.setAttribute("aria-label", label(k));
+        b.innerHTML = `<span class="c">${esc(codeOf(k))}</span><span class="n">${m ? num(m[metric]) : BLOCKED[k] ? "!" : "–"}</span>`;
+        frag.appendChild(b);
+      }
+      e.tiles.innerHTML = "";
+      e.tiles.appendChild(frag);
+    }
+    function markSel() {
+      for (const el of e.panel.querySelectorAll("[data-k]")) {
+        const on = el.dataset.k === selected;
+        el.classList.toggle("sel", on);
+        if (on) el.setAttribute("aria-current", "true"); else el.removeAttribute("aria-current");
+      }
+    }
+    function render() {
+      if (!ready || !open) return;
+      e.box.hidden = style !== "map"; e.tiles.hidden = style !== "tiles";
+      if (style === "map") {
+        if (geo) drawMap();
+        else { e.box.className = "mapbox loading"; e.box.textContent = "Loading map…"; ensureGeo(); }
+      } else drawTiles();
+      for (const b of e.styleG.children) b.setAttribute("aria-pressed", b.dataset.v === style);
+      for (const b of e.metricG.children) b.setAttribute("aria-pressed", b.dataset.m === metric);
+      const c = agg.get("central");
+      if (c) e.central.innerHTML = `Central / all-India · <strong>${num(c[metric])}</strong> ${metric === "active" ? "active" : metric === "new" ? "new" : "closing ≤ 48 h"}`;
+      const t = STEPS[metric], f = (n) => fmtN(n);
+      const names = ["0", `1–${f(t[1] - 1)}`, `${f(t[1])}–${f(t[2] - 1)}`, `${f(t[2])}–${f(t[3] - 1)}`, `${f(t[3])}–${f(t[4] - 1)}`, `${f(t[4])}+`];
+      e.legend.innerHTML = names.map((x, i) => `<span><i class="sw" style="background:var(--b${i})"></i>${x}</span>`).join("") +
+        `<span><i class="sw none"></i>not on TenderWatch yet</span>` +
+        (Object.keys(BLOCKED).some((k) => !agg.has(k)) ? `<span><i class="sw blocked"></i>blocked by a CAPTCHA</span>` : "");
+      markSel();
+    }
+
+    // ----- boundary file (lazy) -----
+    async function ensureGeo() {
+      if (geoState !== "idle") return;
+      geoState = "loading";
+      try {
+        const r = await fetch("map/india-states.json");
+        if (!r.ok) throw new Error(r.status);
+        const g = await r.json();
+        if (!g || !g.units || !(g.w > 0) || !(g.h > 0)) throw new Error("bad geometry");
+        geo = g; geoState = "ok";
+      } catch (err) {
+        geoState = "error"; style = "tiles";
+        e.styleG.querySelector('[data-v="map"]').hidden = true;
+        setMsg("The map outline could not be loaded, so the tile grid is shown instead.");
+      }
+      render();
+    }
+
+    // ----- tooltip (mouse only) -----
+    function tipHtml(k) {
+      const m = agg.get(k), n = esc(nameOf(k));
+      if (!m) return `<strong>${n}</strong>${BLOCKED[k] ? "Cannot be crawled: " + esc(BLOCKED[k]) : "Not on TenderWatch yet."}`;
+      const when = ago(finished[m.best.slug]), host = hostOf(m.best.base_url);
+      const foot = [when ? "Crawled " + when : "", host].filter(Boolean).map(esc).join(" · ");
+      return `<strong>${n}</strong><div class="row"><span>Active tenders</span><b>${num(m.active)}</b></div><div class="row"><span>New (2 days)</span><b>${num(m.new)}</b></div>` +
+        `<div class="row"><span>Closing within 48 h</span><b>${num(m.closing48)}</b></div><div class="row"><span>Organisations</span><b>${num(m.orgs)}</b></div>` +
+        (foot || LIMITED[k] ? `<div class="foot">${foot}${LIMITED[k] ? (foot ? "<br>" : "") + esc(LIMITED[k]) : ""}</div>` : "");
+    }
+    function moveTip(ev) {
+      e.tip.style.left = Math.max(8, Math.min(ev.clientX + 16, innerWidth - e.tip.offsetWidth - 8)) + "px";
+      e.tip.style.top = Math.max(8, Math.min(ev.clientY + 16, innerHeight - e.tip.offsetHeight - 8)) + "px";
+    }
+    function showTip(k, ev) { e.tip.innerHTML = tipHtml(k); e.tip.hidden = false; moveTip(ev); }
+    function hideTip() { e.tip.hidden = true; }
+
+    // ----- actions -----
+    function scrollToList() {
+      const bar = document.querySelector(".search");
+      const y = els.count.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 0) - 6;
+      window.scrollTo({ top: Math.max(0, y), behavior: reduceMotion() ? "auto" : "smooth" });
+    }
+    function pick(k) {
+      hideTip();
+      const m = agg.get(k);
+      if (!m) { setMsg(`${nameOf(k)}: ${BLOCKED[k] || "not on TenderWatch yet."}`); return; }
+      if (!selectSource(m.best.slug)) return;
+      setMsg(`${nameOf(k)}: showing the ${num(m.best.active)} active tenders${m.srcs.length > 1 ? " of " + m.best.name : ""} in the list below.`);
+      scrollToList();
+    }
+    function setOpen(v, persist) {
+      open = v;
+      e.toggle.setAttribute("aria-expanded", v);
+      e.body.hidden = !v;
+      if (persist) store.set(v ? "1" : "0");
+      if (!v) hideTip();
+      render();
+    }
+    // keep the highlighted state in step with the source filter (dropdown, URL, Clear, or a click here)
+    function sync() {
+      if (!ready) return;
+      const cur = sources[els.source.value], key = cur && cur.state ? cur.state : null;
+      if (key === selected) return;
+      selected = key;
+      markSel();
+    }
+
+    function init() {
+      if (!manifest.sources.some((x) => x.state)) return;   // older index: no map panel at all
+      buildModel();
+      Object.assign(e, {
+        panel: $("mapPanel"), toggle: $("mapToggle"), body: $("mapBody"), metricG: $("mapMetric"), styleG: $("mapStyle"), hint: $("mapHint"),
+        box: $("mapBox"), tiles: $("mapTiles"), central: $("mapCentral"), centralNote: $("mapCentralNote"), msg: $("mapMsg"), legend: $("mapLegend"), tip: $("mapTip"),
+      });
+      e.central.dataset.k = "central";
+      e.central.hidden = e.centralNote.hidden = !agg.has("central");
+      e.hint.textContent = canHover ? "Hover a state for details; click opens its tender list." : "Tap a state to open its tender list.";
+      e.panel.hidden = false;
+      ready = true;
+
+      e.toggle.addEventListener("click", () => setOpen(!open, true));
+      e.metricG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b) { metric = b.dataset.m; render(); } });
+      e.styleG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b && !b.hidden) { style = b.dataset.v; render(); } });
+      e.panel.addEventListener("click", (ev) => { const t = ev.target.closest("[data-k]"); if (t) pick(t.dataset.k); });
+      e.panel.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") {
+          hideTip(); setMsg("");
+          if (selected) clearSource();
+        } else if ((ev.key === "Enter" || ev.key === " ") && ev.target.dataset && ev.target.dataset.k && ev.target.tagName !== "BUTTON") {
+          ev.preventDefault(); pick(ev.target.dataset.k);   // SVG states / markers (tiles and the chip are real buttons)
+        }
+      });
+      if (canHover) {
+        e.panel.addEventListener("mouseover", (ev) => { const t = ev.target.closest("[data-k]"); if (t) showTip(t.dataset.k, ev); else hideTip(); });
+        e.panel.addEventListener("mousemove", (ev) => { if (!e.tip.hidden) moveTip(ev); });
+        e.panel.addEventListener("mouseleave", hideTip);
+        window.addEventListener("scroll", hideTip, { passive: true });
+      }
+
+      const saved = store.get();
+      const startOpen = saved === "1" ? true : saved === "0" ? false : matchMedia("(min-width: 760px)").matches;
+      sync();
+      setOpen(startOpen, false);
+    }
+    function setStatus(rows) { for (const s of rows || []) if (s && s.slug) finished[s.slug] = s.finished; }
+    return { init, sync, setStatus };
+  })();
 
   // ---------- init ----------
   async function fetchJSON(url) {
@@ -645,13 +890,14 @@
     apply();
     ensureLoaded();
     loadStatus();
+    mapUI.init();
   }
 
   let timer;
   els.q.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(apply, 120); });
   for (const k of ["cat", "close", "value", "sort"]) els[k].addEventListener("change", apply);
   els.org.addEventListener("change", () => { ensureLoaded(); apply(); });
-  els.source.addEventListener("change", () => {
+  function onSourceChange() {
     if (lazy) {
       const org = els.org.value;
       if (org && orgsData && !orgEntries(org, els.source.value).length) els.org.value = "";   // that source has no such organisation
@@ -659,7 +905,22 @@
       rebuildOptions();
     }
     ensureLoaded(); apply();
-  });
+  }
+  els.source.addEventListener("change", onSourceChange);
+  // Same as choosing the source in the dropdown, but from the map: show that source's full list ("All tenders"),
+  // drop the organisation filter (search text and the other filters stay).
+  function selectSource(slug) {
+    if (!sources[slug]) return false;
+    const defSort = els.sort.value === defaultSort();
+    if (lazy && view !== "all") { view = "all"; fullScope = false; }
+    setupSourceFilter(slug);
+    if (els.source.value !== slug) return false;
+    els.org.value = "";
+    if (defSort) els.sort.value = defaultSort();
+    onSourceChange();
+    return true;
+  }
+  function clearSource() { els.source.value = ""; onSourceChange(); }
   els.isNew.addEventListener("click", () => { newOnly = !newOnly; els.isNew.classList.toggle("active", newOnly); els.isNew.setAttribute("aria-pressed", newOnly); apply(); });
   els.closed.addEventListener("click", () => {
     showClosed = !showClosed; els.closed.classList.toggle("active", showClosed); els.closed.setAttribute("aria-pressed", showClosed);

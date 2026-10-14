@@ -11,6 +11,8 @@
     --bg: #f6f7f4; --surface: #ffffff; --text: #1b1f1a; --muted: #5f665c;
     --line: #dde1d8; --accent: #1f6f43; --accent-ink: #ffffff; --soft: #e8f1ea;
     --warn: #b4571a; --warn-soft: #fbeee3; --radius: 10px;
+    --b0: #e3e6df; --b1: #cfe6d7; --b2: #9ccdb0; --b3: #5fae82; --b4: #2f8a58; --b5: #17613a;
+    --none: #f0f1ec; --ink-light: #1b1f1a; --ink-dark: #ffffff;
     --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
@@ -18,12 +20,16 @@
       --bg: #141714; --surface: #1d211d; --text: #e9ece6; --muted: #a2a99e;
       --line: #2e342e; --accent: #5fbf84; --accent-ink: #0d1a11; --soft: #203328;
       --warn: #e8955a; --warn-soft: #3a2a1c;
+      --b0: #2b302b; --b1: #25402f; --b2: #2d5c3f; --b3: #38804f; --b4: #4ba46a; --b5: #7ad39a;
+      --none: #202420; --ink-light: #e9ece6; --ink-dark: #0d1a11;
     }
   }
   :root[data-theme="dark"] {
     --bg: #141714; --surface: #1d211d; --text: #e9ece6; --muted: #a2a99e;
     --line: #2e342e; --accent: #5fbf84; --accent-ink: #0d1a11; --soft: #203328;
     --warn: #e8955a; --warn-soft: #3a2a1c;
+    --b0: #2b302b; --b1: #25402f; --b2: #2d5c3f; --b3: #38804f; --b4: #4ba46a; --b5: #7ad39a;
+    --none: #202420; --ink-light: #e9ece6; --ink-dark: #0d1a11;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
@@ -90,6 +96,68 @@
   .status td, .status th { text-align: left; padding: 3px 8px 3px 0; vertical-align: top; }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
+  /* ---- India map panel (shown only when the manifest carries per-source "state" fields) ---- */
+  .mappanel { margin: 0 0 6px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .mappanel [hidden], .maptip[hidden] { display: none !important; }
+  .maphead { margin: 0; font-size: 1rem; }
+  .maphead button { display: flex; align-items: baseline; gap: 8px; width: 100%; font: inherit; font-weight: 600; text-align: left; padding: 10px 14px; border: 0; border-radius: var(--radius); background: transparent; color: var(--text); cursor: pointer; }
+  .maphead .mapsub { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+  .maphead .chev { margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .15s; align-self: center; }
+  .maphead button[aria-expanded="true"] .chev { transform: rotate(-135deg); }
+  .mappanel button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  .mapbody { padding: 0 14px 14px; }
+  .maptools { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; margin: 0 0 12px; }
+  .maptools .muted, .mappanel .muted { color: var(--muted); font-size: 0.82rem; }
+  .mappanel .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+  .mappanel .seg button { font: inherit; font-size: 0.88rem; padding: 7px 14px; border: 0; background: transparent; color: var(--text); cursor: pointer; }
+  .mappanel .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .mapbox, .maptiles { max-width: 640px; margin: 0 auto; width: 100%; }
+  .mapbox.loading { aspect-ratio: 560 / 637; display: grid; place-items: center; color: var(--muted); font-size: 0.88rem; }
+  .mapbox svg { width: 100%; height: auto; display: block; }
+  .st { stroke: var(--surface); stroke-width: .7; stroke-linejoin: round; cursor: pointer; transition: filter .08s; outline: none; }
+  .st.b0 { fill: var(--b0); } .st.b1 { fill: var(--b1); } .st.b2 { fill: var(--b2); } .st.b3 { fill: var(--b3); }
+  .st.b4 { fill: var(--b4); } .st.b5 { fill: var(--b5); }
+  .st.none { fill: var(--none); cursor: default; stroke: var(--line); }
+  .st.blocked { fill: url(#mapHatch); cursor: default; stroke: var(--warn); stroke-dasharray: 3 2; }
+  .st:not(.none):not(.blocked):hover, .st:focus-visible { filter: brightness(1.12) saturate(1.1); stroke: var(--text); stroke-width: 1.3; }
+  .st:focus-visible { stroke-width: 2.4; }
+  .st.sel { stroke: var(--text); stroke-width: 1.8; }
+  .lab { font-size: 7.2px; font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: var(--ink-light); }
+  .lab.dk { fill: var(--ink-dark); } .lab.mt { fill: var(--muted); font-weight: 600; }
+  .mk { stroke: var(--text); stroke-width: 1; cursor: pointer; outline: none; }
+  .mk.b0 { fill: var(--b0); } .mk.b1 { fill: var(--b1); } .mk.b2 { fill: var(--b2); } .mk.b3 { fill: var(--b3); } .mk.b4 { fill: var(--b4); } .mk.b5 { fill: var(--b5); }
+  .mk.none { fill: var(--none); stroke: var(--muted); stroke-dasharray: 2 2; cursor: default; }
+  .mk.blocked { fill: var(--warn-soft); stroke: var(--warn); stroke-dasharray: 2 2; cursor: default; }
+  .mk:hover, .mk:focus-visible { stroke-width: 2; }
+  .mk:focus-visible { stroke-width: 3; }
+  .mk.sel { stroke-width: 2.4; }
+  .mlab { font-size: 7px; font-weight: 600; fill: var(--text); pointer-events: none; }
+  .maptiles { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+  .tile { aspect-ratio: 1; min-width: 0; border: 1px solid transparent; border-radius: 7px; padding: 0; cursor: pointer; font: inherit;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; line-height: 1.1; color: var(--ink-light); }
+  .tile .c { font-weight: 700; font-size: clamp(.62rem, 1.9vw, .9rem); } .tile .n { font-size: clamp(.5rem, 1.45vw, .72rem); }
+  .tile.b0 { background: var(--b0); } .tile.b1 { background: var(--b1); } .tile.b2 { background: var(--b2); }
+  .tile.b3 { background: var(--b3); color: var(--ink-dark); } .tile.b4 { background: var(--b4); color: var(--ink-dark); } .tile.b5 { background: var(--b5); color: var(--ink-dark); }
+  .tile.none { background: transparent; border: 1.5px dashed var(--line); color: var(--muted); cursor: default; }
+  .tile.blocked { background: repeating-linear-gradient(45deg, var(--warn-soft), var(--warn-soft) 5px, transparent 5px, transparent 10px); border: 1.5px dashed var(--warn); color: var(--warn); cursor: default; }
+  .maptiles .tile:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; } .maptiles .tile.sel { outline: 3px solid var(--text); outline-offset: 1px; }
+  .mapbelow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; margin-top: 10px; }
+  .mappanel .chip { font: inherit; font-size: 0.9rem; padding: 8px 14px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+  .mappanel .chip.sel { border-color: var(--text); box-shadow: inset 0 0 0 1.5px var(--text); }
+  .mapmsg { margin-top: 8px; min-height: 1.3em; text-align: center; font-size: 0.86rem; color: var(--text); }
+  .maplegend { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.78rem; color: var(--muted); align-items: center; justify-content: center; }
+  .sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -3px; margin-right: 4px; }
+  .sw.none { background: var(--none); border: 1px solid var(--line); } .sw.blocked { border: 1.5px dashed var(--warn); background: var(--warn-soft); }
+  .mapattr { margin-top: 10px; font-size: 0.74rem; color: var(--muted); text-align: center; }
+  .maptip { position: fixed; z-index: 20; pointer-events: none; background: var(--text); color: var(--bg); border-radius: 8px; padding: 9px 11px; font-size: 0.8rem; width: 232px; box-shadow: 0 6px 20px rgba(0,0,0,.28); }
+  .maptip strong { display: block; font-size: 0.92rem; margin-bottom: 4px; }
+  .maptip .row { display: flex; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; padding: 1px 0; }
+  .maptip .foot { opacity: .75; margin-top: 5px; font-size: 0.74rem; }
+  @media (max-width: 560px) {
+    .mapbody { padding: 0 10px 12px; }
+    .maphead button { padding: 10px; }
+    .mappanel .seg button { padding: 7px 10px; font-size: 0.84rem; }
+  }
   @media (max-width: 560px) {
     .views { flex-wrap: nowrap; gap: 6px; }
     .views button { flex: 1 1 0; padding: 6px 4px; font-size: 0.82rem; line-height: 1.25; }
@@ -106,6 +174,30 @@
     <h1>TenderWatch</h1>
     <div class="meta" id="meta">Loading…</div>
   </header>
+
+  <section class="mappanel" id="mapPanel" aria-label="Tenders by state" hidden>
+    <h2 class="maphead"><button type="button" id="mapToggle" aria-expanded="false" aria-controls="mapBody"><span>Map</span><span class="mapsub">tenders by state</span><span class="chev" aria-hidden="true"></span></button></h2>
+    <div class="mapbody" id="mapBody" hidden>
+      <div class="maptools">
+        <div class="seg" id="mapMetric" role="group" aria-label="Colour states by">
+          <button type="button" data-m="active" aria-pressed="true">Active</button>
+          <button type="button" data-m="new" aria-pressed="false">New (2d)</button>
+          <button type="button" data-m="closing48" aria-pressed="false">Closing ≤ 48 h</button>
+        </div>
+        <div class="seg" id="mapStyle" role="group" aria-label="Map style">
+          <button type="button" data-v="map" aria-pressed="true">Map</button>
+          <button type="button" data-v="tiles" aria-pressed="false">Tiles</button>
+        </div>
+        <span class="muted" id="mapHint"></span>
+      </div>
+      <div class="mapbox" id="mapBox"></div>
+      <div class="maptiles" id="mapTiles" hidden role="list"></div>
+      <div class="mapbelow"><button type="button" class="chip" id="mapCentral" hidden></button><span class="muted" id="mapCentralNote" hidden>Central (all-India) tenders are not a state.</span></div>
+      <div class="mapmsg" id="mapMsg" role="status" aria-live="polite"></div>
+      <div class="maplegend" id="mapLegend"></div>
+      <div class="mapattr">Boundaries: geoBoundaries India ADM1 (data from DataMeet / Election Commission of India, CC BY 2.5 India), simplified.</div>
+    </div>
+  </section>
 
   <div class="search">
     <input type="search" id="q" placeholder="Search title, organisation, reference, tender ID… (e.g. electric bus, Kozhikode, PWD)" autocomplete="off" autofocus aria-label="Search tenders">
@@ -158,6 +250,7 @@
   <div class="status" id="status"></div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="maptip" id="mapTip" role="presentation" hidden></div>
 <script src="app.js"></script>
 </body>
 </html>
