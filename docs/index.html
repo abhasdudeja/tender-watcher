@@ -91,23 +91,23 @@
   .more[hidden], .notice[hidden] { display: none; }
   .empty { color: var(--muted); padding: 32px 0; text-align: center; }
   .notice { background: var(--warn-soft); color: var(--text); border: 1px solid var(--warn); border-radius: var(--radius); padding: 10px 12px; font-size: 0.88rem; margin: 10px 0; }
-  .status { margin-top: 28px; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
   .privacy { margin: 14px 0 0; font-size: 0.78rem; color: var(--muted); }
   .privacy a { color: inherit; }
-  .status table { border-collapse: collapse; width: 100%; }
-  .status td, .status th { text-align: left; padding: 3px 8px 3px 0; vertical-align: top; }
+  .tabs { display: flex; align-items: center; gap: 4px; border-bottom: 1px solid var(--line); margin: 0 0 14px; }
+  .tabs button { font: inherit; font-weight: 600; padding: 9px 18px; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; background: transparent; color: var(--muted); cursor: pointer; border-radius: 8px 8px 0 0; }
+  .tabs button:hover { color: var(--text); }
+  .tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tabs button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  .tabs button[hidden] { display: none; }
+  .tabs a { margin-left: auto; font-size: 0.85rem; padding: 9px 4px; }
+  [role="tabpanel"][hidden] { display: none; }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
   /* ---- India map panel (shown only when the manifest carries per-source "state" fields) ---- */
   .mappanel { margin: 0 0 6px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
   .mappanel [hidden], .maptip[hidden] { display: none !important; }
-  .maphead { margin: 0; font-size: 1rem; }
-  .maphead button { display: flex; align-items: baseline; gap: 8px; width: 100%; font: inherit; font-weight: 600; text-align: left; padding: 10px 14px; border: 0; border-radius: var(--radius); background: transparent; color: var(--text); cursor: pointer; }
-  .maphead .mapsub { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
-  .maphead .chev { margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .15s; align-self: center; }
-  .maphead button[aria-expanded="true"] .chev { transform: rotate(-135deg); }
   .mappanel button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
-  .mapbody { padding: 0 14px 14px; }
+  .mapbody { padding: 14px; }
   .maptools { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; margin: 0 0 12px; }
   .maptools .muted, .mappanel .muted { color: var(--muted); font-size: 0.82rem; }
   .mappanel .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
@@ -156,8 +156,7 @@
   .maptip .row { display: flex; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; padding: 1px 0; }
   .maptip .foot { opacity: .75; margin-top: 5px; font-size: 0.74rem; }
   @media (max-width: 560px) {
-    .mapbody { padding: 0 10px 12px; }
-    .maphead button { padding: 10px; }
+    .mapbody { padding: 10px; }
     .mappanel .seg button { padding: 7px 10px; font-size: 0.84rem; }
   }
   @media (max-width: 560px) {
@@ -177,9 +176,17 @@
     <div class="meta" id="meta">Loading…</div>
   </header>
 
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+    <button type="button" role="tab" id="tabMap" data-tab="map" class="active" aria-selected="true" aria-controls="mapView">Map</button>
+    <button type="button" role="tab" id="tabTenders" data-tab="tenders" aria-selected="false" aria-controls="tendersView" tabindex="-1">Tenders</button>
+    <a href="status.html">Crawl status</a>
+  </nav>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <div id="mapView" role="tabpanel" aria-labelledby="tabMap">
   <section class="mappanel" id="mapPanel" aria-label="Tenders by state" hidden>
-    <h2 class="maphead"><button type="button" id="mapToggle" aria-expanded="false" aria-controls="mapBody"><span>Map</span><span class="mapsub">tenders by state</span><span class="chev" aria-hidden="true"></span></button></h2>
-    <div class="mapbody" id="mapBody" hidden>
+    <div class="mapbody" id="mapBody">
       <div class="maptools">
         <div class="seg" id="mapMetric" role="group" aria-label="Colour states by">
           <button type="button" data-m="active" aria-pressed="true">Active</button>
@@ -200,7 +207,9 @@
       <div class="mapattr">Boundaries: geoBoundaries India ADM1 (data from DataMeet / Election Commission of India, CC BY 2.5 India), simplified.</div>
     </div>
   </section>
+  </div>
 
+  <div id="tendersView" role="tabpanel" aria-labelledby="tabTenders" hidden>
   <div class="search">
     <input type="search" id="q" placeholder="Search title, organisation, reference, tender ID… (e.g. electric bus, Kozhikode, PWD)" autocomplete="off" autofocus aria-label="Search tenders">
     <div class="views" id="views" role="group" aria-label="View" hidden>
@@ -232,8 +241,6 @@
     </div>
   </div>
 
-  <div id="notice" class="notice" hidden></div>
-
   <div class="count">
     <span id="count"></span>
     <label>Sort <select id="sort">
@@ -248,8 +255,8 @@
 
   <div class="list" id="list"></div>
   <button class="more" id="more" hidden>Show more</button>
+  </div>
 
-  <div class="status" id="status"></div>
   <p class="privacy" id="privacyNote" hidden>This site counts visits and a few clicks anonymously with <a href="https://www.goatcounter.com" rel="noopener">GoatCounter</a>: no cookies, no personal data, nothing you type. It is off if your browser sends Do Not Track.</p>
 </div>
 <div class="toast" id="toast"></div>

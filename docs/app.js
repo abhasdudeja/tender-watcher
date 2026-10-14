@@ -11,7 +11,7 @@
     q: $("q"), source: $("fSource"), org: $("fOrg"), cat: $("fCat"), close: $("fClose"),
     value: $("fValue"), isNew: $("fNew"), closed: $("fClosed"), clear: $("fClear"), sort: $("sort"),
     list: $("list"), more: $("more"), count: $("count"), meta: $("meta"), views: $("views"), hint: $("hint"),
-    notice: $("notice"), status: $("status"), toast: $("toast"),
+    notice: $("notice"), toast: $("toast"), tabs: $("tabs"), mapView: $("mapView"), tendersView: $("tendersView"),
   };
 
   const track = (name) => { if (window.twTrack) window.twTrack(name); };   // analytics.js; fixed event names only, never typed text
@@ -25,6 +25,8 @@
   let showClosed = false;  // include tenders no longer on the portal (st = "closed" | "removed")
   let manifest = null;
   let lazy = false;        // format >= 3 manifest (presets + orgs.json)
+  let tab = "map";         // "map" (the landing tab) | "tenders" (the list)
+  let listStarted = false; // the Tenders tab has loaded its rows (nothing is fetched for the list while only the map is looked at)
   let view = "new";        // "new" | "closing" | "all" (format 3 only; format 2 is always "all")
   let fullScope = false;   // preset view whose capped file the user chose to widen: load the chunks and apply the rule
   let orgsData = null;     // orgs.json (format 3)
@@ -82,8 +84,15 @@
 
   // ---------- URL state ----------
   const VIEWS = ["new", "closing", "all"];
+  // The address says which tab: ?tab=tenders / ?tab=map; an address with list filters but no tab is an older link to the list.
+  const FILTER_KEYS = ["q", "src", "org", "cat", "close", "val", "sort", "new", "closed", "view"];
+  function tabFromParams(p) {
+    const t = p.get("tab");
+    return t === "tenders" || t === "map" ? t : [...p.keys()].some((k) => FILTER_KEYS.includes(k)) ? "tenders" : "map";
+  }
   function readState() {
     const p = new URLSearchParams(location.search);
+    tab = tabFromParams(p);
     els.q.value = p.get("q") || "";
     wantSrc = p.get("src") || "";
     wantOrg = p.get("org") || "";
@@ -98,7 +107,7 @@
       const v = p.get("view");
       if (VIEWS.includes(v)) view = v;
       else if (p.get("new") === "1") view = "new";                          // old "New" chip -> the New view
-      else view = [...p.keys()].some((k) => k !== "view") ? "all" : "new";  // old deep links keep meaning "all"
+      else view = [...p.keys()].some((k) => k !== "view" && k !== "tab") ? "all" : "new";  // old deep links keep meaning "all"
       newOnly = false;
     } else {
       view = "all";
@@ -110,7 +119,7 @@
   }
   // the New view reads best newest-first; every other view keeps "closing soonest"
   function defaultSort() { return lazy && view === "new" ? "pub" : "close"; }
-  function writeState() {
+  function writeState(push) {
     const p = new URLSearchParams();
     if (els.q.value) p.set("q", els.q.value);
     if (els.source.value) p.set("src", els.source.value);
@@ -125,11 +134,18 @@
       // the default view is left out of an otherwise empty URL; next to other params it is written
       // explicitly, because a URL with params but no view is an old-style link and means "all"
       const rest = p.toString();
-      if (view !== "new" || rest) { const q = new URLSearchParams(); q.set("view", view); for (const [k, v] of p) q.set(k, v); return setUrl(q.toString()); }
+      if (view !== "new" || rest) { const q = new URLSearchParams(); q.set("view", view); for (const [k, v] of p) q.set(k, v); return setUrl(withTab(q), push); }
     }
-    setUrl(p.toString());
+    setUrl(withTab(p), push);
   }
-  function setUrl(qs) { history.replaceState(null, "", qs ? "?" + qs : location.pathname); }
+  // the Map tab keeps a clean address; the Tenders tab always says so (tab=tenders) and then lists its filters
+  function withTab(p) {
+    if (tab !== "tenders") return "";
+    const q = new URLSearchParams({ tab: "tenders" });
+    for (const [k, v] of p) q.set(k, v);
+    return q.toString();
+  }
+  function setUrl(qs, push) { history[push ? "pushState" : "replaceState"](null, "", qs ? "?" + qs : location.pathname); }
 
   // ---------- filtering ----------
   function tokens(q) {
@@ -484,6 +500,35 @@
     apply();
   }
 
+  // ---------- tabs: Map (landing) | Tenders ----------
+  function showTab() {
+    els.mapView.hidden = tab !== "map";
+    els.tendersView.hidden = tab !== "tenders";
+    for (const b of els.tabs.querySelectorAll("button[data-tab]")) {
+      const on = b.dataset.tab === tab;
+      b.setAttribute("aria-selected", on);
+      b.classList.toggle("active", on);
+      b.tabIndex = on ? 0 : -1;
+    }
+    mapUI.show(tab === "map");
+  }
+  // first visit to the list: fetch what its view needs (until then only the map's small files were loaded)
+  function startList() {
+    if (listStarted) return;
+    listStarted = true;
+    ensureLoaded();
+    apply();
+  }
+  // fromUser: a click on a tab or on the map. It adds a history entry, so Back returns to the other tab.
+  function setTab(t, fromUser) {
+    if (t === tab) return;
+    tab = t;
+    showTab();
+    if (fromUser) { track("tab/" + t); window.scrollTo(0, 0); }
+    writeState(!!fromUser);
+    if (t === "tenders") startList();
+  }
+
   // ---------- lazy file loading ----------
   const scopeSources = () => (manifest ? manifest.sources.filter((x) => !els.source.value || x.slug === els.source.value) : []);
   const metaOf = (f) => fileMeta.get(f) || { file: f, rows: 1, kind: /-closed-\d+\.json$/.test(f) ? "closed" : "live" };
@@ -587,26 +632,20 @@
       if (!r.ok) return;
       const st = await r.json();
       mapUI.setStatus(st.sources);
-      const rows = st.sources.map((s) => {
-        const ok = s.ok ? "✓" : "✗";
-        const when = s.finished ? fmtDate(s.finished) : "—";
-        const errs = (s.errors || []).length ? ` · ${s.errors.length} error(s): ${esc(s.errors[0])}` : "";
-        return `<tr><td>${ok}</td><td>${esc(s.name || s.slug)}</td><td>${when}</td><td>${s.listed ?? "—"} listed, ${s.new ?? "—"} new, ${s.details_fetched ?? "—"} details${errs}</td></tr>`;
-      }).join("");
-      els.status.innerHTML = `<strong>Crawl status</strong><table>${rows}</table>`;
       const bad = st.sources.filter((s) => !s.ok);
       if (bad.length) {
         els.notice.hidden = false;
-        els.notice.textContent = `Last crawl had problems for: ${bad.map((s) => s.name || s.slug).join(", ")}. Data for those sources may be stale.`;
+        els.notice.innerHTML = `Last crawl had problems for: ${esc(bad.map((s) => s.name || s.slug).join(", "))}. Data for those sources may be stale. <a href="status.html">Crawl status</a>`;
       }
     } catch (e) { /* status is optional */ }
   }
 
   // ---------- India map panel ----------
-  // Shown only when the manifest carries per-source "state" fields (ISO 3166-2 code, or "central"). Everything it
-  // shows is aggregated from the manifest (state / active / stats) and status.json (crawl time); boundaries come from
-  // map/india-states.json, fetched only while the panel is open in "Map" style. A click selects that state's source
-  // in the ordinary source filter (selectSource), so URL state and lazy chunk loading behave exactly as for the dropdown.
+  // The landing tab. Shown only when the manifest carries per-source "state" fields (ISO 3166-2 code, or "central").
+  // Everything it shows is aggregated from the manifest (state / active / stats) and status.json (crawl time);
+  // boundaries come from map/india-states.json, fetched when the Map tab is first drawn in "Map" style. A click selects
+  // that state's source in the ordinary source filter (selectSource) and opens the Tenders tab, so URL state and lazy
+  // chunk loading behave exactly as for the dropdown.
   const mapUI = (function () {
     const pre = (o) => { const r = {}; for (const k of Object.keys(o)) r["IN-" + k] = o[k]; return r; };
     const CODE = pre({ AN: "AN", AP: "AP", AR: "AR", AS: "AS", BR: "BR", CH: "CH", CT: "CG", DL: "DL", DH: "DD", GA: "GA", GJ: "GJ", HR: "HR", HP: "HP", JK: "JK", JH: "JH",
@@ -625,20 +664,14 @@
     const LIMITED = pre({ MZ: "Only the state e-Tender notice board is crawled (a handful of open notices)." });
     const STEPS = { active: [0, 100, 1000, 3000, 6000], new: [0, 20, 100, 300, 800], closing48: [0, 20, 100, 300, 800] };
     const LABEL = { active: "active tenders", new: "new tenders in the last 2 days", closing48: "tenders closing within 48 hours" };
-    const KEY = "tenderwatch.mapOpen";
-    const store = {
-      get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
-      set(v) { try { localStorage.setItem(KEY, v); } catch (e) { /* storage may be unavailable */ } },
-    };
     const plain = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "");
     const num = (n) => fmtN(n || 0);
     const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
-    const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const e = {};          // elements, resolved in init()
     const agg = new Map(); // "IN-KL" | "central" -> { active, new, closing48, orgs, srcs, best }
     const finished = {};   // source slug -> last crawl finish (status.json)
-    let ready = false, open = false, metric = "active", style = innerWidth < 640 ? "tiles" : "map", selected = null;
+    let ready = false, open = false /* the Map tab is showing */, metric = "active", style = innerWidth < 640 ? "tiles" : "map", selected = null;
     let geo = null, geoState = "idle";   // "idle" | "loading" | "ok" | "error"
 
     function buildModel() {
@@ -774,25 +807,18 @@
     function hideTip() { e.tip.hidden = true; }
 
     // ----- actions -----
-    function scrollToList() {
-      const bar = document.querySelector(".search");
-      const y = els.count.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 0) - 6;
-      window.scrollTo({ top: Math.max(0, y), behavior: reduceMotion() ? "auto" : "smooth" });
-    }
     function pick(k) {
       hideTip();
       track("map/state/" + k);   // also counted for states we do not cover yet: shows where the demand is
       const m = agg.get(k);
       if (!m) { setMsg(`${nameOf(k)}: ${BLOCKED[k] || "not on TenderWatch yet."}`); return; }
       if (!selectSource(m.best.slug)) return;
-      setMsg(`${nameOf(k)}: showing the ${num(m.best.active)} active tenders${m.srcs.length > 1 ? " of " + m.best.name : ""} in the list below.`);
-      scrollToList();
+      setMsg("");
+      setTab("tenders", true);   // the list, filtered to that state's source
     }
-    function setOpen(v, persist) {
+    // called when the Map tab is shown or hidden: nothing is drawn (or fetched) while another tab is up
+    function show(v) {
       open = v;
-      e.toggle.setAttribute("aria-expanded", v);
-      e.body.hidden = !v;
-      if (persist) { store.set(v ? "1" : "0"); track(v ? "map/open" : "map/close"); }
       if (!v) hideTip();
       render();
     }
@@ -809,7 +835,7 @@
       if (!manifest.sources.some((x) => x.state)) return;   // older index: no map panel at all
       buildModel();
       Object.assign(e, {
-        panel: $("mapPanel"), toggle: $("mapToggle"), body: $("mapBody"), metricG: $("mapMetric"), styleG: $("mapStyle"), hint: $("mapHint"),
+        panel: $("mapPanel"), metricG: $("mapMetric"), styleG: $("mapStyle"), hint: $("mapHint"),
         box: $("mapBox"), tiles: $("mapTiles"), central: $("mapCentral"), centralNote: $("mapCentralNote"), msg: $("mapMsg"), legend: $("mapLegend"), tip: $("mapTip"),
       });
       e.central.dataset.k = "central";
@@ -818,7 +844,6 @@
       e.panel.hidden = false;
       ready = true;
 
-      e.toggle.addEventListener("click", () => setOpen(!open, true));
       e.metricG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b) { metric = b.dataset.m; track("map/metric/" + metric); render(); } });
       e.styleG.addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b && !b.hidden) { style = b.dataset.v; track("map/style/" + style); render(); } });
       e.panel.addEventListener("click", (ev) => { const t = ev.target.closest("[data-k]"); if (t) pick(t.dataset.k); });
@@ -837,13 +862,10 @@
         window.addEventListener("scroll", hideTip, { passive: true });
       }
 
-      const saved = store.get();
-      const startOpen = saved === "1" ? true : saved === "0" ? false : matchMedia("(min-width: 760px)").matches;
       sync();
-      setOpen(startOpen, false);
     }
     function setStatus(rows) { for (const s of rows || []) if (s && s.slug) finished[s.slug] = s.finished; }
-    return { init, sync, setStatus };
+    return { init, show, sync, setStatus };
   })();
 
   // ---------- init ----------
@@ -891,10 +913,14 @@
       if (!orgsData) refreshFilterOptions(); else { rebuildOrgOptions(null); rebuildCatOptions(null); }
       updateViewButtons();
     }
-    apply();
-    ensureLoaded();
     loadStatus();
     mapUI.init();
+    if (!manifest.sources.some((x) => x.state)) {   // an index without the map data: the list is all there is
+      tab = "tenders";
+      els.tabs.querySelector('button[data-tab="map"]').hidden = true;
+    }
+    showTab();
+    if (tab === "tenders") startList(); else writeState();
   }
 
   let timer;
@@ -949,7 +975,20 @@
     ensureLoaded(); apply(); els.q.focus();
   });
   els.more.addEventListener("click", () => renderMore());
-  document.addEventListener("keydown", (e) => { if (e.key === "/" && document.activeElement !== els.q) { e.preventDefault(); els.q.focus(); } });
+  els.tabs.addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (b) setTab(b.dataset.tab, true); });
+  els.tabs.addEventListener("keydown", (e) => {   // arrow keys move between the two tabs
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const t = tab === "map" ? "tenders" : "map", b = els.tabs.querySelector(`button[data-tab="${t}"]`);
+    if (b.hidden) return;
+    e.preventDefault(); setTab(t, true); b.focus();
+  });
+  window.addEventListener("popstate", () => { if (manifest) setTab(tabFromParams(new URLSearchParams(location.search)), false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "/" || document.activeElement === els.q || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) return;
+    e.preventDefault();
+    setTab("tenders", true);
+    els.q.focus();
+  });
 
   init();
 })();

@@ -15,7 +15,7 @@ docs/                             the static site (GitHub Pages serves this fold
 docs/data/index.json              manifest: per source its counts, state, stats and chunk files (+ orgs.json and presets/, see "The site")
 docs/data/index/<slug>-live-N.json    active tenders, loaded lazily by the site
 docs/data/index/<slug>-closed-N.json  closed / removed tenders, loaded only on "Show closed"
-docs/data/status.json             last crawl status per source (shown at the bottom of the site)
+docs/data/status.json             last crawl status per source (shown on docs/status.html, linked from the site)
 docs/map/india-states.json        state boundaries for the map panel (see "The map")
 tools/build_map.py                regenerates that file from a boundary GeoJSON
 tests/                            parser, storage, migration, index, map-build and crawl-flow tests
@@ -282,7 +282,14 @@ The first paint needs about 200 KB (gzipped) instead of every tender. The crawle
 | `index/<slug>-live-<n>.json`, `-closed-<n>.json` | the tenders, ≤ 3,000 rows per chunk, organisations kept together so a new tender only changes its own organisation's chunk |
 | `status.json` | last crawl status per source |
 
-The page loads the manifest and `orgs.json`, paints a preset, and fetches chunks only when a view needs
+The site has two tabs. **Map** is the landing tab and needs only the manifest and `status.json` (plus the map
+outline): no tender rows are fetched until someone opens **Tenders** (a click on a state opens it, filtered to
+that state's source). The address says which tab: `?tab=tenders&...` for the list, a clean address for the map;
+links with list filters but no `tab=` still open the list. Crawl status is its own page, `docs/status.html` (one
+row per source: result, last crawl, active / listed / new / details, errors), linked from the tab bar; the main
+page only shows a banner when a source's last crawl failed.
+
+The Tenders tab loads `orgs.json`, paints a preset, and fetches chunks only when a view needs
 them: an organisation's files, a source's live chunks, or every live chunk for *All tenders* or a search
 (with a loading percentage). Closed chunks load only when *Show closed* is on. Search is client-side over
 the rows that are loaded. The windows and caps are constants at the top of `crawler/index.py`.
@@ -291,7 +298,7 @@ the rows that are loaded. The windows and caps are constants at the top of `craw
 
 The site has a map of India: each state or UT is coloured by its active tenders (or new tenders, or those
 closing within 48 hours); hovering shows active, new (2 days), closing within 48 hours, the number of
-organisations and when it was last crawled; clicking opens that state's tender list. Small places (Delhi,
+organisations and when it was last crawled; clicking opens the Tenders tab filtered to that state. Small places (Delhi,
 Chandigarh, Goa, Puducherry, Dadra & Nagar Haveli and Daman & Diu, Lakshadweep) get round markers so they can
 be clicked, and a tile-grid style is the phone, keyboard and screen-reader alternative.
 
@@ -331,7 +338,7 @@ Visits are counted against the page path only (not `?q=...`). Events have fixed 
 | `map/state/IN-KL` (`central` for the all-India chip) | a state, marker or tile clicked on the map (also for states not covered yet) |
 | `map/metric/active`, `map/metric/new`, `map/metric/closing` | the map's number toggle |
 | `map/style/map`, `map/style/tiles` | the Map / Tiles switch |
-| `map/open`, `map/close` | the map panel toggle |
+| `tab/map`, `tab/tenders` | the Map / Tenders tabs (also fired by a click on a state) |
 | `search` | the search box used, once per page load |
 
 In GoatCounter these show up under *Events* (set a path/event filter). Add an event by calling `track("name")` in

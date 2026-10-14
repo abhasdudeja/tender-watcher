@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TenderWatch crawl status</title>
+<meta name="description" content="When each tender portal was last crawled by TenderWatch, and how the crawl went.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<style>
+  :root {
+    --bg: #f6f7f4; --surface: #ffffff; --text: #1b1f1a; --muted: #5f665c;
+    --line: #dde1d8; --accent: #1f6f43; --soft: #e8f1ea;
+    --warn: #b4571a; --warn-soft: #fbeee3; --bad: #b3261e; --radius: 10px;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141714; --surface: #1d211d; --text: #e9ece6; --muted: #a2a99e;
+      --line: #2e342e; --accent: #5fbf84; --soft: #203328; --warn: #e8955a; --warn-soft: #3a2a1c; --bad: #f2867f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141714; --surface: #1d211d; --text: #e9ece6; --muted: #a2a99e;
+    --line: #2e342e; --accent: #5fbf84; --soft: #203328; --warn: #e8955a; --warn-soft: #3a2a1c; --bad: #f2867f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+  body { line-height: 1.45; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 20px 0 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.35rem; margin: 0; letter-spacing: -0.01em; }
+  header .back { font-size: 0.9rem; }
+  .sum { color: var(--muted); font-size: 0.9rem; margin: 0 0 12px; }
+  .sum strong { color: var(--text); }
+  .notice { background: var(--warn-soft); border: 1px solid var(--warn); border-radius: var(--radius); padding: 10px 12px; font-size: 0.88rem; margin: 0 0 12px; }
+  .tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+  th, td { text-align: left; padding: 8px 12px; vertical-align: top; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: 0; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.src { font-weight: 600; }
+  td.src small { display: block; font-weight: 400; color: var(--muted); }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+  .badge.ok { background: var(--soft); color: var(--accent); }
+  .badge.fail { background: var(--warn-soft); color: var(--bad); border: 1px solid var(--warn); }
+  .badge.old { background: var(--warn-soft); color: var(--warn); }
+  tr.bad td { background: color-mix(in srgb, var(--warn-soft) 55%, transparent); }
+  .err { color: var(--bad); }
+  .muted { color: var(--muted); }
+  .privacy { margin: 14px 0 0; font-size: 0.78rem; color: var(--muted); }
+  .privacy a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Crawl status</h1>
+    <a class="back" href="./">&larr; Back to TenderWatch</a>
+  </header>
+  <p class="sum" id="sum">Loading…</p>
+  <div class="notice" id="notice" hidden></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Source</th><th>Result</th><th>Last crawl finished</th>
+        <th class="num">Active</th><th class="num">Listed</th><th class="num">New</th><th class="num">Details</th><th>Notes</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p class="sum" style="margin-top:10px">The crawl runs once a day. A source that failed keeps its last good data on the site, so its numbers may be out of date until the next successful crawl.</p>
+  <p class="privacy" id="privacyNote" hidden>This site counts visits and a few clicks anonymously with <a href="https://www.goatcounter.com" rel="noopener">GoatCounter</a>: no cookies, no personal data, nothing you type. It is off if your browser sends Do Not Track.</p>
+</div>
+<script src="analytics.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var n = function (v) { return v == null ? "—" : Number(v).toLocaleString("en-IN"); };
+  var STALE_HOURS = 36;      // the crawl is daily: older than this and something is wrong
+  function when(iso) {
+    var t = iso ? Date.parse(iso) : NaN;
+    if (isNaN(t)) return { text: "—", hours: Infinity };
+    var d = new Date(t), h = (Date.now() - t) / 3600000;
+    var rel = h < 1 ? "under an hour ago" : h < 48 ? Math.round(h) + " h ago" : Math.round(h / 24) + " days ago";
+    return { text: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) + ", " + d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) + " · " + rel, hours: h };
+  }
+  var getJSON = function (u) { return fetch(u, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
+  // "Active" is what the site lists right now (index.json), also for a source whose last crawl failed and kept its old data
+  var activeNow = getJSON("data/index.json").then(function (m) { var o = {}; (m.sources || []).forEach(function (s) { o[s.slug] = s.active; }); return o; }).catch(function () { return {}; });
+  Promise.all([getJSON("data/status.json"), activeNow]).then(function (both) {
+    var st = both[0], active = both[1];
+    var rows = (st.sources || []).slice().sort(function (a, b) {
+      return (a.ok === b.ok ? 0 : a.ok ? 1 : -1) || String(a.name || a.slug).localeCompare(String(b.name || b.slug));
+    });
+    var bad = rows.filter(function (s) { return !s.ok; }), old = rows.filter(function (s) { return s.ok && when(s.finished).hours > STALE_HOURS; });
+    $("sum").innerHTML = "<strong>" + (rows.length - bad.length) + " of " + rows.length + "</strong> sources crawled without problems" +
+      (st.updated ? " · status updated " + esc(when(st.updated).text) : "") + ".";
+    if (bad.length || old.length) {
+      var names = bad.concat(old).map(function (s) { return esc(s.name || s.slug); }).join(", ");
+      $("notice").hidden = false;
+      $("notice").innerHTML = "Needs attention: " + names + ". The data for " + (bad.length + old.length === 1 ? "that source" : "those sources") + " on the site may be out of date.";
+    }
+    $("rows").innerHTML = rows.map(function (s) {
+      var w = when(s.finished), notes = [];
+      var errs = s.errors || [];
+      if (errs.length) notes.push('<span class="err">' + esc(errs[0]) + "</span>" + (errs.length > 1 ? " (+" + (errs.length - 1) + " more)" : ""));
+      if (s.details_failed) notes.push(n(s.details_failed) + " detail pages failed");
+      if (s.throttled) notes.push("slowed down " + n(s.throttled) + "×");
+      if (s.deactivated) notes.push(n(s.deactivated) + " no longer listed");
+      var badge = !s.ok ? '<span class="badge fail">Failed</span>' : w.hours > STALE_HOURS ? '<span class="badge old">Old</span>' : '<span class="badge ok">OK</span>';
+      return '<tr class="' + (!s.ok || w.hours > STALE_HOURS ? "bad" : "") + '"><td class="src">' + esc(s.name || s.slug) + "<small>" + esc(s.slug) + "</small></td><td>" + badge + "</td><td>" + esc(w.text) + "</td>" +
+        '<td class="num">' + n(active[s.slug] != null ? active[s.slug] : s.active) + "</td>" +
+        (s.ok ? '<td class="num">' + n(s.listed) + '</td><td class="num">' + n(s.new) + '</td><td class="num">' + n(s.details_fetched) + "</td>" : '<td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td>') +
+        "<td>" + (notes.length ? notes.join("<br>") : '<span class="muted">—</span>') + "</td></tr>";
+    }).join("");
+  }).catch(function () { $("sum").textContent = "Could not load data/status.json."; });
+})();
+</script>
+</body>
+</html>
