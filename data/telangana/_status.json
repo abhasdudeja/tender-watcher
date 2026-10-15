@@ -1,0 +1,23 @@
+{
+ "slug": "telangana",
+ "name": "Telangana",
+ "ok": true,
+ "started": "2026-10-15T10:22:17Z",
+ "orgs": 69,
+ "orgs_skipped": 0,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 2058,
+ "new": 2058,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 2058,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "deactivated": 0,
+ "active": 2058,
+ "finished": "2026-10-15T10:57:25Z",
+ "requests": 2093
+}

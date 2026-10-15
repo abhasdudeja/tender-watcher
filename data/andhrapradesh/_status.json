@@ -1,0 +1,23 @@
+{
+ "slug": "andhrapradesh",
+ "name": "Andhra Pradesh",
+ "ok": true,
+ "started": "2026-10-15T10:22:17Z",
+ "orgs": 76,
+ "orgs_skipped": 0,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 2710,
+ "new": 2710,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 2710,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "deactivated": 0,
+ "active": 2710,
+ "finished": "2026-10-15T11:14:37Z",
+ "requests": 2740
+}
