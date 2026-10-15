@@ -437,7 +437,7 @@ sources:
     state: IN-KA
     type: kppp
     base_url: https://kppp.karnataka.gov.in
-    enabled: false          # switch on after a successful local crawl
+    enabled: true
     ignore_robots: false
     fetch_details: true
     max_detail_fetches: 4000
