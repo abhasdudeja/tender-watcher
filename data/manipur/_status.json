@@ -1,23 +1,23 @@
 {
  "slug": "manipur",
  "name": "Manipur",
- "ok": true,
- "started": "2026-10-15T12:18:29Z",
- "orgs": 13,
- "orgs_skipped": 4,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-10-15T14:16:16Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 29,
+ "listed": 0,
  "new": 0,
  "changed": 0,
  "details_failed": 0,
  "details_fetched": 0,
- "throttled": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 0,
- "active": 29,
- "finished": "2026-10-15T12:18:39Z",
- "requests": 10
+ "errors": [
+  "organisation list: HTTP 503"
+ ],
+ "finished": "2026-10-15T15:19:04Z",
+ "requests": 24
 }
