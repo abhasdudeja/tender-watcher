@@ -1,0 +1,23 @@
+{
+ "slug": "goa",
+ "name": "Goa",
+ "ok": true,
+ "started": "2026-10-15T12:16:16Z",
+ "orgs": 33,
+ "orgs_skipped": 0,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 259,
+ "new": 259,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 259,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "deactivated": 0,
+ "active": 259,
+ "finished": "2026-10-15T12:21:12Z",
+ "requests": 293
+}

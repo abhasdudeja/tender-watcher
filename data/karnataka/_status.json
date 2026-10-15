@@ -1,0 +1,23 @@
+{
+ "slug": "karnataka",
+ "name": "Karnataka",
+ "ok": true,
+ "started": "2026-10-15T12:17:20Z",
+ "orgs": 177,
+ "orgs_skipped": 99,
+ "orgs_failed": 0,
+ "orgs_unreachable": 0,
+ "listed": 2993,
+ "new": 984,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 1004,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [],
+ "deactivated": 32,
+ "active": 2993,
+ "finished": "2026-10-15T12:34:44Z",
+ "requests": 1041
+}

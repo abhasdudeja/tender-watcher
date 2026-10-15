@@ -2,7 +2,7 @@
  "slug": "mizoram-etender",
  "name": "Mizoram e-Tender",
  "ok": false,
- "started": "2026-10-15T09:17:07Z",
+ "started": "2026-10-15T12:19:38Z",
  "orgs": 0,
  "orgs_skipped": 0,
  "orgs_failed": 1,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [
-  "organisation list: no notice cards on the first page (markup changed?)"
+  "organisation list: HTTP Error 403: "
  ],
- "finished": "2026-10-15T09:17:08Z",
- "requests": 1
+ "finished": "2026-10-15T12:19:55Z",
+ "requests": 3
 }

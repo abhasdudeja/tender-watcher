@@ -2,9 +2,9 @@
  "slug": "manipur",
  "name": "Manipur",
  "ok": true,
- "started": "2026-10-15T07:37:01Z",
+ "started": "2026-10-15T12:18:29Z",
  "orgs": 13,
- "orgs_skipped": 13,
+ "orgs_skipped": 4,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 29,
@@ -18,6 +18,6 @@
  "errors": [],
  "deactivated": 0,
  "active": 29,
- "finished": "2026-10-15T07:37:04Z",
- "requests": 1
+ "finished": "2026-10-15T12:18:39Z",
+ "requests": 10
 }

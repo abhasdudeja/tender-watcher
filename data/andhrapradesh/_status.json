@@ -1,23 +1,23 @@
 {
  "slug": "andhrapradesh",
  "name": "Andhra Pradesh",
- "ok": true,
- "started": "2026-10-15T10:22:17Z",
- "orgs": 76,
+ "ok": false,
+ "started": "2026-10-15T12:19:00Z",
+ "orgs": 0,
  "orgs_skipped": 0,
- "orgs_failed": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 2710,
- "new": 2710,
+ "listed": 0,
+ "new": 0,
  "changed": 0,
  "details_failed": 0,
- "details_fetched": 2710,
+ "details_fetched": 0,
  "throttled": 0,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 0,
- "active": 2710,
- "finished": "2026-10-15T11:14:37Z",
- "requests": 2740
+ "errors": [
+  "organisation list: Failed to perform, curl: (28) Connection timed out after 40002 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-10-15T12:21:55Z",
+ "requests": 0
 }
