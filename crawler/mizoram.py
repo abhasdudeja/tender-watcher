@@ -1,26 +1,27 @@
 """The Mizoram e-Tender notice board, tender.mizoram.gov.in (a Laravel site run by the state, not NIC's GePNIC).
 
-It is a paged list of notices - 15 per page, ~50 pages, newest first, expired notices included - not a
-tender system: each card has a reference number, the department, a notice type, a description, its
-attachments (PDF names) and three dates (issue, opening, last date). There is no detail page and no
-value or EMD. Only notices whose last date is still ahead are live; the rest are history and are
-never yielded, so (like every other source) the store holds live tenders plus those that just left.
+It is a notice board, not a tender system: each notice has a number, the office, a type ("TENDER NOTICE"), a
+description, PDF attachments and three dates (issue, opening, last date of submission). There is no detail page and
+no value or EMD. The site is a single-page app (the page itself is an empty shell); its data comes from the site's
+own public JSON API, which is what is read here:
 
-    GET /home?page=N   (1.. until a page has no cards)
+    GET /api/public/tenders?status=open&order=latest&page=N      {"tenders": {"data": [...], "total", "last_page", ...}}
 
-A department plays the role of a GePNIC organisation. The notice id is the portal's own (the
-`download<id>` modal of the card). robots.txt allows everything. The crawl loop is crawler/engine.py.
+15 notices per page, only the open ones. A board with no open notice answers `total: 0`: that is a valid answer
+(`may_be_empty`), not a failure; whatever was open before is then kept and marked closed like any tender that leaves
+a portal. (Until October 2026 the board served the notices as server-rendered HTML cards; the page now carries none.)
+
+A department (the notice's office) plays the role of a GePNIC organisation. The notice id is the API's own. The crawl
+loop is crawler/engine.py.
 """
 from __future__ import annotations
 
-import hashlib
+import json
 import logging
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Iterator, List, Optional
+from typing import Dict, Iterator, List, Optional, Tuple
 from urllib.parse import urlsplit
-
-from bs4 import BeautifulSoup
 
 from . import engine
 from .http import PortalSession
@@ -28,13 +29,13 @@ from .http import PortalSession
 log = logging.getLogger("tenderwatch.mizoram")
 
 IST = timezone(timedelta(hours=5, minutes=30))
-MAX_PAGES = 200                  # runaway guard (the board has ~50)
+MAX_PAGES = 200                  # runaway guard (15 notices a page)
 
 CHANGE_KEYS = ("close", "open", "title", "ref")
 LISTING_FIELDS = ("ref", "title", "chain", "pub", "close", "open", "tender_type", "documents")
 DETAIL_FIELDS: tuple = ()
 
-_norm = lambda t: re.sub(r"\s+", " ", (t or "").replace("\xa0", " ")).strip()  # noqa: E731
+_norm = lambda t: re.sub(r"\s+", " ", str(t if t is not None else "").replace("\xa0", " ")).strip()  # noqa: E731
 
 
 def _now() -> datetime:
@@ -42,86 +43,80 @@ def _now() -> datetime:
 
 
 def parse_dt(text: Optional[str]) -> Optional[str]:
-    """'30-10-2026 01:00 pm' -> '2026-10-30T13:00'; a bare '28-09-2026' -> '2026-09-28'; else None."""
-    m = re.search(r"(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2})\s*([ap]m)?)?", text or "", re.I)
+    """'2026-11-11 12:00:00' -> '2026-11-11T12:00'; a midnight value ('2026-10-12 00:00:00') or a bare date -> '2026-10-12'."""
+    m = re.match(r"\s*(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?", text or "")
     if not m:
         return None
-    d, mo, y, hh, mm, ap = m.groups()
+    y, mo, d, hh, mm = m.groups()
     try:
-        datetime(int(y), int(mo), int(d))
-        if hh is None:
-            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
-        hour = int(hh) % 12 + (12 if (ap or "").lower() == "pm" else 0) if ap else int(hh)
-        datetime(int(y), int(mo), int(d), hour, int(mm))
+        datetime(int(y), int(mo), int(d), int(hh or 0), int(mm or 0))
     except ValueError:
         return None
-    return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}T{hour:02d}:{mm}"
+    if hh is None or (hh, mm) == ("00", "00"):
+        return f"{y}-{mo}-{d}"
+    return f"{y}-{mo}-{d}T{hh}:{mm}"
 
 
-def parse_cards(html: str) -> List[Dict]:
-    """One /home page -> notice rows, in page order. Cards are the innermost div.container holding an h3
-    and an 'Issue date' (the page wraps all of them in one more container)."""
-    soup = BeautifulSoup(html, "lxml")
-    cand = [c for c in soup.find_all("div", class_="container") if c.find("h3") and "Issue date" in c.get_text()]
+def parse_tenders(text: str) -> Tuple[int, List[Dict]]:
+    """One API page -> (last page number, notice rows). ValueError if the answer is not the notices list."""
+    try:
+        j = json.loads(text)
+    except ValueError as e:
+        raise ValueError(f"not JSON ({e})") from e
+    tenders = j.get("tenders") if isinstance(j, dict) else None
+    if not isinstance(tenders, dict) or not isinstance(tenders.get("data"), list):
+        raise ValueError("no tenders list in the answer")
     rows = []
-    for card in cand:
-        if any(o is not card and o in card.find_all("div", class_="container") for o in cand):
-            continue                                        # the page wrapper, not a card
-        head = card.find("h3")
-        first = card.find("div", recursive=False)
-        ref = _norm(first.get_text(" ")) if first is not None else ""
-        dept = _norm(card.find("i").get_text(" ")) if card.find("i") else ""
-        kind = _norm(head.get_text(" "))
-        desc_div = head.parent.find_next_sibling("div") if head.parent is not None else None
-        # the description is the plain div after the type; never the attachments or the dates block
-        plain = desc_div is not None and not desc_div.find("a") and "container" not in (desc_div.get("class") or [])             and "Issue date" not in desc_div.get_text()
-        desc = _norm(desc_div.get_text(" ")) if plain else ""
-        modal = card.find("div", class_="modal")
-        mid = re.search(r"download(\d+)", (modal.get("id") or "") if modal else "")
-        text = _norm(card.get_text(" "))
-        dates = {k: (re.search(k + r":\s*(\d{1,2}-\d{1,2}-\d{4}(?:\s+\d{1,2}:\d{2}\s*[ap]m)?)", text, re.I) or [None, None])[1]
-                 for k in ("Issue date", "Opening Date", "Last Date")}
-        docs = sorted({_norm(a.get_text(" ")) for a in card.find_all("a", href=re.compile("downloadcount")) if _norm(a.get_text(" "))})
-        title = desc or kind
-        rid = mid.group(1) if mid else "x" + hashlib.sha1(f"{ref}|{dept}|{title}".encode("utf-8")).hexdigest()[:10]
+    for t in tenders["data"]:
+        if not isinstance(t, dict) or t.get("id") is None or t.get("is_open") is False:
+            continue
+        office = (t.get("office") or {}).get("name")
+        subject, detail = _norm(t.get("subject")), _norm(t.get("detail"))
+        docs = sorted({_norm(f"{m.get('ori_filename') or ''}.{m.get('file_ext')}" if m.get("file_ext") else m.get("ori_filename"))
+                       for m in t.get("media") or [] if m.get("ori_filename")})
         rows.append({
-            "id": rid, "ref": ref, "title": title, "chain": dept or "Unspecified department",
-            "pub": parse_dt(dates["Issue date"]), "open": parse_dt(dates["Opening Date"]), "close": parse_dt(dates["Last Date"]),
-            "tender_type": kind if desc and len(kind) <= 60 else None,
+            "id": str(t["id"]), "ref": _norm(t.get("tender_number")), "title": detail or subject,
+            "chain": _norm(office) or "Unspecified department",
+            "pub": parse_dt(t.get("issue_date")), "open": parse_dt(t.get("opening_date")),
+            "close": parse_dt(t.get("last_date_of_submission")),
+            "tender_type": subject if detail and 0 < len(subject) <= 60 else None,
             "documents": docs or None,
         })
-    return rows
+    return int(tenders.get("last_page") or 1), rows
 
 
 class MizoramPortal:
     """Adapter that lets crawler.engine drive the notice board (see the interface in engine.py)."""
 
     throttle_scope = "source"
-    may_be_empty = True          # a board with no live notice is a valid answer, not a parse failure
+    may_be_empty = True          # a board with no open notice is a valid answer, not a failure
 
     def __init__(self, sess: PortalSession, base_url: str):
         parts = urlsplit(base_url)
         self.sess = sess
+        self.api = f"{parts.scheme}://{parts.netloc}/api/public"
         self.home = f"{parts.scheme}://{parts.netloc}/home"
         self._by_org: Dict[str, List[Dict]] = {}
 
     def list_orgs(self) -> List[Dict]:
         now = _now().strftime("%Y-%m-%dT%H:%M")
-        seen, live, pages = set(), [], 0
-        for page in range(1, MAX_PAGES + 1):
-            rows = parse_cards(self.sess.get(self.home if page == 1 else f"{self.home}?page={page}", label="list"))
-            if not rows:
-                if page == 1:
-                    raise RuntimeError("no notice cards on the first page (markup changed?)")
-                break
+        seen, live, pages, last = set(), [], 0, 1
+        page = 1
+        while page <= min(last, MAX_PAGES):
+            text = self.sess.get(f"{self.api}/tenders?status=open&order=latest&page={page}", label="list")
+            try:
+                last, rows = parse_tenders(text)
+            except ValueError as e:
+                raise RuntimeError(f"the notices API gave an unexpected answer: {e} (site changed?)") from e
             pages += 1
             for row in rows:
                 if row["id"] in seen:
                     continue                                   # a notice that shifted to the next page while we read
                 seen.add(row["id"])
-                if not row["close"] or row["close"] >= now:    # no parsable last date: keep it rather than hide it
+                if not row["close"] or row["close"] >= now[:len(row["close"])]:   # no parsable last date: keep it rather than hide it
                     live.append(row)
-        log.info("%d notices on %d pages, %d still open", len(seen), pages, len(live))
+            page += 1
+        log.info("%d open notices on %d page(s), %d still open", len(seen), pages, len(live))
         self._by_org = {}
         for row in live:
             self._by_org.setdefault(row["chain"], []).append(row)
@@ -129,7 +124,7 @@ class MizoramPortal:
 
     def walk_org(self, org: Dict) -> Iterator[Dict]:
         for row in self._by_org.get(org["name"], []):
-            yield dict(row, detail_ref=None)                   # nothing more to fetch: the card is the whole record
+            yield dict(row, detail_ref=None)                   # nothing more to fetch: the notice is the whole record
 
     def fetch_detail(self, org: Dict, row: Dict) -> Dict:
         raise engine.DetailFailed("the notice board has no detail pages")

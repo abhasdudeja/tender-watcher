@@ -4,7 +4,8 @@
 #                   eprocure.gov.in/eprocure/app, most state portals).
 #                   The crawler appends GePNIC page names to base_url.
 # type: nprocure -> Gujarat's nProcure portal and its client sites.
-# type: mizoram  -> the Mizoram e-Tender notice board (tender.mizoram.gov.in): listing pages only, no detail pages.
+# type: mizoram  -> the Mizoram e-Tender notice board (tender.mizoram.gov.in), read through its public JSON API:
+#                   notices only, no detail pages. An empty board is a valid answer.
 # type: epsv2    -> Beltron/mjunction "eProc 2.0" portals (Bihar): base_url is the open-area tender listing page;
 #                   the crawler reads the same JSON API that page uses. Needs extra_ca_certs (see certs/README.md).
 # type: cheps    -> Chhattisgarh's CHEPS (eproc.cgstate.gov.in/CHEPS): the home page's LOAD LIVE DATA form, which the

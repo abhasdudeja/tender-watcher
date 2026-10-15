@@ -145,15 +145,16 @@ detail refresh.
 
 NIC's Mizoram portal (`mizoramtenders.gov.in`) puts a CAPTCHA in front of every tender list, so it is
 disabled in `sources.yaml` and cannot be crawled. The state also runs its own e-Tender notice board,
-`tender.mizoram.gov.in` (source `mizoram-etender`, type `mizoram`): a paged list (`/home?page=N`, 15 cards a page,
-~51 pages, expired notices included). Each card has a reference, department, notice type, description,
-attachment names and three dates (issue, opening, last date); there is no detail page and no value or EMD.
+`tender.mizoram.gov.in` (source `mizoram-etender`, type `mizoram`). Each notice has a reference, office, notice type,
+description, attachment names and three dates (issue, opening, last date); there is no detail page and no value or EMD.
 
-`crawler/mizoram.py` reads every page (~1 minute), keeps only notices whose last date is still ahead, and groups
-them by department (a department plays the role of an organisation). Notices that expire stay in the store, marked
-closed, like on every other source. At the moment only a handful of notices are open at any time. A board with no open
-notice is a valid result (`may_be_empty` in the adapter), whereas a first page without any card (markup changed) fails
-the run and deactivates nothing.
+The site used to serve its notices as HTML cards. Since October 2026 `/home` is an empty JavaScript app shell, and the
+notices come from the site's own public JSON API, which `crawler/mizoram.py` reads: `GET /api/public/tenders?status=open&order=latest&page=N`
+(15 notices a page; only open ones, so usually a single request). Offices play the role of organisations. Notices that
+close stay in the store, marked closed, like on every other source. **A board with no open notice answers `total: 0`;
+that is a valid result** (`may_be_empty` in the adapter): whatever was open before is kept and marked closed. An answer
+that is not the notices list (for example the empty app shell again) fails the run with a clear message and
+deactivates nothing.
 
 ### How the Telangana and Andhra Pradesh crawls work (Tender Management System portals)
 
