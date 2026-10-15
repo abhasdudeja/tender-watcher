@@ -2,27 +2,22 @@
  "slug": "westbengal",
  "name": "West Bengal",
  "ok": true,
- "started": "2026-10-15T05:53:43Z",
+ "started": "2026-10-15T07:37:01Z",
  "orgs": 99,
- "orgs_skipped": 46,
+ "orgs_skipped": 98,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
- "listed": 3074,
- "new": 575,
- "changed": 18,
- "details_failed": 2,
- "details_fetched": 591,
- "throttled": 3,
- "throttle_recoveries": [
-  420
- ],
+ "listed": 3081,
+ "new": 8,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 8,
+ "throttled": 0,
+ "throttle_recoveries": [],
  "gave_up": false,
- "errors": [
-  "detail 2026_MAD_1046711_9: Timeout: Failed to perform, curl: (28) Connection timed out after 40001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.",
-  "detail 2026_MAD_1046711_3: Timeout: Failed to perform, curl: (28) Connection timed out after 40001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
- ],
- "deactivated": 414,
- "active": 3074,
- "finished": "2026-10-15T06:20:57Z",
- "requests": 645
+ "errors": [],
+ "deactivated": 0,
+ "active": 3081,
+ "finished": "2026-10-15T07:37:21Z",
+ "requests": 10
 }
