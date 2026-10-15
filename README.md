@@ -155,6 +155,30 @@ closed, like on every other source. At the moment only a handful of notices are 
 notice is a valid result (`may_be_empty` in the adapter), whereas a first page without any card (markup changed) fails
 the run and deactivates nothing.
 
+### How the Telangana and Andhra Pradesh crawls work (Tender Management System portals)
+
+`tender.telangana.gov.in` and `tender.apeprocurement.gov.in` run the same Java platform (pages titled "eProcurement -
+Tender Management System"), set up in `sources.yaml` as `type: tms` (`crawler/tms.py`). Their public "Live Tenders"
+list needs no login and has no CAPTCHA. The crawler follows the page's own requests:
+
+1. `GET /login.html` for a session cookie and the CSRF token, then `POST /TenderDetailsHome.html` (`hdnType=current`)
+   for the list page: its token, the department `<select>`, the table headings and the hidden form every detail view
+   posts.
+2. `GET /TenderDetailsHomeJson.html?...` pages the list (DataTables parameters, 100 rows per request, sorted by tender
+   id so paging is stable; about 2,000 live tenders is ~21 requests). Telangana answers JSON, Andhra Pradesh the same
+   JSON Base64-encoded. The columns are found from the table headings (Telangana lists a published date, Andhra
+   Pradesh does not). The listing already carries the estimated value, so it is stored without opening any detail page.
+3. `POST /ViewTender.html` with the list form plus the three numbers inside the row's `viewBtn(...)` gives the detail
+   page: fees, bid security (stored as `emd` when it is an amount), validity, document names and the rest as
+   `details`. Contact details (officer, address, phone, e-mail) are never stored; `authority` is the circle / division.
+
+A *department* is an organisation; the row's "Department Name" cell is `<department>-<circle>` and the circle becomes
+the second half of `chain`. The portal administrator's own test tenders (department `Eprocadmin`) are skipped. The pages
+can encrypt the form fields before posting; the portals accept them plain (the page has that call commented out), so
+nothing is encrypted. Detail pages are fetched one at a time (one shared server session). If the session ends, the
+crawler logs in again once. **Karnataka's KPPP** (`kppp.karnataka.gov.in`) hides its tender list behind a CAPTCHA, so it
+is not crawled (commented in `sources.yaml`; the map marks it as blocked like Chhattisgarh).
+
 ### Parallel crawling
 
 Sources are independent portals, so they run concurrently: one thread each locally, one matrix

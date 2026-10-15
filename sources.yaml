@@ -7,6 +7,8 @@
 # type: mizoram  -> the Mizoram e-Tender notice board (tender.mizoram.gov.in): listing pages only, no detail pages.
 # type: epsv2    -> Beltron/mjunction "eProc 2.0" portals (Bihar): base_url is the open-area tender listing page;
 #                   the crawler reads the same JSON API that page uses. Needs extra_ca_certs (see certs/README.md).
+# type: tms      -> the "Tender Management System" eProcurement portals (Telangana, Andhra Pradesh): base_url is the
+#                   portal's root; the crawler reads the live-tender list the same way the page does.
 #
 # state:        ISO 3166-2 code of the state or UT the source covers (IN-KL, IN-DL ...), or 'central' for the all-India
 #                portal. The site's map reads it from the index; several sources may share one state.
@@ -367,20 +369,6 @@ sources:
     detail_max_age_days: 14
     delay_seconds: 1.0
     detail_workers: 2
-    
-  # - slug: chhattisgarh
-  #   name: Chhattisgarh
-  #   state: IN-CT
-  #   type: gepnic
-  #   base_url: https://wbtenders.gov.in/nicgep/app
-  #   enabled: true
-  #   ignore_robots: true
-  #   fetch_details: true
-  #   max_detail_fetches: 6000
-  #   refresh_after_hours: 48
-  #   detail_max_age_days: 14
-  #   delay_seconds: 1.0
-  #   detail_workers: 2
 
   - slug: mizoram-etender
     name: Mizoram e-Tender
@@ -389,6 +377,75 @@ sources:
     base_url: https://tender.mizoram.gov.in/home
     enabled: true
     ignore_robots: false
-    fetch_details: false
+    fetch_details: true
+    refresh_after_hours: 48
+    delay_seconds: 1.0
+
+  - slug: jharkhand
+    name: Jharkhand
+    state: IN-JH
+    type: gepnic
+    base_url: https://jharkhandtenders.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: false
+    fetch_details: true
+    refresh_after_hours: 48
+    delay_seconds: 1.0
+
+  - slug: odhisha
+    name: Odhisha
+    state: IN-OR
+    type: gepnic
+    base_url: https://tendersodisha.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: false
+    fetch_details: true
+    refresh_after_hours: 48
+    delay_seconds: 1.0
+
+
+  - slug: telangana
+    name: Telangana
+    state: IN-TG
+    type: tms
+    base_url: https://tender.telangana.gov.in
+    enabled: true
+    ignore_robots: false
+    fetch_details: true
+    max_detail_fetches: 4000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+
+  - slug: andhrapradesh
+    name: Andhra Pradesh
+    state: IN-AP
+    type: tms
+    base_url: https://tender.apeprocurement.gov.in
+    enabled: true
+    ignore_robots: false
+    fetch_details: true
+    max_detail_fetches: 4000
+    refresh_after_hours: 48
+    detail_max_age_days: 14
+    delay_seconds: 1.0
+
+  # Karnataka's KPPP (kppp.karnataka.gov.in) shows its tender search only after a CAPTCHA, so it cannot be crawled
+  # (like Chhattisgarh). The map marks IN-KA as blocked. No crawler type exists for it.
+  # - slug: karnataka
+  #   name: Karnataka (KPPP)
+  #   state: IN-KA
+  #   type: kppp
+  #   base_url: https://kppp.karnataka.gov.in
+  #   enabled: false
+
+  - slug: karnatana
+    name: Karnataka
+    state: IN-KA
+    type: karnataka
+    base_url: https://tendersodisha.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: false
+    fetch_details: true
     refresh_after_hours: 48
     delay_seconds: 1.0

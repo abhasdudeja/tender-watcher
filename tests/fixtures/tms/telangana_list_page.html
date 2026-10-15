@@ -1,0 +1,492 @@
+<html><head><title>:: eProcurement ::</title></head><body>
+<form action="/TenderDetailsHome.html" id="tenderDetailsHome" method="post" name="tenderDetailsHome" onkeypress="searchKeyPress(event);">
+<div id="ModalBackgroundDiv" style="position: absolute; top: 0px; left: 0px; background-color: black; z-index: 100; opacity: 0.8; filter: alpha(opacity =   60); -moz-opacity: 0.8; overflow: hidden; display: none"></div>
+<div class="card" id="Tendersearch">
+<div class="card-heading">
+<div class="card-title">
+<span> Tender Search </span>
+</div>
+<div class="card-right">
+<span id="errorMessage1" style="color: red;"></span>
+</div>
+</div>
+<div class="card-body">
+<div class="mt10" id="Searchby">
+<div class="row">
+<div class="col-md-4" id="">
+<div class="form-group">
+<div class="dflex">
+<input class="form-control" id="nTenderID" maxlength="200" name="nTenderID" placeholder="Search by ... Tender ID/ IFB No/ Name of Work" type="text" value=""/>
+<input class="Button" id="searchTender" onclick="searchBtn()" type="button" value="Search"/>
+<input align="middle" class="Button" id="Advanced" onclick="Advancedsearch()" type="button" value="Advanced Search"/>
+</div>
+<label id="errmsg" style="color: red;"> </label>
+</div>
+</div>
+<div class="col-md-2" id="">
+<div class="form-group">
+<div class="checkboxes-and-radios">
+<input id="corrigendumsDetails" name="corrigendums" onclick="radiovalid(this)" type="checkbox"/>
+<label class="Text" for="corrigendumsDetails" title="Corrigendums On">View Corrigendums </label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- advance serach starts -->
+<div class="mt10" id="advSearch">
+<div id="advsearch" style="display: none;">
+<div id="AdvancedSearch2">
+<div class="row">
+<div class="col-md-2" id="Department">
+<div class="form-group">
+<label for="" id=""> </label>
+<select class="form-control" id="nDepartmentID" name="nDepartmentID" onchange="getCircles(this.value)">
+<option selected="selected" value="0">Select Department</option>
+<option value="600">AAROGYASRI HEALTH CARE TRUST</option>
+<option value="3086">AG audit</option>
+<option value="1252">AGRICULTURAL MARKETING  DEPARTMENT - TELANGANA</option>
+<option value="597">Agriculture &amp; Cooperative Department</option>
+<option value="473">ARCHAEOLOGY AND MUSEUMS - TELANGANA</option>
+<option value="588">AYUSH</option>
+<option value="2287">BACKWARD CLASSES WELFARE DEPARTMENT</option>
+<option value="390">BOARD OF INTERMEDIATE EDUCATION</option>
+<option value="2261">CENTRE  FOR  GOOD  GOVERNANCE</option>
+<option value="3117">COMMERCIAL TAXES DEPARTMENT</option>
+<option value="3072">Commissioner of Labour</option>
+<option value="396">COMMISSIONERATE OF COLLEGE EDUCATION</option>
+<option value="2401">cooperative electric supply society ltd</option>
+<option value="14">COT - TELANGANA</option>
+<option value="3077">COUNCIL FOR SOCIAL DEVELOPMENT</option>
+<option value="3407">cyberabad municipal corporation</option>
+<option value="1801">DEPARTMENT  OF  EDUCATION-TELANGANA</option>
+<option value="68">DEPARTMENT OF AGRICULTURE</option>
+<option value="2267">Department of Employment and Training</option>
+<option value="2573">Department Of Mines &amp; Geology</option>
+<option value="1821">DEPARTMENT OF TECHNICAL EDUCATION-TELANGANA</option>
+<option value="286">DEPARTMENT OF TOURISM - TELANGANA</option>
+<option value="579">DIRECTOR OF MEDICAL EDUCATION</option>
+<option value="1874">DIRECTORATE OF  ANIMAL  HUSBANDRY-TELANGANA</option>
+<option value="3476">Directorate of Ground water</option>
+<option value="541">DIRECTORATE OF INTERMEDIATE EDUCATION</option>
+<option value="538">DIRECTORATE OF TREASURIES AND ACCOUNTS</option>
+<option value="3351">Disaster Management Department</option>
+<option value="3318">DISTRICT ADMINISTRATION</option>
+<option value="2223">Dr. MCR HRD INSTITUTE </option>
+<option value="567">Dr.B.R.Ambedkar Open University</option>
+<option value="3468">DRUGS CONTROL ADMINISTRATION</option>
+<option value="1710">ENDOWMENTS  DEPARTMENT MARKETING - TELANGANA</option>
+<option value="791">ENDOWMENTS DEPARTMENT - TELANGANA</option>
+<option value="2616">ENERGY DEPARTMENT</option>
+<option value="3100">Environment Forest Science And Technology</option>
+<option value="2249">ENVIRONMENT PROTECTION TRAINING &amp; RESEARCH INST</option>
+<option value="2998">Eprocadmin</option>
+<option value="2185">FISHERIES DEPARTMENT</option>
+<option value="3360">FUTURE CITY DEVELOPMENT AUTHORITY</option>
+<option value="2536">General Administration Department</option>
+<option value="3192">GHMC- MA &amp; UD</option>
+<option value="181">GREATER HYDERABAD MUNICIPAL CORPORATION</option>
+<option value="293">GREATER WARANGAL MUNICIPAL CORPORATION</option>
+<option value="616">Health Medical and Family Welfare Department</option>
+<option value="2358">HIGHER EDUCATION</option>
+<option value="140">HMDA</option>
+<option value="116">HMWSSB</option>
+<option value="3455">Horticulture Department</option>
+<option value="549">HYDERABAD GROWTH CORRIDOR LIMITED</option>
+<option value="521">HYDERABAD METRO RAIL LIMITED</option>
+<option value="2308">HYDERABAD ROAD DEVELOPMENT CORPORATION LIMITED</option>
+<option value="1423">I  &amp;  CAD - Telangana</option>
+<option value="2047">I&amp;CAD - MISSION KAKATIYA</option>
+<option value="2583">INDUSTRIES COMMERCE DEPARTMENT GOVT OF TELANGANA</option>
+<option value="2010">Information and Public Relations Department</option>
+<option value="30">Information Technology and Communications</option>
+<option value="78">INSURANCE MEDICAL SERVICES</option>
+<option value="1879">JAWAHARLAL NEHRU  TECHNOLOGICAL  UNIVERSITY-TELANG</option>
+<option value="585">JAWAHARLAL NEHRU ARCHITECTURE&amp;FINE ARTS UNIVERSITY</option>
+<option value="2226">JUDICIARY</option>
+<option value="558">KAKATIYA UNIVERSITY</option>
+<option value="416">Kakatiya Urban Development Authority</option>
+<option value="2164">MAHATMA GANDHI UNIVERSITY</option>
+<option value="3447">Malkajgiri Municipal Corporation</option>
+<option value="2281">MEDICAL AND HEALTH DEPARTMENT</option>
+<option value="2274">MEDICAL EDUCATION DEPARTMENT</option>
+<option value="2476">Mission Bhagiratha Department. /</option>
+<option value="2174">MJPTBCWREI Society</option>
+<option value="613">MNJ Institute of Oncology &amp; Regional Cancer Centre</option>
+<option value="689">MUNICIPAL ADMINISTRATION DEPARTMENT - TELANGANA</option>
+<option value="725">MUNICIPALITIES - TELANGANA</option>
+<option value="510">Nalgonda-Ranga Reddy Co-operation Milk Producers</option>
+<option value="606">NALSAR UNIVERSITY</option>
+<option value="2252">National Academy of  Construction</option>
+<option value="517">National Institute of Technology</option>
+<option value="2235">NITHM</option>
+<option value="274">NIZAMABAD MUNICIPAL CORPORATION</option>
+<option value="2255">Nizambad Dist Co.Operative Central Bank Ltd</option>
+<option value="2041">NIZAMS INSTITUTE OF MEDICAL SCIENCES</option>
+<option value="437">Northern Power Distribution company of TS LTD</option>
+<option value="2152">NOTIFIED AREA COMMITTE, RGIA HYD</option>
+<option value="430">OSMANIA UNIVERSITY</option>
+<option value="2293">P.V.NARSIMHA RAO TELANGANA VETERINARY UNIVERSITY</option>
+<option value="2241">PANCHAYATH RAJ and RURAL DEVELOPMENT</option>
+<option value="1584">PHMED - TELANGANA</option>
+<option value="425">PLANNING  DEPARTMENT</option>
+<option value="307">POLICE DEPARTMENT</option>
+<option value="2038">POLICE DEPARTMENT-GREY HOUNDS-TS</option>
+<option value="2101">POLICE DEPARTMENT-OCTOPUS TELANGANA</option>
+<option value="26">POTTI SREERAMULU TELUGU UNIVERSITY</option>
+<option value="1600">PRED - TELANGANA</option>
+<option value="74">Printing, Stationery &amp; Stores Purchase Department </option>
+<option value="2110">PRISONS DEPARTMENT - TELANGANA</option>
+<option value="2104">PROF JAYASHANKAR TS AGRICULTURAL UNIVERSITY</option>
+<option value="422">PROHIBITION AND EXCISE DEPARTMENT</option>
+<option value="576">Quli Qutub Shah Urban Development Authority</option>
+<option value="1260">R&amp;B - Telangana</option>
+<option value="623">Rajiv Gandhi University of Knowledge Technologies</option>
+<option value="2264">RCUES</option>
+<option value="555">REGISTRATION AND STAMPS</option>
+<option value="2284">Resident Commissioner, Telangana Bhavan</option>
+<option value="657">REVENUE DEPARTMENT - TS</option>
+<option value="1882">RURAL   DEVELOPMENT-TELANGANA</option>
+<option value="603">Satavahana University</option>
+<option value="2178">SCHEDULED CASTE DEVLOPMENT DEPT</option>
+<option value="2238">SKLTS HORTICULTURAL UNIVERSITY</option>
+<option value="443">SOUTHERN POWER DISTRIBUTION COMPANY OF TELANGANA L</option>
+<option value="2171">SPORTS AUTHORITY OF TELANGANA</option>
+<option value="64">STATE AUDIT DEPARTMENT</option>
+<option value="340">T.G.S.W.R.E.I Society</option>
+<option value="3291">TELANGANA ANTI-NACROTICS BUREAU(TGANB),HYDERABAD</option>
+<option value="320">TELANGANA BEVERAGES CORPORATION LIMITED</option>
+<option value="479">Telangana Dairy Development Co-operative Federatio</option>
+<option value="3053">Telangana District Tribal Development</option>
+<option value="2044">TELANGANA FOODS</option>
+<option value="399">TELANGANA FOREST DEVELOPMENT CORPORATION LTD</option>
+<option value="3182">Telangana Handicrafts Development Corporation Limited</option>
+<option value="1772">TELANGANA HOUSING BOARD</option>
+<option value="328">TELANGANA LIVESTOCK DEVELOPMENT AGENCY</option>
+<option value="1952">Telangana Police Housing, Infratech and Consultancy Services Corp Limited</option>
+<option value="1968">TELANGANA POWER GENERATION CORPORATION LIMITED</option>
+<option value="513">Telangana RAJIV SWAGRUHA CORPORATION LTD</option>
+<option value="3494">Telangana Rythu Power Distribution Company Limited</option>
+<option value="2565">Telangana Scheduled Castes Co-operative Development Corporation Ltd</option>
+<option value="573">Telangana State Agro Industries Development Corpor</option>
+<option value="2872">Telangana State Aids Control Society</option>
+<option value="2340">TELANGANA STATE ARCHIVES &amp; RESEARCH INSTITUTE</option>
+<option value="2322">Telangana State Aviation Corporation Ltd</option>
+<option value="331">Telangana State Civil Supplies Corporation Limited</option>
+<option value="545">TELANGANA STATE COOP. OILSEEDS GROWERS FEDERATION </option>
+<option value="2522">Telangana State Cooperative Apex Bank Ltd</option>
+<option value="627">Telangana STATE COOPERATIVE RURAL IRRIGATION CORPO</option>
+<option value="3065">Telangana State Cyber Security Bureau, Hyderabad</option>
+<option value="3094">Telangana State Election Commission</option>
+<option value="496">TELANGANA STATE FINANCIAL CORPORATION</option>
+<option value="2430">Telangana state Girijan Co-Operative Corporation Limited</option>
+<option value="3129">Telangana State Hajj Committee</option>
+<option value="2155">TELANGANA STATE MINERAL DEVEP CORP LTD</option>
+<option value="654">Telangana State Minorities Finance Corporation</option>
+<option value="2495">Telangana State Minorities Welfare Department</option>
+<option value="2107">TELANGANA STATE POLLUTION CONTROL BOARD</option>
+<option value="2278">Telangana State Renewable Energy Development corporation Limited</option>
+<option value="2016">TELANGANA STATE ROAD TRANSPORT CORPORATION - TSRTC</option>
+<option value="3164">Telangana State Seed and Organic Certification Authority</option>
+<option value="387">TELANGANA STATE SEED CERTIFICATION AGENCY</option>
+<option value="506">TELANGANA STATE SEEDS DEVELOPMENT CORPORATION LIMI</option>
+<option value="2006">TELANGANA STATE TOURISM DEVELOPMENT CORPORATION</option>
+<option value="2220">TELANGANA STATE WAQF BOARD</option>
+<option value="561">TELANGANA STATE WAREHOUSING CORPORATION</option>
+<option value="570">TELANGANA TRIBAL POWER COMPANY LTD</option>
+<option value="2433">TELANGANA TRIBAL WELFARE RESIDENTIAL EDUCATIONAL INSTITUTIONS SOCIETY</option>
+<option value="500">TELANGANA UNIVERSITY</option>
+<option value="283">TELANGANA URBAN SERVICES FOR THE POOR</option>
+<option value="83">TELANGANA VAIDYA VIDHANA PARISHAD</option>
+<option value="2345">Telangana Welfare of Disabled &amp; Senior Citizens</option>
+<option value="643">Telangana WOMENS CO-OPERATIVE FINANCE CORPORATION </option>
+<option value="1913">TG FOREST DEPARTMENT</option>
+<option value="1405">TG STATE  HOUSING  CORPORATION  LIMITED</option>
+<option value="1902">TG STATE IRRIGATION DEVELOPMENT CORPORATION LTD</option>
+<option value="1886">TGEWIDC</option>
+<option value="412">TGGenco</option>
+<option value="22">TGSRTC</option>
+<option value="1333">TGTRANSCO - PRODUCTS</option>
+<option value="1354">TGTRANSCO - WORKS</option>
+<option value="1996">TGTS</option>
+<option value="349">THE SINGARENI COLLIERIES COMPANY LIMITED</option>
+<option value="3364">THE TELANGANA STATE HANDLOOM WEAVERS CO-OPERATIVE SOCIETY LTD, TGSCO</option>
+<option value="503">TRANSPORT DEPARTMENT</option>
+<option value="2290">TS COOP HOUSING SOCIETIES FEDERATION LTD</option>
+<option value="2158">TS COOPERATIVE MARKETING FEDERATION LTD</option>
+<option value="303">TS DISASTER RESPONSE AND FIRE SERVICES DEPT</option>
+<option value="2271">TS ENGINEERING RESEARCH LABS</option>
+<option value="1395">TS INDUSTRIAL INFRASTRUCTURE  CORPORATION</option>
+<option value="2376">TS SHEEP &amp; GOAT DEVELOPMENT COOPERATIVE FEDERATION LIMITED</option>
+<option value="1778">TSMSIDC</option>
+<option value="674">TWED - TELANGANA</option>
+<option value="3410">Urban Biodiversity wing MMC</option>
+<option value="2116">WOMEN DEVELOPMET AND CHILD WELFARE DEPARTMENT</option>
+<option value="2229">Yadagirigutta Temple Development Authority</option>
+<option value="552">YOUTH ADVANCEMENT,TOURISM &amp;CULTURE (PMU) DEPARTMEN</option>
+</select>
+<label style="color: red;"></label>
+</div>
+</div>
+<div class="col-md-2" id="circle">
+<div class="form-group">
+<label for="" id=""> </label>
+<select class="form-control" id="subDeptId" name="subDeptId">
+<option value="">
+
+															Select Circle
+
+														</option>
+</select>
+<label style="color: red;"> </label>
+</div>
+</div>
+<div class="col-md-2" id="">
+<div class="form-group">
+<select class="form-control" id="ddlDistrict" name="ddlDistrict">
+<option selected="selected" value="">
+
+															Select District
+
+														</option>
+<option value="14">ADILABAD</option>
+<option value="28">BHADRADRI KOTHAGUDEM</option>
+<option value="8">HYDERABAD</option>
+<option value="19">JAGITIAL</option>
+<option value="24">JANGOAN</option>
+<option value="25">JAYASHANKAR BHUPALPALLY</option>
+<option value="2">JOGULAMBA GADWAL</option>
+<option value="13">KAMAREDDY</option>
+<option value="18">KARIMNAGAR</option>
+<option value="27">KHAMMAM</option>
+<option value="17">KOMRAM BHEEM</option>
+<option value="26">MAHABUBABAD</option>
+<option value="1">MAHABUBNAGAR</option>
+<option value="16">MANCHERIAL</option>
+<option value="9">MEDAK</option>
+<option value="6">MEDCHAL-MALKAJGIRI</option>
+<option value="33">MULUGU</option>
+<option value="3">NAGARKURNOOL</option>
+<option value="29">NALGONDA</option>
+<option value="32">NARAYANPET</option>
+<option value="15">NIRMAL</option>
+<option value="12">NIZAMABAD</option>
+<option value="21">PEDDAPALLI</option>
+<option value="20">RAJANNA SIRICILLA</option>
+<option value="5">RANGAREDDY</option>
+<option value="10">SANGAREDDY</option>
+<option value="11">SIDDIPET</option>
+<option value="30">SURYAPET</option>
+<option value="7">VIKARABAD</option>
+<option value="4">WANAPARTHY</option>
+<option value="22">WARANGAL (URBAN)</option>
+<option value="23">WARANGAL RURAL</option>
+<option value="31">YADADRI BHUVANAGIRI           </option>
+</select>
+<span id="errmsg"></span>
+</div>
+</div>
+<div class="col-md-2" id="">
+<div class="form-group">
+<select class="form-control" id="ddlMandal" name="ddlMandal">
+<option value="">
+
+															Select Mandal
+
+														</option>
+</select>
+</div>
+</div>
+<div class="col-md-2" id="">
+<div class="form-group">
+<select class="form-control" id="biddingType1" name="biddingType">
+<option value="">
+
+															Select Search By
+
+														</option>
+<option value="102">
+
+															Limited
+
+														</option>
+<option value="1">
+
+															Auction Applicable
+
+														</option>
+</select>
+</div>
+</div>
+<div class="col-md-2" id="">
+<div class="form-group">
+<select class="form-control" id="sProcurementType" name="sProcurementType">
+<option value="">
+
+															Tender Category
+
+														</option>
+<option value="101">
+
+															WORKS
+
+														</option>
+<option value="102">
+
+															PRODUCTS
+
+														</option>
+<option value="104">
+
+															SERVICES
+
+														</option>
+</select>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-2" id="">
+<div class="form-group">
+<input class="form-control" id="mECVValue1" maxlength="12" name="mECVValue1" placeholder="ECV From Value" type="text" value=""/>
+<span id="errmsgFrom" style="color: red"></span>
+</div>
+</div>
+<div class="col-md-2" id="">
+<div class="form-group">
+<input class="form-control" id="mECVValue2" maxlength="12" name="mECVValue2" placeholder="ECV To Value" type="text" value=""/>
+<span id="errmsgTo" style="color: red"></span>
+</div>
+</div>
+<div class="col-md-2" id="dtBidClosingselect2">
+<div class="form-group">
+<select class="form-control" id="dtBidClosingselect1" name="dtBidClosingselect" onchange="fnEnableDate()" placeholder="By dates">
+<option value="">
+
+															By Dates
+
+														</option>
+<option value="108">
+
+															Bid Submission StartDate
+
+														</option>
+<option value="109">
+
+															Bid Submission EndDate
+
+														</option>
+</select>
+</div>
+</div>
+<div class="col-md-2" id="Enddate">
+<div class="form-group">
+<div class="dflex">
+<input class="form-control" id="dtBidClosing1" name="dtBidClosing1" placeholder="Bid Closing From" readonly="readonly" type="text" value=""/>
+<a class="dinline" href="javascript:void(0)" id="aHref1" runat="server"> <img align="absMiddle" alt="" border="0" id="IMG1" name="popdtp" onclick="if(self.gfPop)gfPop1.fPopCalendar(document.getElementById('dtBidClosing1'));return false;" src="/views/Calender/calbtn.svg"/></a>
+</div>
+</div>
+</div>
+<div class="col-md-2" id="Enddate1">
+<div class="form-group">
+<div class="dflex">
+<input class="form-control" id="dtBidClosing2" name="dtBidClosing2" placeholder="Bid Closing To" readonly="readonly" type="text" value=""/>
+<a class="dinline" href="javascript:void(0)" id="aHref1" runat="server"> <img align="absMiddle" alt="" border="0" id="IMG1" name="popdtp" onclick="if(self.gfPop)gfPop1.fPopCalendar(document.getElementById('dtBidClosing2'));return false;" src="/views/Calender/calbtn.svg"/></a>
+</div>
+</div>
+</div>
+<div class="col-md-2" id="Startdate">
+<div class="form-group">
+<div class="dflex">
+<input class="form-control" id="dtTenderOpening1" name="dtTenderOpening1" placeholder="Bid Start From" readonly="readonly" type="text" value=""/>
+<a class="dinline" href="javascript:void(0)" id="aHref1" runat="server"> <img align="absMiddle" alt="" border="0" id="IMG1" name="popdtp" onclick="if(self.gfPop)gfPop1.fPopCalendar(document.getElementById('dtTenderOpening1'));return false;" src="/views/Calender/calbtn.svg"/>
+</a>
+</div>
+</div>
+</div>
+<div class="col-md-2" id="Startdate1">
+<div class="form-group">
+<div class="dflex">
+<input class="form-control" id="dtTenderOpening2" name="dtTenderOpening2" placeholder="Bid Start To" readonly="readonly" type="text" value=""/>
+<a class="dinline" href="javascript:void(0)" id="aHref1" runat="server"> <img align="absMiddle" alt="" border="0" id="IMG1" name="popdtp" onclick="if(self.gfPop)gfPop1.fPopCalendar(document.getElementById('dtTenderOpening2'));return false;" src="/views/Calender/calbtn.svg"/>
+</a>
+</div>
+</div>
+</div>
+<div class="col-md-2" id="">
+<div class="form-group">
+<input align="middle" class="Button w80" id="Tender" onclick="advsearchBtn()" type="button" value="Apply"/>
+<input class="Button" id="VTMSBodyContent" name="ctl00$VTMSBodyContent$Clear" onclick="funclear()" type="button" value="Clear"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- advance search ends -->
+<div class="card">
+<div class="card-heading">
+<div class="card-title">
+<span>   </span>
+</div>
+<div class="card-right"></div>
+</div>
+<div class="card-body">
+<div class="table-responsive">
+<table class="display" id="pagetable13" width="100%">
+<thead>
+<tr>
+<th align="left">Department Name</th>
+<th align="left">Tender ID</th>
+<th align="left">Enquiry/IFB/Tender Notice Number</th>
+<th align="left">Tender Category</th>
+<th align="left">Name of Work</th>
+<th align="left">Estimated Contract Value</th>
+<th align="left">Published Date &amp; Time</th>
+<th align="left">Bid Submission Start Date &amp; Time</th>
+<th align="left">Bid Submission Closing Date&amp; Time</th>
+<th align="left" style="width: 6%">Action</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<input id="hdnSearch4" name="hdnSearch4" type="hidden" value=""/>
+<input id="hdnSearch" name="hdnSearch" type="hidden"/>
+<input id="hdncorrigendumsDetails" name="hdncorrigendumsDetails" type="hidden" value=""/>
+<input id="hdncorrigendumsDetails1" name="hdncorrigendumsDetails1" type="hidden" value=""/>
+<input id="hdnnoSearch" name="hdnnoSearch" type="hidden" value=""/>
+<input id="hdncorrigendumsDetails2" name="hdncorrigendumsDetails2" type="hidden" value=""/>
+<input name="hdnPreviousPage" type="hidden" value=""/>
+<input name="hdnIndentID" type="hidden" value=""/>
+<input name="hdnTenderCategory" type="hidden" value=""/>
+<input name="hdnProcurementID" type="hidden" value=""/>
+<input id="hdnType" name="hdnType" type="hidden" value="current"/>
+<input id="hdnPreviousPge" name="hdnPreviousPge" type="hidden" value="TenderDetailsHome.html"/>
+<input id="hdnadvsearch" name="hdnadvsearch" type="hidden"/>
+<input name="hdnFromStatus" type="hidden" value=""/>
+<input name="typeOfWorkFromConsolidation" type="hidden" value=""/>
+<input name="popUPRequestParameter" type="hidden" value=""/>
+<input name="selectedCircleDivison" type="hidden" value=""/>
+<input name="selectedDepartmentID" type="hidden" value=""/>
+<input name="selectedProcurementType" type="hidden" value=""/>
+<input name="selectedTypeofWork" type="hidden" value=""/>
+<input id="aid" name="aid" type="hidden"/>
+<input name="CSRFToken" type="hidden" value="59a3bf8f-27ad-4112-a9e5-36abddc2d964"/>
+<input name="hdnEncryptNames" type="hidden" value="hdnEncryptNames"/>
+<input name="hdnEncryptValues" type="hidden" value="hdnEncryptValues"/>
+</form>
+<select id="nDepartmentID" name="nDepartmentID">
+<option selected="selected" value="0">Select Department</option>
+<option value="1252">AGRICULTURAL MARKETING  DEPARTMENT - TELANGANA</option>
+<option value="2998">Eprocadmin</option>
+<option value="1423">I  &amp;  CAD - Telangana</option>
+<option value="349">THE SINGARENI COLLIERIES COMPANY LIMITED</option>
+</select>
+<table id="pagetable13"><thead><tr><th align="left">Department Name</th><th align="left">Tender ID</th><th align="left">Enquiry/IFB/Tender Notice Number</th><th align="left">Tender Category</th><th align="left">Name of Work</th><th align="left">Estimated Contract Value</th><th align="left">Published Date &amp; Time</th><th align="left">Bid Submission Start Date &amp; Time</th><th align="left">Bid Submission Closing Date&amp; Time</th><th align="left" style="width: 6%">Action</th></tr></thead><tbody></tbody></table>
+</body></html>

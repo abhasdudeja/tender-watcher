@@ -1,0 +1,453 @@
+<html><head><title>:: eProcurement ::</title></head><body>
+<form action="null" id="tenderDetailsHome" method="post" name="tenderDetailsHome" onkeypress="searchKeyPress(event);">
+<div id="ModalBackgroundDiv" style="position: absolute; top: 0px; left: 0px; background-color: black; z-index: 100; opacity: 0.8; filter: alpha(opacity =   60); -moz-opacity: 0.8; overflow: hidden; display: none"></div>
+<div>
+<div class="tCenter">
+<span id="errorMessage1" style="color: red;"></span>
+<!-- tenderList Starts Here -->
+<div id="tenderList">
+<div class="card">
+<div class="card-heading">
+<div class="card-title">
+<span> Tender Search </span>
+</div>
+<div class="card-right"></div>
+</div>
+<div class="card-body">
+<div class="table-responsive">
+<table align="center" border="0" class="tablesorter-blue" id="Searchby" width="98%">
+<tbody>
+<tr>
+<td align="right" class="tdlight wTender"><span class="Text" id="">For Tender</span></td>
+<td align="left" class="tdwhite wSearch">
+<div class="dinline w60">
+<div class="form-group has-search">
+<!-- <span class="fa fa-search form-control-feedback"></span> -->
+<input class="form-control" id="nTenderID" maxlength="200" name="nTenderID" onblur="specialChar1(this.id,required,numericerror)" placeholder="Tender ID/ IFB No/ Name of Work" required="true" style="width: 100%" type="text" value=""/>
+<span id="numericerror" style="color: red;"></span>
+</div>
+</div>
+<div class="dinline pl10">
+<div style="position: relative;">
+<input align="middle" class="Button" id="searchTender" onclick="searchBtn()" type="button" value="Search"/>
+<input align="middle" class="Button" id="Advanced" onclick="Advancedsearch()" type="button" value="Advanced Search"/>
+</div>
+</div>
+</td>
+<!--suneel 25/01/2023 Start -->
+<td align="left" class="tdwhite wSearchBtn" id="Department"><select class="wselect" id="nDepartmentID" name="nDepartmentID" onchange="getCircles(this.value)">
+<option value="">Select Department</option>
+<!-- <option value="0" selected="selected">Department Name</option> -->
+<option value="4959"> Greater Visakhapatnam Smart City Corporation Limited</option>
+<option value="1804">A P  STATE HOUSING  CORPORATION  LIMITED</option>
+<option value="4492">A P Factories</option>
+<option value="264">A P FOREST DEPARTMENT</option>
+<option value="4788">A P Labour Welfare Board</option>
+<option value="1564">A P M S I D C</option>
+<option value="4632">A P PLANNING DEPARTMENT</option>
+<option value="5532">A P State Agro Industries Development Corporation Limited</option>
+<option value="5759">A P State Seed Certification Authority</option>
+<option value="4244">A.P Building &amp; other Construction Workers Welfare Board</option>
+<option value="4842">A.P. LEGISLATURE SECRETARIAT</option>
+<option value="37">ACHARYA NAGARJUNA UNIVERSITY</option>
+<option value="1910">ACHARYA NG RANGA  AGRICULTURAL  UNIVERSITY</option>
+<option value="427">Adult  Education Department</option>
+<option value="1033">AGRICULTURAL MARKETING  DEPARTMENT</option>
+<option value="4336">Amaravati Development Corporation Limited</option>
+<option value="4795">ANANTAPURAMU HINDUPUR URBAN DEVELOPMENT AUTHORITY</option>
+<option value="1040">ANDHRA  PRADESH  HOUSING BOARD</option>
+<option value="5576">Andhra Kesari University</option>
+<option value="4924">Andhra Pradesh Economic Development Board</option>
+<option value="4629">ANDHRA PRADESH ELECTRONICS AND IT AGENCY</option>
+<option value="5445">Andhra Pradesh Fisheries University</option>
+<option value="5538">Andhra Pradesh Forest Development Corporation Limited</option>
+<option value="5627">ANDHRA PRADESH GENERAL INSURANCE CORPORATION LIMITED</option>
+<option value="216">ANDHRA PRADESH HEAVY MACHIENERY &amp; ENGINEERING LTD</option>
+<option value="5602">Andhra Pradesh Higher Education Regulatory and Monitoring Commission</option>
+<option value="4518">ANDHRA PRADESH HUMAN RESOURCE DEVELOPMENT INSTITUTE</option>
+<option value="5549">Andhra Pradesh Inland Waterways Authority</option>
+<option value="4430">Andhra Pradesh Metro Rail Corporation Limited.</option>
+<option value="5322">Andhra Pradesh Micro Small and Medium Enterprises Development Corporation(INC64G327565)</option>
+<option value="4873">ANDHRA PRADESH NON RESIDENT TELUGU SOCIETY</option>
+<option value="1851">ANDHRA PRADESH POLLUTION CONTROL BOARD</option>
+<option value="5138">Andhra Pradesh Power Finance Corporation Limited</option>
+<option value="4619">Andhra Pradesh Public Service Commission</option>
+<option value="5597">Andhra Pradesh Scheduled Tribes Cooperative Finance Corporation Limited</option>
+<option value="1928">Andhra Pradesh Solar Power Corporation Limited</option>
+<option value="1948">ANDHRA PRADESH STATE BEVERAGES CORPORATION LIMITED-APSBCL</option>
+<option value="5115">Andhra Pradesh State Co-Operative Marketing Federation Ltd</option>
+<option value="4955">Andhra Pradesh State Energy Conservation Mission (APSECM)</option>
+<option value="4173">Andhra Pradesh State FiberNet Limited</option>
+<option value="4285">Andhra Pradesh State Skill Development Corporation</option>
+<option value="434">ANDHRA PRADESH STATE WAQF BOARD</option>
+<option value="1830">ANDHRA PRADESH TECHNOLOGY SERVICES LIMITED</option>
+<option value="1045">ANDHRA PRADESH TOURISM  DEVELOPMENT  CORPORATION  </option>
+<option value="4277">Andhra Pradesh Township and Infrastructure Development Corporation</option>
+<option value="4881">Andhra Pradesh Urban Finance &amp; Infrastructure Development Corporation Limited</option>
+<option value="370">ANDHRA PRADESH VAIDYA VIDHANA PARISHAD</option>
+<option value="10">ANDHRA UNIVERSITY</option>
+<option value="4465">Andhrapradesh Center for Financial Systems &amp; Services</option>
+<option value="415">ANDHRAPRADESH MUNICIPAL DEVELOPMENT PROJECT</option>
+<option value="983">ANIMAL HUSBANDRY DEPARTMENT</option>
+<option value="1925">ANTI   CORRUPTION BUREAU</option>
+<option value="4200">AP AIRPORTS DEVELOPMENT CORPORATION LIMITED</option>
+<option value="1854">AP CAPITAL REGION DEVELOPMENT AUTHORITY</option>
+<option value="5017">AP Content Corporation</option>
+<option value="1894">AP COOPERATIVE OILSEEDS GROWERS FEDERATION LTD</option>
+<option value="402">AP DAIRY DEVELOPMENT CO OPERATIVE FED LTD</option>
+<option value="5008">AP GOVT TEXT BOOK PRESS</option>
+<option value="4384">AP HANDICRAFTS DEVELOPMENT CORPORATION LIMITED</option>
+<option value="1790">AP INDUSTRIAL INFRASTRUCTURE CORPORATION LIMITED</option>
+<option value="5097">AP PRISONS AND CORRECTIONAL SERVICES</option>
+<option value="1834">AP RAJIV SWAGRUHA CORPORATION LTD   AP UNIT</option>
+<option value="4835">AP Scheduled Castes Co-op. Finance Corp. Ltd</option>
+<option value="5100">AP SPECAL PROTECTION FORCE</option>
+<option value="383">AP STATE CIVIL SUPPLIES CORPORATION</option>
+<option value="4859">AP State Commission for SCs and STs</option>
+<option value="4442">AP STATE CO-OP BANK LTD</option>
+<option value="5427">AP STATE DISASTER MANAGEMENT AUTHORITY</option>
+<option value="421">AP State Disaster Response and Fire Services</option>
+<option value="5196">AP State Energy Efficiency Devlopment Corporation Limited</option>
+<option value="447">AP STATE FINANCIAL CORPORATION</option>
+<option value="1942">AP STATE GROUND WATER DEPARTMENT</option>
+<option value="5634">AP STATE HANDLOOM WEAVERS COOPERATIVE SOCIETY LIMITED(APCO)</option>
+<option value="325">AP STATE IRRIGATION DEVELOPMENT CORPORATION LTD</option>
+<option value="4682">AP STATE KAPU WELFARE AND DEVELOPMENT CORPORATION</option>
+<option value="338">AP STATE POLICE HOUSING CORPORATION LIMITED</option>
+<option value="1891">AP STATE SEEDS DEVELOPMENT CORPORATION LIMITED</option>
+<option value="1858">AP Trade Promotion Corporation Ltd</option>
+<option value="4401">AP Tribal Welfare Residential Educational Institutional Society ( Gurukulam )</option>
+<option value="1935">AP URBAN GREENING AND BEAUTIFICATION CORP LTD</option>
+<option value="4328">AP Womens Cooperative Finance Corporation</option>
+<option value="5107">APCPDCL</option>
+<option value="305">APEWIDC</option>
+<option value="349">APGENCO</option>
+<option value="4211">APMEPMA</option>
+<option value="4779">APREI SOCIETY</option>
+<option value="4785">APSCRIC</option>
+<option value="424">APSDPS, PLANNING DEPARTMENT</option>
+<option value="390">APSRTC</option>
+<option value="1897">APSWREI SOCIETY</option>
+<option value="1766">APTRANSCO   PRODUCTS</option>
+<option value="226">APTRANSCO  WORKS</option>
+<option value="367">ARCHAEOLOGY  AND MUSEUMS</option>
+<option value="440">AYUSH DEPARTMENT</option>
+<option value="1945">BACKWARD CLASSES WELFARE DEPARTMENT</option>
+<option value="4479">Board of Intermediate Education</option>
+<option value="4426">Boilers Department</option>
+<option value="443">CAPITAL CITY DEVELOPMENT &amp; MANAGEMENT CORP</option>
+<option value="5112">Chittoor Urban Development Authority</option>
+<option value="4422">Commercial Taxes Department</option>
+<option value="418">Commissioner Of Health &amp; Family Welfare</option>
+<option value="5251">Cooperation and cooperative Societies</option>
+<option value="375">COT   ANDHRA PRADESH</option>
+<option value="4224">Damodaram Sanjivayya National Law University Visakhapatnam</option>
+<option value="1012">DEPARTMENT OF  EDUCATION</option>
+<option value="989">Department of  Technical Education</option>
+<option value="1915">DEPARTMENT OF AGRICULTURE</option>
+<option value="5473">Department of Economically Weaker Sections (EWS) Welfare</option>
+<option value="1886">DEPARTMENT OF EMPLOYMENT AND TRAINING</option>
+<option value="4407">Department of Fisheries</option>
+<option value="4527">Department of Mines and Geology</option>
+<option value="4642">DEPARTMENT OF PUBLIC LIBRARIES</option>
+<option value="5004">DIRECTOR OF INDUSTRIES</option>
+<option value="4847">Directorate of Economics &amp; Statistics</option>
+<option value="5782">Directorate of Secondary Health</option>
+<option value="5783">Directorate of SecondaryHealth</option>
+<option value="219">District Purchasing Committee   Kurnool</option>
+<option value="412">Dr YSR Aarogyasri  Health Care Trust</option>
+<option value="1591">Dr. YSR HORTICULTURAL UNIVERSITY</option>
+<option value="210">DRAVIDIAN UNIVERSITY KUPPAM</option>
+<option value="4469">DRDA</option>
+<option value="4511">Drugs Control Administration</option>
+<option value="162">EASTERN POWER DISTRIBUTION COMPANY OF A.P LIMITED</option>
+<option value="1682">ENDOWMENTS  DEPARTMENT MARKETING</option>
+<option value="1050">ENDOWMENTS DEPARTMENT</option>
+<option value="5079">Environment, Forests Science and Technology Department</option>
+<option value="5460">EPROCADMIN</option>
+<option value="4918">Executive Engineer R &amp; B Division Peddapuram</option>
+<option value="437">FINANCE DEPARTMENT</option>
+<option value="4183">Garden Superintendent TTD Tirumala</option>
+<option value="4412">General Administration Department</option>
+<option value="5093">Governors Secretariat</option>
+<option value="5154">Gram Volunteers/Ward Volunteers and Village Secretariats /Ward Secretariats</option>
+<option value="5">GRAMA PANCHAYAT</option>
+<option value="49">GREATER VISAKHAPATNAM MUNICIPAL CORPORATION</option>
+<option value="4445">GROUND WATER AND WATER AUDIT DEPARTMENT</option>
+<option value="45">GUNTUR MUNICIPAL CORPORATION</option>
+<option value="4891">Handlooms and Textiles</option>
+<option value="4357">Higher Education Department</option>
+<option value="149">HINDUSTAN SHIPYARD LIMITED</option>
+<option value="794">I &amp; CAD</option>
+<option value="1919">INCAP</option>
+<option value="5120">Industries and Commerce</option>
+<option value="1837">Information  and  Public  Relations  Department</option>
+<option value="4214">INFRASTRUCTURE AND INVESTMENT DEPARTMENT OF ANDHRA PRADESH</option>
+<option value="1873">INSURANCE  MEDICAL SERVICES</option>
+<option value="4994">INTERNATIONAL INSTITUTE OF DIGITAL TECHNOLOGIES</option>
+<option value="4191">ITE C Department</option>
+<option value="978">JAWAHARLAL NEHRU TECHNOLOGICAL  UNIVERSITY</option>
+<option value="4980">JUDICIARY</option>
+<option value="98">KAKINADA MUNICIPAL CORPORATION</option>
+<option value="4819">Kakinada Smart City Corporation Limited</option>
+<option value="222">KRISHNA UNIVERSITY</option>
+<option value="31">KURNOOL MUNICIPAL CORPORATION</option>
+<option value="5290">Labour Department</option>
+<option value="5715">LEATHER INDUSTRIES DEVELOPMENT CORPORATION OF AP LIMITED</option>
+<option value="4885">Legal Metrology</option>
+<option value="1">MC Vijayawada</option>
+<option value="1938">MEDICAL AND HEALTH DEPARTMENT</option>
+<option value="4754">Mineral Exploration Research And Innovation Trust</option>
+<option value="5818">MINORITIES WELFARE DEPARTMENT</option>
+<option value="462">MUNICIPAL ADMINISTRATION DEPARTMENT</option>
+<option value="88">MUNICIPAL CORPORATION OF ANANTHAPUR</option>
+<option value="91">MUNICIPAL CORPORATION OF KADAPA</option>
+<option value="28">MUNICIPAL CORPORATION OF RAJAHMUNDRY</option>
+<option value="1595">MUNICIPALITIES  ANDHRA PRADESH</option>
+<option value="4749">NATIONAL ACADEMY OF CONSTRUCTIONS, ANDHRA PRADESH</option>
+<option value="40">NELLORE MUNICIPAL CORPORATION</option>
+<option value="4645">Nellore Urban Development Authority</option>
+<option value="5662">NICDIT Krishnapatnam Industrial City Development Limited</option>
+<option value="1843">NREDCAP LTD</option>
+<option value="195">NTR UNIVERSITY OF HEALTH SCIENCES</option>
+<option value="1951">Panchayat Raj and Rural Development</option>
+<option value="672">PHMED</option>
+<option value="1902">POLICE DEPARTMENT</option>
+<option value="394">POLICE DEPARTMENT GREY HOUNDS</option>
+<option value="409">POLICE DEPARTMENT OCTOPUS</option>
+<option value="4435">PORT DEPARTMENT</option>
+<option value="490">PRED</option>
+<option value="406">PRINTING STATIONERY STORES PURCHASE DEPT</option>
+<option value="1877">PROHIBITION  AND  EXCISE   DEPARTMENT</option>
+<option value="714">R&amp;B</option>
+<option value="4969">Real Time Governance</option>
+<option value="1847">REVENUE  DEPARTMENT</option>
+<option value="1931">RGUKT</option>
+<option value="1009">RURAL  DEVELOPMENT</option>
+<option value="5546">Science City of Andhra Pradesh</option>
+<option value="4948">Social Welfare Department</option>
+<option value="4280">Society for Employment generation and Enterprise Development in AP</option>
+<option value="174">SOUTHERN POWER DISTRIBUTION COMPANY OF AP LTD</option>
+<option value="430">SPORTS AUTHORITY OF ANDHRA PRADESH</option>
+<option value="94">SRI KRISHNADEVARAYA UNIVERSITY</option>
+<option value="198">SRI PADMAVATI MAHILA VISVAVIDYALAYAM TIRUPATI</option>
+<option value="213">SRI VENKATESWARA UNIVERSITY NCC WORKS</option>
+<option value="207">Sri Venkateswara University, Tirupati</option>
+<option value="5476">Sri Venkateswara Vedic University</option>
+<option value="4223">SRI VENKATESWARA VETERINARY UNIVERSITY</option>
+<option value="1827">STATE WAREHOUSING CORPORATION</option>
+<option value="4232">THE  ANAKAPALLE RURAL ELECTRIC CO OPERATIVE SOCIETY</option>
+<option value="1922">THE ANDHRA PRADESH MINERAL DEV CORP LTD</option>
+<option value="4274">The Cheepurupalli Rural Electric Cooperative Society Cooperative Ltd, Cheepurupalli</option>
+<option value="4217">THE KUPPAM RURAL ELECTRIC COOPERATIVE SOCIETY LIMITED</option>
+<option value="101">TIRUMALA TIRUPATI DEVASTHANAMS</option>
+<option value="156">TIRUMALA TIRUPATI DEVASTHANAMS   MARKETING</option>
+<option value="159">TIRUPATI URBAN DEVELOPMENT AUTHORITY</option>
+<option value="5168">Town and Country Planning</option>
+<option value="1880">TRANSPORT DEPARTMENT</option>
+<option value="4318">Tribal Welfare Department</option>
+<option value="201">TUNGABHADRA BOARD TB DAM</option>
+<option value="698">TWED</option>
+<option value="192">VGTM URBAN DEVELOPMENT AUTHORITY</option>
+<option value="152">VIJAYAWADA MUNICIPAL CORPORATION</option>
+<option value="4228">VIKRAMA SIMHAPURI UNIVERSITY NELLORE</option>
+<option value="14">Visakhapatnam Metropolitan Region Development Authority</option>
+<option value="1861">WOMEN DEVELOPMENT AND CHILD WELFARE DEPARTMENT</option>
+<option value="180">YOGI VEMANA UNIVERSITY</option>
+<option value="387">Youth Advancement Tourism &amp; Culture Department</option>
+</select> <label style="color: red;"></label></td>
+<td align="left" class="tdwhite wSearchBtn" id="circle"><select class="selectAuto" id="subDeptId" name="subDeptId">
+<option value="">Select Circle</option>
+</select> <label style="color: red;"> </label></td>
+<td class="wSearchRadioBtn">
+<div class="dinline" style="padding-left: 10px">
+<div class="checkboxes-and-radios">
+<input id="corrigendumsDetails" name="corrigendums" onclick="radiovalid(this)" type="checkbox"/>
+<label class="Text" for="corrigendumsDetails" title="Corrigendums On">View Corrigendums </label>
+</div>
+</div>
+</td>
+<!-- End -->
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- tenderList Ends Here -->
+<div class="clear"></div>
+<div id="advSearch">
+<div id="advsearch" style="display: none;">
+<table id="AdvancedSearch2">
+<!-- <td align="right" class="tdlight"><label class="TextHead"
+
+									id="lblTenderID">District</label></td> -->
+<td align="left" class="tdwhite" width="5%"><select class="wselect" id="ddlDistrict" name="ddlDistrict">
+<option selected="selected" value="">Select District</option>
+<option value="14">ALLURI SETHARAMA RAJU</option>
+<option value="15">ANAKAPALLI</option>
+<option value="27">ANANTHAPUR</option>
+<option value="16">ANNAMAYYA</option>
+<option value="17">BAPATLA</option>
+<option value="28">CHITTOOR</option>
+<option value="29">EAST GODAVARI</option>
+<option value="18">ELURU</option>
+<option value="30">GUNTUR</option>
+<option value="19">KAKINADA</option>
+<option value="20">KONASEEMA</option>
+<option value="33">KRISHNA</option>
+<option value="34">KURNOOL</option>
+<option value="22">NANDYAL</option>
+<option value="21">NTR</option>
+<option value="23">PALNADU</option>
+<option value="24">PARVATHIPURAM MANYAM</option>
+<option value="36">PRAKASAM</option>
+<option value="35">SRI POTTI SRI RAMULU NELLORE</option>
+<option value="25">SRI SATYA SAI</option>
+<option value="37">SRIKAKULAM</option>
+<option value="26">TIRUPATHI</option>
+<option value="39">VISAKHAPATANAM</option>
+<option value="38">VIZIANAGARAM</option>
+<option value="40">WEST GODAVARI</option>
+<option value="32">YSR</option>
+</select> <span id="errmsg"></span></td>
+<!--   <td width="20%" align="right" class="tdlight"><label
+
+									id="lblTenderNo" class="TextHead">Mandal</label></td> -->
+<td align="left" class="tdwhite" width="5%"><select class="selectAuto" id="ddlMandal" name="ddlMandal">
+<option value="">Select Mandal</option>
+</select></td>
+<td align="left" class="tdwhite" width="5%">
+<div class="inlineBlock">
+<select class="selectAuto" id="biddingType1" name="biddingType">
+<option value="">Select Search By</option>
+<option value="102">Limited</option>
+<option value="1">eAuction</option>
+</select>
+<td align="left" class="tdwhite" width="5%"><select class="selectAuto" id="sProcurementType" name="sProcurementType">
+<option value="">Tender Category</option>
+<option value="101">WORKS</option>
+<option value="102">PRODUCTS</option>
+<option value="104">SERVICES</option>
+</select></td>
+<td align="left" class="tdwhite" width="5%"><input class="txtInput" id="mECVValue1" maxlength="10" name="mECVValue1" placeholder="ECV From Value" type="text" value=""/><span id="errmsgFrom" style="color: red"></span></td>
+<td align="left" class="tdwhite" width="5%"><input class="txtInput" id="mECVValue2" maxlength="10" name="mECVValue2" placeholder="ECV To Value" type="text" value=""/><span id="errmsgTo" style="color: red"></span></td>
+<td align="left" class="tdwhite" id="dtBidClosingselect2" width="5%">
+<div class="inlineBlock">
+<select class="selectAuto" id="dtBidClosingselect1" name="dtBidClosingselect" onchange="fnEnableDate()">
+<option value="">By Dates</option>
+<option value="108">Bid Submission StartDate</option>
+<option value="109">Bid Submission EndDate</option>
+</select>
+</div>
+</td>
+<td align="left" class="tdwhite" id="Enddate" width="10%">
+<div class="dateIconRight dateContainer">
+<i class="fa fa-calendar"></i>
+<input class="datepickerwithouttime txtInput" id="dtBidClosing1" name="dtBidClosing1" placeholder="Bid Closing" type="text" value=""/>
+<!-- <input type="text" class="form-control" placeholder="Select Date" /> -->
+</div> <a href="javascript:void(0)" id="aHref1" runat="server">
+</a></td>
+<td align="left" class="tdwhite" id="Enddate1" width="10%">
+<div class="dateIconRight dateContainer">
+<i class="fa fa-calendar"></i>
+<input class="datepickerwithouttime txtInput" id="dtBidClosing2" name="dtBidClosing2" placeholder="Bid Closing" type="text" value=""/>
+<!-- <input type="text" class="form-control" placeholder="Select Date" /> -->
+</div> <a href="javascript:void(0)" id="aHref1" runat="server">
+</a></td>
+<td align="left" class="tdwhite" id="Startdate" width="10%">
+<div class="dateIconRight dateContainer">
+<i class="fa fa-calendar"></i>
+<input class="datepickerwithouttime txtInput" id="dtTenderOpening1" name="dtTenderOpening1" placeholder="Bid Start" type="text" value=""/>
+<!-- <input type="text" class="form-control" placeholder="Select Date" /> -->
+</div> <a href="javascript:void(0)" id="aHref1" runat="server">
+</a></td>
+<td align="left" class="tdwhite" id="Startdate1" width="10%">
+<div class="dateIconRight dateContainer">
+<i class="fa fa-calendar"></i>
+<input class="datepickerwithouttime txtInput" id="dtTenderOpening2" name="dtTenderOpening2" placeholder="Bid Start" type="text" value=""/>
+<!-- <input type="text" class="form-control" placeholder="Select Date" /> -->
+</div> <a href="javascript:void(0)" id="aHref1" runat="server">
+</a></td>
+<td width="12%">
+<div class="dflex">
+<input align="middle" class="Button" id="searchTender" onclick="advsearchBtn()" type="button" value="Apply"/> <input align="middle" class="Button" onclick="funReset()" type="button" value="Clear"/>
+</div>
+</td>
+</div>
+</td></table>
+</div>
+</div>
+</div>
+<!-- Advanced Search Ends Here -->
+</div>
+<div class="card">
+<div class="card-heading">
+<div class="card-title">
+<span> Tender List </span>
+</div>
+<div class="card-right"></div>
+</div>
+<div class="card-body">
+<div class="table-responsive">
+<table class="display tablesorter-blue" id="pagetable13" width="99%">
+<thead>
+<tr>
+<th align="left">Department Name</th>
+<th align="left" width="5%">Tender ID</th>
+<th align="left" width="10%">Tender Notice Number</th>
+<th align="left" width="5%">Tender Category</th>
+<th align="left">Name of Work</th>
+<th align="left" width="10%">Estimated <br/>Contract
+
+												Value
+
+											</th>
+<th align="left" width="13%">Start Date &amp; Time</th>
+<th align="left" width="13%">Closing Date &amp; Time</th>
+<th align="center" width="5%">Action</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<input id="hdnSearch4" name="hdnSearch4" type="hidden" value=""/>
+<input id="hdnSearch" name="hdnSearch" type="hidden"/>
+<input id="hdncorrigendumsDetails" name="hdncorrigendumsDetails" type="hidden" value=""/>
+<input id="hdncorrigendumsDetails1" name="hdncorrigendumsDetails1" type="hidden" value=""/>
+<input id="hdnnoSearch" name="hdnnoSearch" type="hidden" value=""/>
+<input id="hdncorrigendumsDetails2" name="hdncorrigendumsDetails2" type="hidden" value=""/>
+<input id="hdnadvsearch" name="hdnadvsearch" type="hidden"/>
+<input name="hdnPreviousPage" type="hidden" value=""/>
+<input name="hdnIndentID" type="hidden" value=""/>
+<input name="hdnTenderCategory" type="hidden" value=""/>
+<input name="hdnProcurementID" type="hidden" value=""/>
+<input id="hdnType" name="hdnType" type="hidden" value="current"/>
+<input id="hdnPreviousPge" name="hdnPreviousPge" type="hidden" value="TenderDetailsHome.html"/>
+<input name="hdnFromStatus" type="hidden" value=""/>
+<input name="typeOfWorkFromConsolidation" type="hidden" value=""/>
+<input name="popUPRequestParameter" type="hidden" value=""/>
+<input name="selectedCircleDivison" type="hidden" value=""/>
+<input name="selectedDepartmentID" type="hidden" value=""/>
+<input name="selectedProcurementType" type="hidden" value=""/>
+<input name="selectedTypeofWork" type="hidden" value=""/>
+<input id="aid" name="aid" type="hidden"/>
+<div>
+<input name="CSRFToken" type="hidden" value="85daaacd-e24b-42b3-83d1-35b870856a6a"/>
+<input name="hdnEncryptNames" type="hidden" value="hdnEncryptNames"/>
+<input name="hdnEncryptValues" type="hidden" value="hdnEncryptValues"/>
+</div></form>
+<select id="nDepartmentID" name="nDepartmentID">
+<option value="">Select Department</option>
+<option value="349">APGENCO</option>
+</select>
+<table id="pagetable13"><thead><tr><th align="left">Department Name</th><th align="left" width="5%">Tender ID</th><th align="left" width="10%">Tender Notice Number</th><th align="left" width="5%">Tender Category</th><th align="left">Name of Work</th><th align="left" width="10%">Estimated <br/>Contract
+
+												Value
+
+											</th><th align="left" width="13%">Start Date &amp; Time</th><th align="left" width="13%">Closing Date &amp; Time</th><th align="center" width="5%">Action</th></tr></thead><tbody></tbody></table>
+</body></html>
