@@ -1,0 +1,43 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-15T05:53:43Z",
+   "recoveries_s": [
+    420
+   ],
+   "events": [
+    {
+     "t": "2026-10-15T06:00:55Z",
+     "kind": "wait",
+     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-15T06:05:16Z",
+     "kind": "wait",
+     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-15T06:09:32Z",
+     "kind": "wait",
+     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-15T06:14:02Z",
+     "kind": "recovered",
+     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
+     "waited_s": 420,
+     "attempts": 3
+    }
+   ]
+  }
+ ]
+}
