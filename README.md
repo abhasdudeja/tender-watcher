@@ -376,12 +376,16 @@ be clicked, and a tile-grid style is the phone, keyboard and screen-reader alter
 
 ## Crawling from an Indian IP (local runs)
 
-Some portals refuse GitHub's cloud addresses: **Gujarat** (the connection times out) and the **Mizoram notice
-board** (HTTP 403). The Actions crawl keeps their last good data and the status page flags them. Crawl them from a
-machine on an Indian connection with `tools/local_crawl.ps1`:
+Some portals refuse GitHub's cloud addresses: **Gujarat**, **Andhra Pradesh** and **Chhattisgarh** (the connection
+times out) and the **Mizoram notice board** (HTTP 403). They are set to `enabled: false` in `sources.yaml` (with a
+"local only" comment), so the Actions crawl skips them and keeps their last good data. `enabled: false` does not stop a
+local run: a source named with `--source` always runs. Crawl them from a machine on an Indian connection with
+`tools/local_crawl.ps1` (a scheduled task runs it daily at about 13:00; a plain `python -m crawler.run` skips disabled
+sources, so name them: `--source gujarat --source andhrapradesh ...`). To move a source back to the cloud, set it to
+`enabled: true` and (optionally) remove it from the script's default list.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1                 # gujarat + mizoram-etender
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1                 # the four local-only sources
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1 -Slugs sikkim -NoPush
 ```
 

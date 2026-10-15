@@ -53,7 +53,7 @@ sources:
     state: IN-GJ
     type: nprocure
     base_url: https://tender.nprocure.com
-    enabled: true
+    enabled: false         # local only: refuses GitHub's cloud addresses; crawled by tools/local_crawl.ps1
     ignore_robots: true
     extra_ca_certs: certs/sectigo-ov-r36.pem
     fetch_details: true
@@ -379,7 +379,7 @@ sources:
     state: IN-MZ
     type: mizoram
     base_url: https://tender.mizoram.gov.in/home
-    enabled: true
+    enabled: false         # local only: refuses GitHub's cloud addresses; crawled by tools/local_crawl.ps1
     ignore_robots: false
     fetch_details: true
     refresh_after_hours: 48
@@ -401,6 +401,7 @@ sources:
     state: IN-OR
     type: gepnic
     base_url: https://tendersodisha.gov.in/nicgep/app
+    max_detail_fetches: 4000
     enabled: true
     ignore_robots: false
     fetch_details: true
@@ -425,7 +426,7 @@ sources:
     state: IN-AP
     type: tms
     base_url: https://tender.apeprocurement.gov.in
-    enabled: true
+    enabled: false         # local only: refuses GitHub's cloud addresses; crawled by tools/local_crawl.ps1
     ignore_robots: false
     fetch_details: true
     max_detail_fetches: 4000
@@ -512,7 +513,7 @@ sources:
     state: IN-CT
     type: cheps
     base_url: https://eproc.cgstate.gov.in
-    enabled: true
+    enabled: false         # local only: refuses GitHub's cloud addresses; crawled by tools/local_crawl.ps1
     ignore_robots: false
     fetch_details: true     # the list page only (what the portal's owners pointed to)
     max_detail_fetches: 4000

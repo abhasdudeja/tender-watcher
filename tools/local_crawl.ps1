@@ -3,7 +3,9 @@
   Crawl some sources from THIS machine (an Indian IP) and publish the result to the repo.
 
 .DESCRIPTION
-  For portals that refuse GitHub's cloud IPs (Gujarat, the Mizoram notice board). Steps:
+  For portals that refuse GitHub's cloud IPs (Gujarat, the Mizoram notice board, Andhra Pradesh, Chhattisgarh). Those
+  are marked enabled: false in sources.yaml, so the GitHub crawl skips them; a source named here runs even when
+  disabled. Steps:
     1. refuse to start unless the working tree is clean, we are on master and nothing is unpushed;
        fast-forward to origin/master (never a merge, never a force);
     2. crawl the given sources (--no-index), then rebuild docs/data from data/;
@@ -13,12 +15,12 @@
   Everything printed is meant to be read by a person (or Claude): the last line says what happened.
 
   Run:   powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1
-         ... -Slugs gujarat,mizoram-etender   (the default)
+         ... -Slugs gujarat,mizoram-etender,andhrapradesh,chhattisgarh   (the default)
          ... -NoPush                          (commit locally only)
   Logs:  logs\local-crawl-<timestamp>.log (the crawler's own log)
 #>
 param(
-  [string[]]$Slugs = @("gujarat", "mizoram-etender"),
+  [string[]]$Slugs = @("gujarat", "mizoram-etender", "andhrapradesh", "chhattisgarh"),   # the sources set to enabled: false in sources.yaml
   [switch]$NoPush,
   [int]$MaxPushTries = 3
 )
