@@ -454,6 +454,7 @@ sources:
     enabled: true
     ignore_robots: false
     fetch_details: true
+    max_detail_fetches: 4000
     refresh_after_hours: 48
     delay_seconds: 1.0
 
@@ -464,6 +465,7 @@ sources:
     base_url: https://tntenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: false
+    max_detail_fetches: 4000
     fetch_details: true
     refresh_after_hours: 48
     delay_seconds: 1.0
@@ -476,6 +478,7 @@ sources:
     enabled: true
     ignore_robots: false
     fetch_details: true
+    max_detail_fetches: 4000
     refresh_after_hours: 48
     delay_seconds: 1.0
 
@@ -487,6 +490,7 @@ sources:
     enabled: true
     ignore_robots: false
     fetch_details: true
+    max_detail_fetches: 4000
     refresh_after_hours: 48
     delay_seconds: 1.0
 
@@ -498,6 +502,7 @@ sources:
     enabled: true
     ignore_robots: false
     fetch_details: true
+    max_detail_fetches: 4000
     refresh_after_hours: 48
     delay_seconds: 1.0
 
@@ -508,6 +513,19 @@ sources:
     base_url: https://eproc.cgstate.gov.in
     enabled: true
     ignore_robots: false
-    fetch_details: false     # the list page only (what the portal's owners pointed to)
+    fetch_details: true     # the list page only (what the portal's owners pointed to)
+    max_detail_fetches: 4000
     refresh_after_hours: 48
     delay_seconds: 1.0
+
+  - slug: dnhdd
+    name: DNH & DD
+    state: IN-DH
+    type: gepnic
+    base_url: https://dnhtenders.gov.in/nicgep/app
+    max_detail_fetches: 4000
+    enabled: true
+    ignore_robots: false
+    fetch_details: true
+    refresh_after_hours: 48
+    delay_seconds: 1.0   
