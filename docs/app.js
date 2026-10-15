@@ -673,8 +673,7 @@
       AS: [4, 8], NL: [4, 9], RJ: [5, 2], MP: [5, 4], CT: [5, 5], JH: [5, 6], ML: [5, 8], MN: [5, 9], GJ: [6, 1], MH: [6, 3], TG: [6, 5], OR: [6, 6], TR: [6, 8], MZ: [6, 9],
       DH: [7, 1], GA: [7, 2], KA: [7, 3], AP: [7, 5], LD: [8, 1], KL: [8, 3], TN: [8, 4], PY: [9, 5], AN: [9, 8] });   // [row, column]
     const MARKER = pre({ CH: [-32, -18], DL: [-32, 6], DH: [-24, 8], GA: [-22, 6], LD: [-10, 18], PY: [14, 14] });     // marker offsets from the real position
-    const CAPTCHA = "Its portal asks for a CAPTCHA before listing tenders, so it cannot be crawled.";
-    const BLOCKED = pre({ CT: CAPTCHA, KA: CAPTCHA });
+    const BLOCKED = pre({});             // states whose portal cannot be crawled (none now); { IN-XX: reason } to mark one
     const LIMITED = pre({ MZ: "Only the state e-Tender notice board is crawled (a handful of open notices)." });
     const STEPS = { active: [0, 100, 1000, 3000, 6000], new: [0, 20, 100, 300, 800], closing48: [0, 20, 100, 300, 800] };
     const LABEL = { active: "active tenders", new: "new tenders in the last 2 days", closing48: "tenders closing within 48 hours" };

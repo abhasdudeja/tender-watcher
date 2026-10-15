@@ -176,8 +176,36 @@ A *department* is an organisation; the row's "Department Name" cell is `<departm
 the second half of `chain`. The portal administrator's own test tenders (department `Eprocadmin`) are skipped. The pages
 can encrypt the form fields before posting; the portals accept them plain (the page has that call commented out), so
 nothing is encrypted. Detail pages are fetched one at a time (one shared server session). If the session ends, the
-crawler logs in again once. **Karnataka's KPPP** (`kppp.karnataka.gov.in`) hides its tender list behind a CAPTCHA, so it
-is not crawled (commented in `sources.yaml`; the map marks it as blocked like Chhattisgarh).
+crawler logs in again once.
+
+### How the Karnataka crawl works (KPPP)
+
+`kppp.karnataka.gov.in` is a single-page app. Its tender search sits behind a CAPTCHA in the page, but the portal's
+owners (the Centre for e-Governance, Karnataka, and KPPP) agreed to the project reading the portal's JSON API
+directly, so `type: kppp` (`crawler/kppp.py`) does that, politely (about one request a second). **Keep that
+agreement in mind before changing the crawler**: it covers this API at this rate, not a way around the CAPTCHA for
+any other portal. The calls (no login, no cookie):
+
+1. `POST /supplier-registration-service/v1/api/portal-service/{,works/,services/}search-eproc-tenders?page=N&size=100`
+   with a JSON body (`category`, `status: PUBLISHED`, `tenderType`: OPEN / RESERVED / RESTRICTED, other filters null).
+   The answer is a JSON list; the total is in the `X-Total-Count` header. About 3,000 live tenders.
+2. `GET .../{nitId}/goods-tender-full-view` (`works-tender-full-view`, `service-tender-full-view`) for the estimated
+   value (the list has none), EMD, tender fee, dates and the document names (cut at 200 characters).
+
+A department is an organisation and its office is the second half of `chain`. The row id is `G`/`W`/`S` plus the
+internal id; the tender number shown on the site is `ref` (searchable). The officer's name, office and mobile
+numbers in the detail JSON are never read or stored.
+
+### How the Chhattisgarh crawl works (CHEPS)
+
+`eproc.cgstate.gov.in/CHEPS` is a classic server-rendered portal. Its home page has a **LOAD LIVE DATA** button, which
+the portal's owners (CHiPS) pointed the project to; `type: cheps` (`crawler/cheps.py`) does what that button does and
+nothing else: `GET` the home page, take the `loadForm` fields (the page's own security token), `POST` it with
+`loadAlldata=Y`. The answer is the same page with a table of every live tender grouped by department (about 570
+tenders in one ~2 MB response, 2 requests in all). No login, no CAPTCHA. Each row gives the tender number (`id` and
+`ref`), the bid start and due dates, the description (the portal cuts it at about 50 characters), the probable
+amount of contract (`value`; "NA" when not stated) and a corrigendum flag. Opening a tender is a different page that
+is not part of what the owners pointed to, so no detail pages are read (`fetch_details: false`).
 
 ### Parallel crawling
 
@@ -329,7 +357,8 @@ be clicked, and a tile-grid style is the phone, keyboard and screen-reader alter
 * **Which source is which state** comes from the `state:` key of each block in `sources.yaml` (an ISO 3166-2 code
   such as `IN-KL`, or `central` for the all-India source). The index carries it, so the page hard-codes no slugs;
   a new state source only needs its `state:`. Several sources may share one state (their numbers are summed).
-  States without a source are drawn as "not on TenderWatch yet"; Chhattisgarh is hatched (its portal needs a CAPTCHA).
+  States without a source are drawn as "not on TenderWatch yet". A portal that cannot be crawled can be hatched as
+  "blocked" through the `BLOCKED` table in `docs/app.js` (empty now).
 * **Numbers** are in `docs/data/index.json` (`sources[].stats`: `new`, `closing`, `closing48`, `orgs`; `closing48` is
   the deadline within 48 hours, `orgs` the organisations with an active tender).
 * **Boundaries** are `docs/map/india-states.json`: simplified SVG paths, 36 units, about 72 KB (25 KB gzipped),

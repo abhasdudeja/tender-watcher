@@ -1,0 +1,106 @@
+{
+ "createdTs": null,
+ "version": null,
+ "createdDate": null,
+ "modifiedDate": null,
+ "noticeInvitingTenderDTO": {
+  "createdTs": 1792063188728,
+  "version": 4,
+  "createdDate": null,
+  "modifiedDate": null,
+  "evaluationType": "TWO_COVER",
+  "evaluationTypeText": "Two Tender Document System(Two Cover)",
+  "invitingStrategy": "OPEN",
+  "invitingStrategyText": "Open",
+  "tenderFee": "500.00",
+  "emd": "500.00",
+  "bidValueType": "LUMPSUM",
+  "bidValueTypeText": "Lumpsum",
+  "techWeightage": null,
+  "tenderReceiptClose": "11-11-2026 17:00:00",
+  "tenderQueryClose": "10-11-2026 17:00:00",
+  "technicalBidOpen": "13-11-2026 11:30:00",
+  "publishedDate": "15-10-2026 16:56:31",
+  "publishedByPost": "REDACTED",
+  "publishedByUser": "REDACTED",
+  "bidValidityPeriod": 90,
+  "noOfCalls": 1,
+  "preBidMeetingDate": null,
+  "preBidMeetingYn": false,
+  "preQualificationBidOpen": null,
+  "retenderedYn": null,
+  "contactPerson": "REDACTED",
+  "splitEmdRequiredYn": false,
+  "emdBankGuarantee": null,
+  "emdCash": null,
+  "bgValidityPeriod": null,
+  "hideWeightage": null,
+  "isMultipleSupplierSelectionAllowed": null,
+  "techEvalStartDate": null,
+  "multipleCurrencySelectionAllowedYn": false,
+  "isTechWeightageAllowed": null,
+  "highestBidderSelection": true,
+  "qcbsTenderYn": false,
+  "itemwiseEmdRequiredYn": null,
+  "itemwiseTechEvalYn": null,
+  "officeNumber": "REDACTED",
+  "mobileNumber": "REDACTED",
+  "provisionalAmount": null,
+  "tenderSupplierList": null
+ },
+ "tenderSchedule": {
+  "createdTs": 1792063188762,
+  "version": 4,
+  "createdDate": null,
+  "modifiedDate": null,
+  "tenderNumber": "KSRTC/2026-27/SE4215",
+  "title": "HSN CNT COM STALL 06",
+  "description": "Commercial Stall (Com Stall 06) at Hassan Central Bus Stand Specification per stall 331 sq ft license period 05 years economic LICENSE fee per month Rs 9697",
+  "category": "SERVICES",
+  "categoryText": "Services",
+  "ecv": "9697.00",
+  "deptName": "Karnataka State Road Transport Corporation",
+  "fileName": "HSNCNTCOMSTALL06",
+  "status": "PUBLISHED",
+  "statusText": "Published",
+  "remarks": null,
+  "ecvtenderYn": false,
+  "location": 3623,
+  "locationName": "KSRTC Divisional Controller Office Hassan",
+  "procEntityTypeText": null
+ },
+ "tenderCriterionDocumentList": [
+  {
+   "documentName": "EMD DD AND TENDER APPLICATION DD SHOULD UPLOAD AS MENTIONED IN THE TENDER DOCUMENT",
+   "optional": true,
+   "documentTypeText": "Technical Bid"
+  },
+  {
+   "documentName": "ID PROOF AND PAN",
+   "optional": true,
+   "documentTypeText": "Technical Bid"
+  },
+  {
+   "documentName": "SELF CERTIFIED COPY OF NOT BLACK LISTED IN ANY CORPORATION ANNEXURE-2",
+   "optional": true,
+   "documentTypeText": "Technical Bid"
+  },
+  {
+   "documentName": "SELF CERTIFIED COPY OF TERMS AND CONDITIONS WITH TENDER NOTIFICATION ANNEXURE 1",
+   "optional": true,
+   "documentTypeText": "Technical Bid"
+  },
+  {
+   "documentName": "Self declaration regarding non allotment of other shops, constructed or Open space under the caste SC/ST/PH reservation category Annexure - 3",
+   "optional": true,
+   "documentTypeText": "Technical Bid"
+  },
+  {
+   "documentName": "THE BIDDERS SHOULD FOLLOW ALL TERMS AND CONDITIONS OF TENDER DOCUMENT",
+   "optional": true,
+   "documentTypeText": "Technical Bid"
+  }
+ ],
+ "tenderAddress": null,
+ "tenderRecallDTO": null
+}

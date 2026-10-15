@@ -169,6 +169,7 @@ class PortalSession:
         self.dump_dir = Path(dump_dir) if dump_dir else None
         self.ignore_robots = ignore_robots
         self.requests_made = 0
+        self.last_headers: Dict[str, str] = {}   # response headers (lower-case names) of the latest request, e.g. X-Total-Count
         self._dump_n = 0
         self._last = 0.0
         self._interval = self.delay        # current minimum start-to-start gap (>= delay, grows after a 429)
@@ -291,6 +292,7 @@ class PortalSession:
                 # decode ourselves: some portals send a stray non-UTF-8 byte despite charset=UTF-8,
                 # which must not make the whole page (or JSON listing) unreadable
                 html = r.content.decode(_charset(r.headers.get("Content-Type", "")), errors="replace")
+                self.last_headers = {k.lower(): v for k, v in r.headers.items()}
                 break
             except RequestException as e:
                 last_err = e
