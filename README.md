@@ -320,6 +320,25 @@ be clicked, and a tile-grid style is the phone, keyboard and screen-reader alter
   India requires the official depiction of its external boundary: check the north and north-east of the map
   (J&K, Ladakh, Arunachal Pradesh) against the official map whenever the boundary file is replaced.
 
+## Crawling from an Indian IP (local runs)
+
+Some portals refuse GitHub's cloud addresses: **Gujarat** (the connection times out) and the **Mizoram notice
+board** (HTTP 403). The Actions crawl keeps their last good data and the status page flags them. Crawl them from a
+machine on an Indian connection with `tools/local_crawl.ps1`:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1                 # gujarat + mizoram-etender
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1 -Slugs sikkim -NoPush
+```
+
+It refuses to start unless the working tree is clean, you are on `master` and nothing is unpushed, then
+fast-forwards to `origin/master`, crawls the sources, rebuilds `docs/data/`, commits `data/` and `docs/data/`
+(`crawl (local): ...`) and pushes - plain pushes only, never forced. If the Actions crawl pushed in the
+meantime, the script puts its own sources' data on top of the new `origin/master` (keeping origin's copy of a
+source if that is newer), rebuilds the index and retries. Its last output line says what happened
+(`DONE: ...` or `ABORT: ...`). The crawler's log is `logs/local-crawl-<time>.log`. It needs the machine's own git
+login (Git Credential Manager); it never asks for a password and never changes credentials.
+
 ## Visit counting (GoatCounter)
 
 `docs/analytics.js` counts visits and a few clicks with [GoatCounter](https://www.goatcounter.com): no cookies, no
