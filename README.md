@@ -208,6 +208,28 @@ tenders in one ~2 MB response, 2 requests in all). No login, no CAPTCHA. Each ro
 amount of contract (`value`; "NA" when not stated) and a corrigendum flag. Opening a tender is a different page that
 is not part of what the owners pointed to, so no detail pages are read (`fetch_details: false`).
 
+### How the GeM CPPP crawls work (central and state lists) and the duplicate check
+
+GeM republishes the tenders published on the central procurement portal (CPPP) as plain pages: `gem.gov.in/cppp` (about
+24,000 live tenders from ~1,900 central organisations: mostly Indian Railways, also CPWD, Military Engineer Services,
+BHEL, NTPC ...) and `gem.gov.in/cppp_state` (about 4,900, the tenders of the NIC state portals). Both are sources of
+`type: gemcppp` (`crawler/gemcppp.py`): server-rendered tables, newest published first, **10 tenders per page and no page
+size or export option** (so a pass is ~2,400 + ~490 requests, about an hour for the central list; the log prints a page
+counter every 100 pages and a pass stopped by throttling resumes where it stopped). No login, no CAPTCHA, robots.txt
+allows it. Listing only: closing, opening and published dates, title, reference, organisation, a corrigendum flag and (central)
+GeM's availability report id; no value, EMD or detail page. The tender id is the last "/" part of the "Title/Ref.No./Tender Id"
+cell: for GePNIC tenders (`2026_PRD_5080689_1`) and railway tenders (8 digits) it is the record id; some systems put `NIL`,
+`NULL` or a small number there, so for anything else the id is a hash (organisation, reference, that value, published
+date, title start) and tenders never overwrite each other.
+
+**Duplicates.** The state list is ~85% tenders the state sources already hold (same GePNIC id), the central list ~6% (CPPP's own
+tenders and a few nProcure ones). Both sources carry `prefer_others: true`: a tender that another source holds too is a
+duplicate and is **left out of the site index** (the stored data is not changed; the manifest's `duplicates` says how many).
+`crawler/dedupe.py` matches by exact id (for GePNIC ids that is the only rule, because the aggregator's reference is cut
+short when it contains "/"; other ids must also agree on the closing day), and for other ids by reference or title plus closing
+day. `python -m crawler.run --dedupe-report` prints the overlap per source with examples. The state list also shows gaps in
+our own crawls: ~750 tenders only GeM has, mostly West Bengal organisations (Zilla Parishads, Health and Family Welfare ...).
+
 ### Parallel crawling
 
 Sources are independent portals, so they run concurrently: one thread each locally, one matrix

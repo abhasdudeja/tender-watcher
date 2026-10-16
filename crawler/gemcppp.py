@@ -10,9 +10,11 @@ here). Public pages: no login, no CAPTCHA, robots.txt allows them.
 
 Columns: bid closing date, opening date, e-published date, one "Title/Ref.No./Tender Id" cell, organisation,
 corrigendum, (central only) GeM availability report id and download. There is no value, no EMD and no detail page, so
-records are listing-only. The id is the last "/" part of the combined cell (an IREPS tender number, or a GePNIC tender id
-such as 2026_PRD_5080689_1); the reference is the part before it and the title the rest (a reference or a title that
-itself contains "/" splits imperfectly, which only affects the displayed split, not the id).
+records are listing-only. The tender id is the last "/" part of the combined cell; the reference is the part before it
+and the title the rest (a reference or a title that itself contains "/" splits imperfectly, which only affects the
+displayed split). That last part is a real id for GePNIC tenders (2026_PRD_5080689_1) and railway tenders (8 digits)
+and is then the record id, which is what lets the duplicate check match them with the other sources. Other systems
+put 'NIL', 'NULL' or a small number there that repeats, so for those the record id is a hash (see row_id).
 
 A whole pass is one request per page (about 2,400 for the central list), so it takes about 40 minutes at one request a
 second; the pass is resumable after a throttling pause. Both sources are `prefer_others: true`: their tenders that other
@@ -72,6 +74,20 @@ def split_cell(cell: str) -> Tuple[str, str, str]:
     return title, ref, tid
 
 
+RELIABLE_ID = re.compile(r"^(?:\d{4}_[A-Za-z0-9]+_\d+_\d+|\d{6,8})$")    # a GePNIC tender id, or a 6-8 digit tender number
+
+
+def row_id(tid: str, ref: str, org: str, pub: Optional[str], title: str = "") -> str:
+    """The record id. The last part of the combined cell is a real tender id for GePNIC and railway tenders, but other
+    systems put 'NIL', 'NULL' or a small number there that repeats across tenders and organisations; for those the id
+    is a hash of the tender's organisation, reference, that value, published date and the start of its title, so
+    tenders never overwrite each other (a title that is later edited makes a new record; the old one is kept, closed)."""
+    if RELIABLE_ID.match(tid):
+        return tid
+    key = f"{org}|{ref}|{tid}|{pub or ''}|{_norm(title)[:80].lower()}"
+    return "g" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:14]
+
+
 def parse_page(html: str) -> Tuple[Optional[int], List[Dict]]:
     """One list page -> (the total number of entries the site says it has, rows)."""
     soup = BeautifulSoup(html, "lxml")
@@ -94,9 +110,10 @@ def parse_page(html: str) -> Tuple[Optional[int], List[Dict]]:
         title, ref, tid = split_cell(d["cell"])
         org = d.get("org") or "Unspecified organisation"
         corr = d.get("corrigendum")
+        pub = parse_dt(d.get("pub"))
         rows.append({
-            "id": tid, "ref": ref, "title": title or ref, "department": org, "chain": org,
-            "pub": parse_dt(d.get("pub")), "open": parse_dt(d.get("open")), "close": parse_dt(d.get("close")),
+            "id": row_id(tid, ref, org, pub, title), "ref": ref, "title": title or ref, "department": org, "chain": org,
+            "pub": pub, "open": parse_dt(d.get("open")), "close": parse_dt(d.get("close")),
             "corrigendum": None if not corr or corr.upper() == "N/A" else corr,
             "gem_report": d.get("gem_report") or None,
         })

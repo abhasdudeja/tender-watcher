@@ -45,6 +45,26 @@ def test_the_combined_cell_splits_into_title_reference_and_id():
     assert tid.startswith("x") and G.split_cell("a cell with no usable id at the end/ref/a sentence, not an id")[2] == tid      # stable
 
 
+def test_a_real_tender_id_is_the_record_id_and_a_repeating_value_gets_a_hash_id():
+    assert G.row_id("92749798", "REF-1", "Org A", "2026-10-14T18:10") == "92749798"                  # railway tender number
+    assert G.row_id("2026_PRD_5080689_1", "x", "Org A", None) == "2026_PRD_5080689_1"                 # GePNIC id
+    assert G.row_id("348101", "GMRC/1", "Gujarat Metro", None) == "348101"                              # 6 digits: kept (matches other portals)
+    a = G.row_id("NIL", "2026-27", "Org A", "2026-10-14T18:10")
+    b = G.row_id("NIL", "2026-27", "Org B", "2026-10-14T18:10")
+    assert a.startswith("g") and b.startswith("g") and a != b                                          # different tenders, different ids
+    assert a == G.row_id("NIL", "2026-27", "Org A", "2026-10-14T18:10")                                  # stable between crawls
+    assert G.row_id("258", "ET-16", "AIIMS", "2026-09-01") != G.row_id("258", "ET-17", "AIIMS", "2026-09-01")
+    assert G.row_id("2026_BL_32790", "005", "Org", None).startswith("g")                                # not a full GePNIC id
+
+
+def test_tenders_that_share_a_placeholder_id_are_all_kept():
+    rows = [{"id": "NIL", "org": "Org A", "title": "First"}, {"id": "NIL", "org": "Org A", "title": "Second"},
+            {"id": "NIL", "org": "Org B", "title": "Third"}]
+    fake, store = FakeGem(rows), {}
+    st = crawl(fake, store)
+    assert st["listed"] == 3 and len(store) == 3
+
+
 def test_the_central_page_is_read_into_rows():
     total, rows = G.parse_page(read("central_p1.html"))
     assert total == 23779 and len(rows) == 10
