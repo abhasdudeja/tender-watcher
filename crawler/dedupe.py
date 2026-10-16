@@ -7,11 +7,15 @@ stored data is never changed; the site index (crawler/index.py) simply leaves du
 `python -m crawler.run --dedupe-report` prints what overlaps.
 
 A tender of a `prefer_others` source is a duplicate of another source's *active* tender when
-  * its id equals that tender's id (a GePNIC id such as 2026_PRD_5080689_1 is unique across portals; any other id
-    must also agree on the closing day), or
-  * the references are equal (alphanumerics only, at least 6 characters) and the closing day is the same, or
+  * its id equals that tender's id. A GePNIC id such as 2026_PRD_5080689_1 is unique across portals, so for those
+    the id is the only rule: an id that is not held elsewhere is a different tender, however alike the titles are.
+    Any other id (a railway tender number, say) must also agree on the closing day; and for those only
+  * the references are equal (alphanumerics only, at least 6 characters, with letters in them) and the closing day is
+    the same, or
   * the titles are equal (first 90 alphanumeric characters, at least 30 of them) and the closing day is the same.
-Matching on a reference or a title alone would flag different tenders that reuse a common reference ("NIT-1").
+Matching on a reference or a title alone would flag different tenders that reuse a common reference ("NIT-1"), and
+the aggregator's reference is only an approximation (a reference containing "/" is cut short), so GePNIC rows never
+use it.
 """
 from __future__ import annotations
 
@@ -33,6 +37,11 @@ def day(stamp) -> str:
     return (stamp or "")[:10]
 
 
+def _distinctive(ref: str) -> bool:
+    """A reference worth matching on: long enough and with letters (not just a year like '2026 27')."""
+    return len(ref) >= MIN_REF and len(re.findall(r"[a-z]", ref)) >= 3
+
+
 Lookup = Tuple[Dict[str, Tuple[str, str]], Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]
 
 
@@ -51,7 +60,7 @@ def build_lookup(stores: Dict[str, Dict[str, Dict]], sources: List[Dict]) -> Loo
             tag, closes = f"{slug}:{rec['id']}", day(rec.get("close"))
             by_id.setdefault(str(rec["id"]), (tag, closes))
             ref, title = norm(rec.get("ref")), norm(rec.get("title"))
-            if len(ref) >= MIN_REF and closes:
+            if _distinctive(ref) and closes:
                 by_ref.setdefault((ref, closes), tag)
             if len(title) >= MIN_TITLE and closes:
                 by_title.setdefault((title[:TITLE_KEY], closes), tag)
@@ -63,11 +72,14 @@ def match(rec: Dict, lookup: Lookup) -> Optional[Tuple[str, str]]:
     by_id, by_ref, by_title = lookup
     closes = day(rec.get("close"))
     rid = str(rec["id"])
+    gepnic = bool(_GEPNIC_ID.match(rid))
     hit = by_id.get(rid)
-    if hit and (_GEPNIC_ID.match(rid) or not closes or not hit[1] or hit[1] == closes):
+    if hit and (gepnic or not closes or not hit[1] or hit[1] == closes):
         return "id", hit[0]
+    if gepnic:
+        return None          # a GePNIC id is unique across portals: one that is not held elsewhere is a different tender
     ref, title = norm(rec.get("ref")), norm(rec.get("title"))
-    if len(ref) >= MIN_REF and closes and (ref, closes) in by_ref:
+    if _distinctive(ref) and closes and (ref, closes) in by_ref:
         return "ref", by_ref[(ref, closes)]
     if len(title) >= MIN_TITLE and closes and (title[:TITLE_KEY], closes) in by_title:
         return "title", by_title[(title[:TITLE_KEY], closes)]

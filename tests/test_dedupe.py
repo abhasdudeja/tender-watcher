@@ -41,6 +41,17 @@ def test_the_same_reference_and_closing_day_is_a_duplicate_a_different_day_is_no
     assert found(own, kerala=[rec("k1", ref="NIT/12/2026-27", close="2026-11-30T10:00")]) == {}
 
 
+def test_a_gepnic_id_that_is_not_held_elsewhere_is_a_different_tender_whatever_its_title_says():
+    own = [rec("2026_A_5_1", ref="NIT/12/2026-27", title=TITLE + " rapid maintenance")]
+    other = [rec("2026_B_9_1", ref="NIT/12/2026-27", title=TITLE + " rapid maintenance")]
+    assert found(own, kerala=other) == {}
+
+
+def test_a_reference_that_is_only_a_year_is_not_distinctive():
+    assert found([rec("a1", ref="2026-27")], kerala=[rec("k1", ref="2026-27")]) == {}
+    assert found([rec("a1", ref="2026-2027")], kerala=[rec("k1", ref="2026-2027")]) == {}
+
+
 def test_a_short_common_reference_alone_is_not_enough():
     assert found([rec("a1", ref="NIT-1")], kerala=[rec("k1", ref="NIT-1")]) == {}
 
