@@ -689,7 +689,7 @@
 
     function buildModel() {
       for (const x of manifest.sources) {
-        if (!x.state || !(x.enabled || x.active > 0)) continue;   // only sources the source dropdown offers
+        if (!x.state || x.state === "multi" || !(x.enabled || x.active > 0)) continue;   // only sources the source dropdown offers; "multi" = several states, not on the map
         let m = agg.get(x.state);
         if (!m) agg.set(x.state, m = { active: 0, new: 0, closing48: 0, orgs: 0, srcs: [], best: null });
         const st = x.stats || {};

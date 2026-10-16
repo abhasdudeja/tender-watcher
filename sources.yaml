@@ -10,6 +10,10 @@
 #                   the crawler reads the same JSON API that page uses. Needs extra_ca_certs (see certs/README.md).
 # type: cheps    -> Chhattisgarh's CHEPS (eproc.cgstate.gov.in/CHEPS): the home page's LOAD LIVE DATA form, which the
 #                   portal's owners pointed the project to. Listing only: no detail pages.
+# type: gemcppp  -> GeM's lists of the tenders published on CPPP (gem.gov.in/cppp = central, /cppp_state = the state
+#                   portals), plain pages, listing only. They are aggregators: prefer_others: true leaves a tender out of
+#                   the site when another source holds it too (crawler/dedupe.py); `python -m crawler.run --dedupe-report`
+#                   shows the overlap. max_pages caps a pass (10 tenders a page; omit it for all of them).
 # type: kppp     -> Karnataka's KPPP (kppp.karnataka.gov.in), read through its JSON API with the portal owners' agreement.
 # type: tms      -> the "Tender Management System" eProcurement portals (Telangana, Andhra Pradesh): base_url is the
 #                   portal's root; the crawler reads the live-tender list the same way the page does.
@@ -530,4 +534,28 @@ sources:
     ignore_robots: false
     fetch_details: true
     refresh_after_hours: 48
-    delay_seconds: 1.0   
+    delay_seconds: 1.0
+
+  - slug: gemcppp
+    name: GeM - CPPP tenders (central)
+    state: central
+    type: gemcppp
+    base_url: https://gem.gov.in/cppp
+    enabled: true
+    ignore_robots: false
+    prefer_others: true
+    fetch_details: false
+    refresh_after_hours: 12
+    delay_seconds: 1.0
+
+  - slug: gemcppp-state
+    name: GeM - CPPP tenders (state portals)
+    state: multi            # several states: not drawn on the map
+    type: gemcppp
+    base_url: https://gem.gov.in/cppp_state
+    enabled: true
+    ignore_robots: false
+    prefer_others: true
+    fetch_details: false
+    refresh_after_hours: 12
+    delay_seconds: 1.0

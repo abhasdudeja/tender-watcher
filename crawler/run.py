@@ -29,13 +29,13 @@ from typing import Dict, List, Optional
 
 import yaml
 
-from . import cheps, epsv2, gepnic, index, kppp, mizoram, nprocure, store, tms
+from . import cheps, dedupe, epsv2, gemcppp, gepnic, index, kppp, mizoram, nprocure, store, tms
 from .progress import format_line
 
 ROOT = Path(__file__).resolve().parent.parent
 CRAWLERS = {"gepnic": gepnic.crawl_source, "nprocure": nprocure.crawl_source, "epsv2": epsv2.crawl_source,
             "mizoram": mizoram.crawl_source, "tms": tms.crawl_source, "kppp": kppp.crawl_source,
-            "cheps": cheps.crawl_source}
+            "cheps": cheps.crawl_source, "gemcppp": gemcppp.crawl_source}
 PROGRESS_FILE = "progress.json"     # the old single-file layout (still read, never written)
 STALE_AFTER_SECONDS = 600           # a running source with no update for this long is flagged
 STATUS_FILE = "_status.json"      # last crawl status of a source, kept next to its data
@@ -279,6 +279,8 @@ def main(argv=None) -> int:
                     help="print the progress of a crawl running in another terminal, then exit")
     ap.add_argument("--index-only", "--build-only", dest="index_only", action="store_true",
                     help="don't crawl; just rebuild docs/data/ from data/")
+    ap.add_argument("--dedupe-report", action="store_true",
+                    help="don't crawl; print which tenders of the prefer_others sources (GeM CPPP) other sources also hold")
     ap.add_argument("--no-index", action="store_true", help="crawl only; don't rebuild docs/data/")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args(argv)
@@ -294,6 +296,11 @@ def main(argv=None) -> int:
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8")) or {}
     sources = cfg.get("sources", [])
     data_dir = Path(args.data_dir)
+
+    if args.dedupe_report:    # read-only, like --index-only
+        stores = {s["slug"]: store.open_source(data_dir, s["slug"], auto_migrate=False) for s in sources}
+        print("\n".join(dedupe.report(stores, sources)))
+        return 0
 
     if args.index_only:       # read-only on the data: un-migrated JSONL is read as is, never migrated here
         stores = {s["slug"]: store.open_source(data_dir, s["slug"], auto_migrate=False) for s in sources}

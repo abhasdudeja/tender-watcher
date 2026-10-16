@@ -27,7 +27,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
-CHUNK_ROWS = 3000      # rows per chunk file (~0.3-0.6 MB raw): a source / organisation view loads only its own chunks
+from . import dedupe
+
+CHUNK_ROWS = 3000     # rows per chunk file (~0.3-0.6 MB raw): a source / organisation view loads only its own chunks
 FORMAT = 3
 IST = timezone(timedelta(hours=5, minutes=30))   # portal dates are IST wall-clock
 NEW_DAYS = 2           # "new" preset: published within this many days (~4-5k tenders are published a day across the sources)
@@ -141,6 +143,8 @@ def build_index(stores: Dict[str, Dict[str, Dict]], sources: List[Dict], out_dir
     org_files: Dict[tuple, set] = {}
     org_counts: Dict[tuple, List[int]] = {}
     categories: Dict[str, int] = {}
+    # tenders an aggregator source (prefer_others) shares with another source: the other source's copy is shown, this one is left out
+    dups = dedupe.find_duplicates(stores, sources)
 
     def dump(rel: str, obj) -> None:
         (out_dir / rel).write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
@@ -149,8 +153,9 @@ def build_index(stores: Dict[str, Dict[str, Dict]], sources: List[Dict], out_dir
     for src in sources:
         slug = src["slug"]
         store = stores.get(slug, {})
-        live = [_row(r) for r in store.values() if r.get("active")]
-        gone = [_row(r) for r in store.values() if not r.get("active")]
+        skip = dups.get(slug, {})
+        live = [_row(r) for r in store.values() if r.get("active") and r["id"] not in skip]
+        gone = [_row(r) for r in store.values() if not r.get("active") and r["id"] not in skip]
         rows_by_src[slug] = live + gone
         chunk_meta = []
         for kind, rows in (("live", live), ("closed", gone)):
@@ -169,6 +174,7 @@ def build_index(stores: Dict[str, Dict[str, Dict]], sources: List[Dict], out_dir
             "slug": slug, "name": src.get("name", slug), "type": src.get("type"), "base_url": src["base_url"],
             "enabled": bool(src.get("enabled", True)), "active": len(live), "inactive": len(gone),
             "total_seen": len(store), "chunks": chunk_meta,
+            **({"duplicates": len(skip)} if skip else {}),               # also held by another source, so not listed here
             **({"state": src["state"]} if src.get("state") else {}),     # ISO 3166-2 code, or "central"; the map reads it
         })
 

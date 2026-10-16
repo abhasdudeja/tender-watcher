@@ -104,5 +104,5 @@ def test_every_source_state_in_sources_yaml_exists_on_the_map():
     cfg = yaml.safe_load((ROOT / "sources.yaml").read_text(encoding="utf-8"))["sources"]
     states = {s["slug"]: s.get("state") for s in cfg}
     assert all(states.values()), [k for k, v in states.items() if not v]        # every source says what it covers
-    assert all(v == "central" or v in res["units"] for v in states.values()), \
-        [k for k, v in states.items() if v != "central" and v not in res["units"]]
+    assert all(v in ("central", "multi") or v in res["units"] for v in states.values()), \
+        [k for k, v in states.items() if v not in ("central", "multi") and v not in res["units"]]
