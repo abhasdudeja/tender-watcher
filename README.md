@@ -361,8 +361,12 @@ The site has two tabs. **Map** is the landing tab and needs only the manifest an
 outline): no tender rows are fetched until someone opens **Tenders** (a click on a state opens it, filtered to
 that state's source; the list then has a heading with the state, its portal and a "Back to map" button). The address says which tab: `?tab=tenders&...` for the list, a clean address for the map;
 links with list filters but no `tab=` still open the list. Crawl status is its own page, `docs/status.html` (one
-row per source: result, last crawl, active / listed / new / details, errors), linked from the tab bar; the main
-page only shows a banner when a source's last crawl failed.
+row per source: result, last crawl, active, listed, new, details fetched, details stored, notes), linked from the tab bar; the main
+page only shows a banner when a source's last crawl failed. *Active* and *Details stored* describe the data on the site
+now (the index manifest's `active` and `with_details`: active tenders whose detail page is saved; a dash for portals read
+from the listing only); *Listed*, *New* and *Details fetched* describe the last crawl only, so *Details fetched* is
+normally far below *Active*: a crawl opens a detail page only for new or changed tenders (or details older than
+`detail_max_age_days`, 14 by default).
 
 The Tenders tab loads `orgs.json`, paints a preset, and fetches chunks only when a view needs
 them: an organisation's files, a source's live chunks, or every live chunk for *All tenders* or a search

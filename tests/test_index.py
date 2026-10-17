@@ -221,3 +221,19 @@ def test_manifest_carries_the_state_and_the_map_stats(tmp_path):
     assert t["stats"]["closing48"] == 2                                      # closed tenders and past deadlines do not count
     assert t["stats"]["orgs"] == 2                                           # Alpha and Beta have active tenders; Gamma only a closed one
     assert u["stats"]["closing48"] == 0 and u["stats"]["orgs"] == 0
+
+
+def test_manifest_counts_listed_tenders_that_have_their_details(tmp_path):
+    stores = {"t": {
+        "A": {"id": "A", "source": "t", "title": "with", "org": "O", "active": True, "details_fetched_at": "2026-10-01T00:00:00Z"},
+        "B": {"id": "B", "source": "t", "title": "without", "org": "O", "active": True, "needs_details": True},
+        "C": {"id": "C", "source": "t", "title": "gone", "org": "O", "active": False, "details_fetched_at": "2026-10-01T00:00:00Z"},
+    }}
+    src = dict(SRC[0], fetch_details=True)
+    m = index.build_index(stores, [src], tmp_path)
+    assert (m["sources"][0]["active"], m["sources"][0]["with_details"]) == (2, 1)      # closed tenders are not counted
+    m = index.build_index(stores, SRC, tmp_path)                                       # a listing-only source has no such number
+    assert "with_details" not in m["sources"][0]
+    listing_only = {"t": {"A": {"id": "A", "source": "t", "title": "x", "org": "O", "active": True}}}
+    m = index.build_index(listing_only, [src], tmp_path)                               # fetch_details on, but no detail page ever stored
+    assert "with_details" not in m["sources"][0]

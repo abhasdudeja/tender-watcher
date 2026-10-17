@@ -157,6 +157,8 @@ def build_index(stores: Dict[str, Dict[str, Dict]], sources: List[Dict], out_dir
         live = [_row(r) for r in store.values() if r.get("active") and r["id"] not in skip]
         gone = [_row(r) for r in store.values() if not r.get("active") and r["id"] not in skip]
         rows_by_src[slug] = live + gone
+        with_details = (sum(1 for r in store.values() if r.get("active") and r["id"] not in skip and r.get("details_fetched_at"))
+                        if src.get("fetch_details") else 0)            # 0 for a source read from its listing only
         chunk_meta = []
         for kind, rows in (("live", live), ("closed", gone)):
             for n, chunk in enumerate(_chunks(rows)):
@@ -175,6 +177,7 @@ def build_index(stores: Dict[str, Dict[str, Dict]], sources: List[Dict], out_dir
             "enabled": bool(src.get("enabled", True)), "active": len(live), "inactive": len(gone),
             "total_seen": len(store), "chunks": chunk_meta,
             **({"duplicates": len(skip)} if skip else {}),               # also held by another source, so not listed here
+            **({"with_details": with_details} if with_details else {}),    # listed tenders whose detail page is stored (portals with detail pages)
             **({"state": src["state"]} if src.get("state") else {}),     # ISO 3166-2 code, or "central"; the map reads it
         })
 

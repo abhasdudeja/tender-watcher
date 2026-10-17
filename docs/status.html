@@ -42,6 +42,7 @@
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   td.src { font-weight: 600; }
   td.src small { display: block; font-weight: 400; color: var(--muted); }
+  th small { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 0.72rem; }
   .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
   .badge.ok { background: var(--soft); color: var(--accent); }
   .badge.fail { background: var(--warn-soft); color: var(--bad); border: 1px solid var(--warn); }
@@ -65,12 +66,12 @@
     <table>
       <thead><tr>
         <th>Source</th><th>Result</th><th>Last crawl finished</th>
-        <th class="num">Active</th><th class="num">Listed</th><th class="num">New</th><th class="num">Details</th><th>Notes</th>
+        <th class="num">Active<small>on the site now</small></th><th class="num">Listed<small>seen in this crawl</small></th><th class="num">New<small>in this crawl</small></th><th class="num">Details fetched<small>in this crawl</small></th><th class="num">Details stored<small>of the active tenders</small></th><th>Notes</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
-  <p class="sum" style="margin-top:10px">The crawl runs once a day. A source that failed keeps its last good data on the site, so its numbers may be out of date until the next successful crawl.</p>
+  <p class="sum" style="margin-top:10px"><strong>Active</strong> and <strong>Details stored</strong> describe the data on the site now; <strong>Listed</strong>, <strong>New</strong> and <strong>Details fetched</strong> describe the last crawl only. A crawl opens a tender's detail page only when the tender is new, its listing changed, or its stored details are over two weeks old, so <em>Details fetched</em> is normally much lower than <em>Active</em>: the other tenders keep the details saved by earlier crawls (that is what <em>Details stored</em> counts; a dash means the portal is read from its listing only). The crawl runs once a day. A source that failed keeps its last good data on the site, so its numbers may be out of date until the next successful crawl.</p>
   <p class="privacy" id="privacyNote" hidden>This site counts visits and a few clicks anonymously with <a href="https://www.goatcounter.com" rel="noopener">GoatCounter</a>: no cookies, no personal data, nothing you type. It is off if your browser sends Do Not Track.</p>
 </div>
 <script src="analytics.js"></script>
@@ -90,9 +91,9 @@
   }
   var getJSON = function (u) { return fetch(u, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
   // "Active" is what the site lists right now (index.json), also for a source whose last crawl failed and kept its old data
-  var activeNow = getJSON("data/index.json").then(function (m) { var o = {}; (m.sources || []).forEach(function (s) { o[s.slug] = s.active; }); return o; }).catch(function () { return {}; });
+  var activeNow = getJSON("data/index.json").then(function (m) { var o = {}; (m.sources || []).forEach(function (s) { o[s.slug] = { active: s.active, withDetails: s.with_details }; }); return o; }).catch(function () { return {}; });
   Promise.all([getJSON("data/status.json"), activeNow]).then(function (both) {
-    var st = both[0], active = both[1];
+    var st = both[0], site = both[1];
     var rows = (st.sources || []).slice().sort(function (a, b) {
       return (a.ok === b.ok ? 0 : a.ok ? 1 : -1) || String(a.name || a.slug).localeCompare(String(b.name || b.slug));
     });
@@ -104,6 +105,13 @@
       $("notice").hidden = false;
       $("notice").innerHTML = "Needs attention: " + names + ". The data for " + (bad.length + old.length === 1 ? "that source" : "those sources") + " on the site may be out of date.";
     }
+    // tenders on the site that have their detail page stored (the index counts them for sources that read detail pages)
+    var cover = function (s) {
+      var x = site[s.slug];
+      if (!x || x.withDetails == null) return '<td class="num muted" title="This portal is read from its listing only: no detail pages">—</td>';
+      var pct = x.active ? Math.floor(100 * x.withDetails / x.active) : 100;
+      return '<td class="num">' + n(x.withDetails) + ' <span class="muted">(' + pct + "%)</span></td>";
+    };
     $("rows").innerHTML = rows.map(function (s) {
       var w = when(s.finished), notes = [];
       var errs = s.errors || [];
@@ -113,8 +121,9 @@
       if (s.deactivated) notes.push(n(s.deactivated) + " no longer listed");
       var badge = !s.ok ? '<span class="badge fail">Failed</span>' : w.hours > STALE_HOURS ? '<span class="badge old">Old</span>' : '<span class="badge ok">OK</span>';
       return '<tr class="' + (!s.ok || w.hours > STALE_HOURS ? "bad" : "") + '"><td class="src">' + esc(s.name || s.slug) + "<small>" + esc(s.slug) + "</small></td><td>" + badge + "</td><td>" + esc(w.text) + "</td>" +
-        '<td class="num">' + n(active[s.slug] != null ? active[s.slug] : s.active) + "</td>" +
+        '<td class="num">' + n(site[s.slug] ? site[s.slug].active : s.active) + "</td>" +
         (s.ok ? '<td class="num">' + n(s.listed) + '</td><td class="num">' + n(s.new) + '</td><td class="num">' + n(s.details_fetched) + "</td>" : '<td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td>') +
+        cover(s) +
         "<td>" + (notes.length ? notes.join("<br>") : '<span class="muted">—</span>') + "</td></tr>";
     }).join("");
   }).catch(function () { $("sum").textContent = "Could not load data/status.json."; });
