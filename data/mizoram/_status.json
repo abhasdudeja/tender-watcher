@@ -1,0 +1,25 @@
+{
+ "slug": "mizoram",
+ "name": "Mizoram (NIC)",
+ "ok": false,
+ "started": "2026-10-17T05:19:01Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
+ "orgs_unreachable": 0,
+ "listed": 0,
+ "new": 0,
+ "changed": 0,
+ "details_failed": 0,
+ "details_fetched": 0,
+ "throttled": 0,
+ "throttle_recoveries": [],
+ "gave_up": false,
+ "errors": [
+  "organisation list parsed empty"
+ ],
+ "deactivated": 0,
+ "active": 0,
+ "finished": "2026-10-17T05:19:02Z",
+ "requests": 1
+}
