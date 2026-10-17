@@ -419,6 +419,21 @@ source if that is newer), rebuilds the index and retries. Its last output line s
 (`DONE: ...` or `ABORT: ...`). The crawler's log is `logs/local-crawl-<time>.log`. It needs the machine's own git
 login (Git Credential Manager); it never asks for a password and never changes credentials.
 
+### Merging a local crawl with the Actions crawl
+
+If both crawled the same source, `git merge origin/master` conflicts on every Parquet shard and on the site index.
+In the middle of that merge run
+
+```powershell
+python -I -X utf8 tools/merge_stores.py
+git commit
+```
+
+It merges each shard tender by tender (a tender on one side only is kept; on both sides the newer `last_seen` wins,
+a tie goes to the side that closed the tender), takes the `_status.json` of the later crawl, rebuilds `docs/data/` from
+the merged stores and stages the result. It never commits, never deletes a tender, and stops if no merge is in
+progress or a crawl holds `data/.crawl.lock`. Anything outside `data/` and `docs/data/` it leaves for you.
+
 ## Visit counting (GoatCounter)
 
 `docs/analytics.js` counts visits and a few clicks with [GoatCounter](https://www.goatcounter.com): no cookies, no
