@@ -544,7 +544,7 @@ sources:
     enabled: true
     ignore_robots: false
     prefer_others: true
-    fetch_details: false
+    fetch_details: true
     refresh_after_hours: 12
     delay_seconds: 1.0
 
@@ -556,6 +556,6 @@ sources:
     enabled: true
     ignore_robots: false
     prefer_others: true
-    fetch_details: false
+    fetch_details: true
     refresh_after_hours: 12
     delay_seconds: 1.0
