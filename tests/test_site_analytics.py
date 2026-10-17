@@ -22,10 +22,19 @@ def test_events_never_carry_typed_text():
     calls = re.findall(r"track\(([^)]*)\)", APP)
     assert calls                                                    # the hooks are still there
     allowed = ('"search"', '"view/" + v', '"map/state/" + k', '"map/metric/" + metric', '"map/style/" + style',
-               '"tab/" + t', '"source/" + els.source.value')
+               '"tab/" + t', '"tab/" + to', '"source/" + els.source.value', '"share/tender"', '"share/open"')
     for c in calls:
         if c == "name":                                             # the const track = (name) => ... definition
             continue
         assert c in allowed, c
     # the search box value is read only to decide whether a search happened, never passed to track()
     assert not re.search(r"track\([^)]*(els\.q|\.value\.trim)", APP)
+
+
+def test_a_shared_tender_link_carries_no_personal_data():
+    # ?t=<source>:<id>&o=<organisation>&ref=share : the tender and a fixed marker, nothing about the sender
+    m = re.search(r"function tenderLink\(t\) \{(.*?)\n  \}", APP, re.S)
+    assert m
+    keys = set(re.findall(r'(?:set\("|new URLSearchParams\(\{ )(\w+)', m.group(1)))
+    assert keys == {"o", "ref"} and '"?t=" + encodeURIComponent(t.s) + ":" + encodeURIComponent(t.id)' in m.group(1)
+    assert 'q.set("ref", "share")' in m.group(1)

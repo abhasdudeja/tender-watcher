@@ -12,6 +12,7 @@
     value: $("fValue"), isNew: $("fNew"), closed: $("fClosed"), clear: $("fClear"), sort: $("sort"),
     list: $("list"), more: $("more"), count: $("count"), meta: $("meta"), views: $("views"), hint: $("hint"),
     notice: $("notice"), toast: $("toast"), tabs: $("tabs"), stateBar: $("stateBar"), stateInfo: $("stateInfo"), stateName: $("stateName"), stateSub: $("stateSub"), back: $("backToMap"), mapView: $("mapView"), tendersView: $("tendersView"),
+    sharedView: $("sharedView"), sharedBody: $("sharedBody"), sharedBack: $("sharedBack"), sharedNote: $("sharedNote"),
   };
 
   const track = (name) => { if (window.twTrack) window.twTrack(name); };   // analytics.js; fixed event names only, never typed text
@@ -26,6 +27,8 @@
   let manifest = null;
   let lazy = false;        // format >= 3 manifest (presets + orgs.json)
   let tab = "map";         // "map" (the landing tab) | "tenders" (the list)
+  let shared = null;       // a link to one tender (?t=<source>:<id>&o=<organisation>): { s, id, o }; its page replaces both tabs
+  const baseTitle = document.title;
   let listStarted = false; // the Tenders tab has loaded its rows (nothing is fetched for the list while only the map is looked at)
   let view = "new";        // "new" | "closing" | "all" (format 3 only; format 2 is always "all")
   let fullScope = false;   // preset view whose capped file the user chose to widen: load the chunks and apply the rule
@@ -93,6 +96,8 @@
   function readState() {
     const p = new URLSearchParams(location.search);
     tab = tabFromParams(p);
+    const t = p.get("t") || "", at = t.indexOf(":");
+    shared = at > 0 && at < t.length - 1 ? { s: t.slice(0, at), id: t.slice(at + 1), o: p.get("o") || "" } : null;
     els.q.value = p.get("q") || "";
     wantSrc = p.get("src") || "";
     wantOrg = p.get("org") || "";
@@ -107,7 +112,7 @@
       const v = p.get("view");
       if (VIEWS.includes(v)) view = v;
       else if (p.get("new") === "1") view = "new";                          // old "New" chip -> the New view
-      else view = [...p.keys()].some((k) => k !== "view" && k !== "tab") ? "all" : "new";  // old deep links keep meaning "all"
+      else view = [...p.keys()].some((k) => !["view", "tab", "t", "o", "ref"].includes(k)) ? "all" : "new";  // old deep links keep meaning "all"
       newOnly = false;
     } else {
       view = "all";
@@ -120,6 +125,7 @@
   // the New view reads best newest-first; every other view keeps "closing soonest"
   function defaultSort() { return lazy && view === "new" ? "pub" : "close"; }
   function writeState(push) {
+    if (shared) return;               // a shared-tender page keeps its address
     const p = new URLSearchParams();
     if (els.q.value) p.set("q", els.q.value);
     if (els.source.value) p.set("src", els.source.value);
@@ -337,7 +343,7 @@
       : '<div class="empty">No tenders match. Try fewer words or clear the filters.</div>';
   }
 
-  function card(t) {
+  function card(t, open) {
     const d = daysUntil(t.d);
     const gone = !!t.st;
     const soon = !gone && d <= 3 ? " soon" : "";
@@ -363,9 +369,10 @@
       <div class="actions">
         ${gone ? "" : `<a class="btn primary" href="${esc(links.home)}" target="_blank" rel="noopener" data-copy="${esc(t.id)}">Open portal ↗</a>`}
         <button data-copy="${esc(t.id)}">Copy Tender ID</button>
+        <button data-share title="Send a link to this tender to a colleague">Share</button>
         <span class="id">${esc(t.id)}${t.r ? " · Ref " + esc(t.r) : ""}</span>
       </div>
-      <details><summary>Details</summary>
+      <details${open ? " open" : ""}><summary>Details</summary>
         <dl>
           <dt>Published</dt><dd>${fmtDate(t.p)}</dd>
           <dt>Closing</dt><dd>${fmtDate(t.d)}</dd>
@@ -384,7 +391,82 @@
         if (navigator.clipboard) navigator.clipboard.writeText(id).then(() => toast("Tender ID copied: " + id)).catch(() => {});
       })
     );
+    el.querySelector("[data-share]").addEventListener("click", () => shareTender(t));
     return el;
+  }
+
+  // ---------- sharing one tender ----------
+  // The link names the source and tender id (and the organisation, so the page can fetch just that organisation's files):
+  //   ?t=<source>:<id>&o=<organisation>&ref=share
+  // It carries no personal data and nothing about the sender. The page it opens is built in the browser from the index.
+  function tenderLink(t) {
+    const q = new URLSearchParams();
+    if (t.o) q.set("o", t.o);
+    q.set("ref", "share");
+    return location.href.split(/[?#]/)[0] + "?t=" + encodeURIComponent(t.s) + ":" + encodeURIComponent(t.id) + "&" + q.toString();
+  }
+  async function shareTender(t) {
+    const url = tenderLink(t);
+    const lines = [t.t, t.o + (t.d && !t.st ? " · closes " + fmtDate(t.d) : "") + (t.v != null ? " · " + fmtINR(t.v) : "")];
+    track("share/tender");
+    if (navigator.share) {            // phones: the system share sheet (WhatsApp, mail, ...)
+      try { await navigator.share({ title: t.t, text: lines.join("\n"), url }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    const text = lines.join("\n") + "\n" + url;
+    if (navigator.clipboard && window.isSecureContext) {
+      try { await navigator.clipboard.writeText(text); toast("Link copied: paste it in a message"); return; } catch (e) { /* fall through */ }
+    }
+    window.prompt("Copy this link to the tender:", url);
+  }
+
+  // find one tender: in what is already loaded, else in the organisation's files, else in every file of its source
+  async function findTender(sh) {
+    const have = all.find((r) => r.s === sh.s && r.id === sh.id);
+    if (have) return have;
+    const src = sources[sh.s];
+    if (!src) return null;
+    const own = [];
+    if (sh.o && orgsData) for (const e of orgEntries(sh.o, sh.s)) own.push(...(e.files || []));
+    const tried = new Set();
+    for (const group of [own, (src.chunks || []).map((c) => c.file)]) {
+      const files = [...new Set(group)].filter((f) => !tried.has(f));
+      for (let i = 0; i < files.length; i += POOL) {
+        const part = files.slice(i, i + POOL);
+        const rows = await Promise.all(part.map((f) => fetchJSON("data/" + f).then((d) => d.tenders || []).catch(() => [])));
+        part.forEach((f) => tried.add(f));
+        for (const list of rows) { const hit = list.find((r) => r.id === sh.id); if (hit) return hit; }
+      }
+    }
+    return null;
+  }
+  async function openShared() {
+    track("share/open");
+    els.sharedNote.textContent = "";
+    els.sharedBody.innerHTML = '<div class="empty">Loading the tender…</div>';
+    const t = await findTender(shared);
+    if (!shared) return;              // the visitor left while it loaded
+    if (!t) {
+      els.sharedBody.innerHTML = '<div class="empty">This tender is not in the current index. It may be very old, or listed under another source.' +
+        '<br><button type="button" id="sharedSearch">Search for ' + esc(shared.id) + "</button></div>";
+      $("sharedSearch").addEventListener("click", () => { location.href = location.pathname + "?" + new URLSearchParams({ tab: "tenders", view: "all", q: shared.id }); });
+      return;
+    }
+    document.title = t.t.slice(0, 90) + " · " + baseTitle;
+    els.sharedNote.textContent = "Data as of " + fmtDate(manifest.generated) + ". The portal has the latest status.";
+    els.sharedBody.replaceChildren(card(t, true));
+  }
+  // leave the shared page for a tab (the list or the map); Back returns to the shared page
+  function leaveShared(to) {
+    shared = null;
+    document.title = baseTitle;
+    els.sharedBody.textContent = "";
+    tab = to;
+    showTab();
+    window.scrollTo(0, 0);
+    track("tab/" + to);
+    writeState(true);
+    if (to === "tenders") startList();
   }
 
   // ---------- populate filters ----------
@@ -515,15 +597,16 @@
 
   // ---------- tabs: Map (landing) | Tenders ----------
   function showTab() {
-    els.mapView.hidden = tab !== "map";
-    els.tendersView.hidden = tab !== "tenders";
+    els.mapView.hidden = tab !== "map" || !!shared;
+    els.tendersView.hidden = tab !== "tenders" || !!shared;
+    els.sharedView.hidden = !shared;
     for (const b of els.tabs.querySelectorAll("button[data-tab]")) {
-      const on = b.dataset.tab === tab;
+      const on = !shared && b.dataset.tab === tab;
       b.setAttribute("aria-selected", on);
       b.classList.toggle("active", on);
       b.tabIndex = on ? 0 : -1;
     }
-    mapUI.show(tab === "map");
+    mapUI.show(tab === "map" && !shared);
   }
   // first visit to the list: fetch what its view needs (until then only the map's small files were loaded)
   function startList() {
@@ -534,6 +617,7 @@
   }
   // fromUser: a click on a tab or on the map. It adds a history entry, so Back returns to the other tab.
   function setTab(t, fromUser) {
+    if (shared) return leaveShared(t);
     if (t === tab) return;
     tab = t;
     showTab();
@@ -933,7 +1017,8 @@
       els.tabs.querySelector('button[data-tab="map"]').hidden = true;
     }
     showTab();
-    if (tab === "tenders") startList(); else writeState();
+    if (shared) openShared();
+    else if (tab === "tenders") startList(); else writeState();
   }
 
   let timer;
@@ -996,7 +1081,12 @@
     if (b.hidden) return;
     e.preventDefault(); setTab(t, true); b.focus();
   });
-  window.addEventListener("popstate", () => { if (manifest) setTab(tabFromParams(new URLSearchParams(location.search)), false); });
+  window.addEventListener("popstate", () => {
+    if (!manifest) return;
+    if (shared || new URLSearchParams(location.search).get("t")) { location.reload(); return; }   // to or from a shared-tender page
+    setTab(tabFromParams(new URLSearchParams(location.search)), false);
+  });
+  els.sharedBack.addEventListener("click", () => leaveShared("tenders"));
   document.addEventListener("keydown", (e) => {
     if (e.key !== "/" || document.activeElement === els.q || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) return;
     e.preventDefault();

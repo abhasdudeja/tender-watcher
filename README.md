@@ -419,6 +419,22 @@ source if that is newer), rebuilds the index and retries. Its last output line s
 (`DONE: ...` or `ABORT: ...`). The crawler's log is `logs/local-crawl-<time>.log`. It needs the machine's own git
 login (Git Credential Manager); it never asks for a password and never changes credentials.
 
+## Sharing a tender
+
+Every tender card has a **Share** button. On a phone it opens the system share sheet (WhatsApp, mail ...); elsewhere it
+copies the title, organisation, closing date, value and a link. The link looks like
+
+```
+https://<site>/?t=<source>:<tender id>&o=<organisation>&ref=share
+```
+
+and opens a page with that one tender (details expanded, an *Open portal* button, and *Browse all tenders* / the tabs to
+leave). The page is built in the browser from the index: it fetches only the organisation's files (`o=`; without it,
+the source's files) and nothing else, so it opens quickly. The link holds no personal data and nothing about the
+sender. A tender that is no longer in the index (very old, or a duplicate left out in favour of another source) shows
+a note and a button that searches for its id. Because the site is static, the preview card a chat app shows for the
+link is the generic site card, not the tender's title; that would need a small server function.
+
 ### Merging a local crawl with the Actions crawl
 
 If both crawled the same source, `git merge origin/master` conflicts on every Parquet shard and on the site index.
@@ -453,6 +469,8 @@ Visits are counted against the page path only (not `?q=...`). Events have fixed 
 | `map/metric/active`, `map/metric/new`, `map/metric/closing` | the map's number toggle |
 | `map/style/map`, `map/style/tiles` | the Map / Tiles switch |
 | `tab/map`, `tab/tenders` | the Map / Tenders tabs (also fired by a click on a state) |
+| `share/tender` | the Share button on a tender (the system share sheet or a copied link) |
+| `share/open` | a shared-tender link was opened |
 | `search` | the search box used, once per page load |
 
 In GoatCounter these show up under *Events* (set a path/event filter). Add an event by calling `track("name")` in
