@@ -1,0 +1,348 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-18T05:55:00Z",
+   "recoveries_s": [
+    3600
+   ],
+   "events": [
+    {
+     "t": "2026-10-18T05:55:01Z",
+     "kind": "503",
+     "since_prev_s": null,
+     "requests_since_prev": 1,
+     "pace_gap_s": null,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 1.5
+    },
+    {
+     "t": "2026-10-18T05:55:07Z",
+     "kind": "503",
+     "since_prev_s": 5.7,
+     "requests_since_prev": 1,
+     "pace_gap_s": 6.19,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 1.5
+    },
+    {
+     "t": "2026-10-18T05:55:18Z",
+     "kind": "503",
+     "since_prev_s": 10.8,
+     "requests_since_prev": 1,
+     "pace_gap_s": 7.1,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 1.5
+    },
+    {
+     "t": "2026-10-18T05:55:18Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-18T05:56:19Z",
+     "kind": "503",
+     "since_prev_s": 61.0,
+     "requests_since_prev": 1,
+     "pace_gap_s": 7.1,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 10.6
+    },
+    {
+     "t": "2026-10-18T05:56:29Z",
+     "kind": "503",
+     "since_prev_s": 10.4,
+     "requests_since_prev": 1,
+     "pace_gap_s": 7.81,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 10.6
+    },
+    {
+     "t": "2026-10-18T05:56:40Z",
+     "kind": "503",
+     "since_prev_s": 10.7,
+     "requests_since_prev": 1,
+     "pace_gap_s": 8.4,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 10.6
+    },
+    {
+     "t": "2026-10-18T05:56:40Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-18T05:58:41Z",
+     "kind": "503",
+     "since_prev_s": 121.0,
+     "requests_since_prev": 1,
+     "pace_gap_s": 8.4,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T05:58:53Z",
+     "kind": "503",
+     "since_prev_s": 11.8,
+     "requests_since_prev": 1,
+     "pace_gap_s": 9.12,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T05:59:05Z",
+     "kind": "503",
+     "since_prev_s": 12.0,
+     "requests_since_prev": 1,
+     "pace_gap_s": 9.69,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T05:59:05Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-18T06:03:06Z",
+     "kind": "503",
+     "since_prev_s": 241.1,
+     "requests_since_prev": 1,
+     "pace_gap_s": 9.69,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T06:03:17Z",
+     "kind": "503",
+     "since_prev_s": 11.7,
+     "requests_since_prev": 1,
+     "pace_gap_s": 10.16,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T06:03:29Z",
+     "kind": "503",
+     "since_prev_s": 12.0,
+     "requests_since_prev": 1,
+     "pace_gap_s": 10.52,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T06:03:29Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-18T06:11:30Z",
+     "kind": "503",
+     "since_prev_s": 481.1,
+     "requests_since_prev": 1,
+     "pace_gap_s": 10.52,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T06:11:42Z",
+     "kind": "503",
+     "since_prev_s": 11.7,
+     "requests_since_prev": 1,
+     "pace_gap_s": 10.82,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T06:11:54Z",
+     "kind": "503",
+     "since_prev_s": 12.0,
+     "requests_since_prev": 1,
+     "pace_gap_s": 11.06,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-18T06:11:54Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-18T06:26:55Z",
+     "kind": "503",
+     "since_prev_s": 901.1,
+     "requests_since_prev": 1,
+     "pace_gap_s": 11.06,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 8.0
+    },
+    {
+     "t": "2026-10-18T06:27:03Z",
+     "kind": "503",
+     "since_prev_s": 7.7,
+     "requests_since_prev": 1,
+     "pace_gap_s": 10.44,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 8.0
+    },
+    {
+     "t": "2026-10-18T06:27:14Z",
+     "kind": "503",
+     "since_prev_s": 10.7,
+     "requests_since_prev": 1,
+     "pace_gap_s": 10.51,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 8.0
+    },
+    {
+     "t": "2026-10-18T06:27:14Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 6,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-18T06:42:15Z",
+     "kind": "503",
+     "since_prev_s": 901.2,
+     "requests_since_prev": 1,
+     "pace_gap_s": 10.51,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 5.3
+    },
+    {
+     "t": "2026-10-18T06:42:21Z",
+     "kind": "503",
+     "since_prev_s": 5.8,
+     "requests_since_prev": 1,
+     "pace_gap_s": 9.66,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 5.3
+    },
+    {
+     "t": "2026-10-18T06:42:31Z",
+     "kind": "503",
+     "since_prev_s": 10.8,
+     "requests_since_prev": 1,
+     "pace_gap_s": 9.89,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 5.3
+    },
+    {
+     "t": "2026-10-18T06:42:31Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 7,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-18T06:57:33Z",
+     "kind": "recovered",
+     "what": "organisation list",
+     "waited_s": 3600,
+     "attempts": 7
+    }
+   ]
+  }
+ ]
+}

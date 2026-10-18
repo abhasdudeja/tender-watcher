@@ -2,22 +2,24 @@
  "slug": "chandigarh",
  "name": "Chandigarh",
  "ok": true,
- "started": "2026-10-17T05:19:01Z",
+ "started": "2026-10-18T05:55:00Z",
  "orgs": 4,
  "orgs_skipped": 2,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 332,
- "new": 56,
- "changed": 10,
+ "new": 0,
+ "changed": 0,
  "details_failed": 0,
- "details_fetched": 66,
- "throttled": 0,
- "throttle_recoveries": [],
+ "details_fetched": 0,
+ "throttled": 7,
+ "throttle_recoveries": [
+  3600
+ ],
  "gave_up": false,
  "errors": [],
- "deactivated": 28,
+ "deactivated": 0,
  "active": 332,
- "finished": "2026-10-17T05:20:47Z",
- "requests": 69
+ "finished": "2026-10-18T06:57:39Z",
+ "requests": 24
 }
