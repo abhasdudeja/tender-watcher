@@ -216,7 +216,8 @@ BHEL, NTPC ...) and `gem.gov.in/cppp_state` (about 4,900, the tenders of the NIC
 `type: gemcppp` (`crawler/gemcppp.py`): server-rendered tables, newest published first, **10 tenders per page and no page
 size or export option** (so a pass is ~2,400 + ~490 requests, about an hour for the central list; the log prints a page
 counter every 100 pages and a pass stopped by throttling resumes where it stopped). No login, no CAPTCHA, robots.txt
-allows it. Listing only: closing, opening and published dates, title, reference, organisation, a corrigendum flag and (central)
+allows it. GitHub's cloud addresses cannot reach it, so both are `enabled: false` and crawled by `tools/local_crawl.ps1`
+(the central list adds about an hour to a local run). Listing only: closing, opening and published dates, title, reference, organisation, a corrigendum flag and (central)
 GeM's availability report id; no value, EMD or detail page. The tender id is the last "/" part of the "Title/Ref.No./Tender Id"
 cell: for GePNIC tenders (`2026_PRD_5080689_1`) and railway tenders (8 digits) it is the record id; some systems put `NIL`,
 `NULL` or a small number there, so for anything else the id is a hash (organisation, reference, that value, published
@@ -403,15 +404,15 @@ be clicked, and a tile-grid style is the phone, keyboard and screen-reader alter
 ## Crawling from an Indian IP (local runs)
 
 Some portals refuse GitHub's cloud addresses: **Gujarat**, **Andhra Pradesh** and **Chhattisgarh** (the connection
-times out) and the **Mizoram notice board** (HTTP 403). They are set to `enabled: false` in `sources.yaml` (with a
-"local only" comment), so the Actions crawl skips them and keeps their last good data. `enabled: false` does not stop a
+times out), the **Mizoram notice board** (HTTP 403) and the two **GeM CPPP lists** (`gem.gov.in`: the connection
+fails). They are set to `enabled: false` in `sources.yaml` (with a "local only" comment), so the Actions crawl skips them and keeps their last good data. `enabled: false` does not stop a
 local run: a source named with `--source` always runs. Crawl them from a machine on an Indian connection with
-`tools/local_crawl.ps1` (a scheduled task runs it daily at about 13:00; a plain `python -m crawler.run` skips disabled
+`tools/local_crawl.ps1` (a scheduled task runs it daily at about 11:11; a plain `python -m crawler.run` skips disabled
 sources, so name them: `--source gujarat --source andhrapradesh ...`). To move a source back to the cloud, set it to
 `enabled: true` and (optionally) remove it from the script's default list.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1                 # the four local-only sources
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1                 # the six local-only sources
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1 -Slugs sikkim -NoPush
 ```
 

@@ -541,7 +541,7 @@ sources:
     state: central
     type: gemcppp
     base_url: https://gem.gov.in/cppp
-    enabled: true
+    enabled: false         # local only: GitHub's cloud addresses cannot reach gem.gov.in; crawled by tools/local_crawl.ps1
     ignore_robots: false
     prefer_others: true
     fetch_details: true
@@ -553,7 +553,7 @@ sources:
     state: multi            # several states: not drawn on the map
     type: gemcppp
     base_url: https://gem.gov.in/cppp_state
-    enabled: true
+    enabled: false         # local only: GitHub's cloud addresses cannot reach gem.gov.in; crawled by tools/local_crawl.ps1
     ignore_robots: false
     prefer_others: true
     fetch_details: true
