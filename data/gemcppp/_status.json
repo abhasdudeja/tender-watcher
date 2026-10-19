@@ -2,7 +2,7 @@
  "slug": "gemcppp",
  "name": "GeM - CPPP tenders (central)",
  "ok": false,
- "started": "2026-10-18T05:52:40Z",
+ "started": "2026-10-19T06:10:18Z",
  "orgs": 0,
  "orgs_skipped": 0,
  "orgs_failed": 1,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [
-  "organisation list: Failed to perform, curl: (7) Failed to connect to gem.gov.in:443 after 8244 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+  "organisation list: Failed to perform, curl: (7) Failed to connect to gem.gov.in:443 after 8247 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
  ],
- "finished": "2026-10-18T05:53:29Z",
+ "finished": "2026-10-19T06:11:06Z",
  "requests": 0
 }
