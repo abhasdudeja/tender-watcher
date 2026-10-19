@@ -59,6 +59,7 @@ INDEX_FIELDS = {
     "authority": "a",
     "first_seen": "f",
     "inactive_since": "i",
+    "link": "u",    # the tender's own address on its portal (GeM lists: a notice PDF or the portal's application address)
 }
 
 

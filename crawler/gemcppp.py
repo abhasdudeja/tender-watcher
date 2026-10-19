@@ -9,8 +9,9 @@ here). Public pages: no login, no CAPTCHA, robots.txt allows them.
     GET /cppp/<n>        page n (also /cppp_state/<n>)
 
 Columns: bid closing date, opening date, e-published date, one "Title/Ref.No./Tender Id" cell, organisation,
-corrigendum, (central only) GeM availability report id and download. There is no value, no EMD and no detail page, so
-records are listing-only. The tender id is the last "/" part of the combined cell; the reference is the part before it
+corrigendum, (central only) GeM availability report id and download. There is no value, no EMD and nothing we can
+fetch as a detail page (the title links to the tender on its original portal, see portal_link: a railway notice PDF, or a
+GePNIC address that only works inside that portal's session), so records are listing-only plus that link. The tender id is the last "/" part of the combined cell; the reference is the part before it
 and the title the rest (a reference or a title that itself contains "/" splits imperfectly, which only affects the
 displayed split). That last part is a real id for GePNIC tenders (2026_PRD_5080689_1) and railway tenders (8 digits)
 and is then the record id, which is what lets the duplicate check match them with the other sources. Other systems
@@ -27,7 +28,9 @@ import logging
 import math
 import re
 from datetime import datetime
+from html import unescape
 from typing import Dict, Iterator, List, Optional, Tuple
+from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
@@ -41,7 +44,7 @@ MAX_SHORTFALL = 0.05            # tenders that close while we page shift the lis
 LOG_EVERY = 100                 # pages
 
 CHANGE_KEYS = ("close", "open", "title", "ref", "corrigendum")
-LISTING_FIELDS = ("ref", "title", "chain", "pub", "close", "open", "corrigendum", "gem_report")
+LISTING_FIELDS = ("ref", "title", "chain", "pub", "close", "open", "corrigendum", "gem_report", "link")
 
 # column heading (lower case) -> what it is
 COLUMNS = {"bid submission closing date": "close", "tender opening date": "open", "e-published date": "pub",
@@ -74,6 +77,21 @@ def split_cell(cell: str) -> Tuple[str, str, str]:
     return title, ref, tid
 
 
+def portal_link(href: Optional[str]) -> Optional[str]:
+    """The address behind a tender's title -> what is worth keeping, or None. It points at the tender on its original
+    portal: a railway notice PDF (www.ireps.gov.in), a plain tender page, or a GePNIC detail address
+    (.../nicgep/app?page=FrontEndTenderDetailsExternal&service=page&tnid=123). The last one only works inside that
+    portal's own session (anything else gets "Unauthorized Page"), so it is cut back to the portal's application
+    address, where the tender id can be searched. Only http(s) addresses are kept."""
+    href = unescape((href or "").strip())          # a page that escapes the "&" twice still reads right
+    u = urlparse(href)
+    if u.scheme not in ("http", "https") or not u.netloc or len(href) > 300:
+        return None
+    if re.search(r"(?:^|&)tnid=", u.query, re.I):
+        return f"{u.scheme}://{u.netloc}{u.path}"
+    return href
+
+
 RELIABLE_ID = re.compile(r"^(?:\d{4}_[A-Za-z0-9]+_\d+_\d+|\d{6,8})$")    # a GePNIC tender id, or a 6-8 digit tender number
 
 
@@ -102,11 +120,14 @@ def parse_page(html: str) -> Tuple[Optional[int], List[Dict]]:
     head = [COLUMNS.get(_norm(c.get_text(" ")).lower(), "") for c in trs[0].find_all(["th", "td"])] if trs else []
     if "cell" not in head or "org" not in head:
         return total, rows
+    cell_at = head.index("cell")
     for tr in trs[1:]:
-        cells = [_norm(c.get_text(" ")) for c in tr.find_all("td")]
+        tds = tr.find_all("td")
+        cells = [_norm(c.get_text(" ")) for c in tds]
         if len(cells) < len(head) - 1:
             continue
         d = dict(zip(head, cells))
+        anchor = tds[cell_at].find("a", href=True) if cell_at < len(tds) else None
         title, ref, tid = split_cell(d["cell"])
         org = d.get("org") or "Unspecified organisation"
         corr = d.get("corrigendum")
@@ -115,7 +136,7 @@ def parse_page(html: str) -> Tuple[Optional[int], List[Dict]]:
             "id": row_id(tid, ref, org, pub, title), "ref": ref, "title": title or ref, "department": org, "chain": org,
             "pub": pub, "open": parse_dt(d.get("open")), "close": parse_dt(d.get("close")),
             "corrigendum": None if not corr or corr.upper() == "N/A" else corr,
-            "gem_report": d.get("gem_report") or None,
+            "gem_report": d.get("gem_report") or None, "link": portal_link(anchor["href"]) if anchor else None,
         })
     return total, rows
 

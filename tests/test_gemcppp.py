@@ -73,6 +73,7 @@ def test_the_central_page_is_read_into_rows():
     assert first["title"] == "Provision of Pre-cooling cum Battery charging Points at Siwan & Mau stations."
     assert first["pub"] == "2026-10-14T18:10" and first["open"] == "2026-10-14T18:10" and first["close"] == "2026-11-06T14:30"
     assert first["corrigendum"] is None and first["gem_report"] is None
+    assert first["link"] == "https://www.ireps.gov.in/ireps/works/pdfdocs/112026/92749798/viewNitPdf_5584942.pdf"   # kept whole: a notice PDF
     assert {r["department"] for r in rows} == {RAIL} and len({r["id"] for r in rows}) == 10
 
 
@@ -86,6 +87,8 @@ def test_the_state_page_carries_gepnic_ids_and_no_report_columns():
     assert total == 4918 and len(rows) == 10
     assert rows[0]["id"] == "2026_PRD_5080689_1" and rows[0]["department"] == "PANCHAYAT AND RURAL DEVELOPMENT"
     assert all(r["id"].startswith("2026_") for r in rows)
+    assert rows[0]["link"] == "https://tenders.wb.gov.in/nicgep/app"                       # GePNIC detail address cut back to the portal
+    assert all(r["link"].endswith("/nicgep/app") for r in rows)
 
 
 def test_a_page_without_the_table_has_no_rows():
@@ -199,3 +202,12 @@ def test_the_runner_dispatches_gemcppp_sources_to_this_crawler():
     assert run.CRAWLERS["gemcppp"] is G.crawl_source
     with pytest.raises(engine.DetailFailed):
         G.GemCpppPortal(mock.Mock(), BASE).fetch_detail({}, {})
+
+
+def test_a_tender_link_is_kept_unless_it_is_a_session_bound_gepnic_address():
+    assert G.portal_link("https://www.ireps.gov.in/ireps/supply/pdfdocs/102026/1/viewNitPdf_5.pdf").endswith("viewNitPdf_5.pdf")
+    assert G.portal_link("http://www.ntpctender.com/") == "http://www.ntpctender.com/"
+    assert G.portal_link("https://x.gov.in/nicgep/app?page=FrontEndTenderDetailsExternal&service=page&tnid=77") == "https://x.gov.in/nicgep/app"
+    assert G.portal_link("https://x.gov.in/eprocure/app?TNID=1&a=2") == "https://x.gov.in/eprocure/app"
+    for bad in (None, "", "javascript:alert(1)", "ftp://x/y", "/relative/path", "https://x.in/" + "a" * 300):
+        assert G.portal_link(bad) is None

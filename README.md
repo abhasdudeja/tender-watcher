@@ -503,6 +503,17 @@ page, raw. (`value` is absent when the portal says `NA`/`0`.)
   fetching and per-portal parallelism, both of which are in place.
 - Very large sources: an organisation file over ~50k rows should be split further (e.g. by publish year).
 - Corrigenda: GePNIC has a *Latest Corrigendums* list; attach to tenders by ID.
+- GeM CPPP details: the two GeM sources (`gemcppp`, `gemcppp-state`) are listing-only (title, reference, organisation and
+  dates; no value, EMD, category or location), and about 22,500 central and 840 state tenders exist only there. Probed
+  on 2026-10-19 (600 rows): every title links to the tender on its original portal, but those links are not usable for
+  detail fetching. About 97% of the central list is Indian Railways, whose link is the tender notice PDF on
+  `www.ireps.gov.in` (a document: the crawler does not download documents, and a PDF has no fixed fields). The
+  state list and the other central links are GePNIC `FrontEndTenderDetailsExternal&tnid=` pages that answer
+  "Unauthorized Page" without the portal's own session (so they can only be read through the organisation listing,
+  as the native sources do). What is possible: keep the link in the record (about +2.5 MB of index for the central list)
+  and use it for *Open portal* / *Open notice*; or add a source for an uncovered portal (state-only GeM tenders are
+  mostly West Bengal organisations). `fetch_details` is `true` for both sources, but their adapter ignores it. The
+  status page's *Details stored* column shows a dash for them.
 - Alerts: a saved search → email/Telegram on new matches (another scheduled workflow).
 
 ## Being a good citizen

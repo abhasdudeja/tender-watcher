@@ -237,3 +237,11 @@ def test_manifest_counts_listed_tenders_that_have_their_details(tmp_path):
     listing_only = {"t": {"A": {"id": "A", "source": "t", "title": "x", "org": "O", "active": True}}}
     m = index.build_index(listing_only, [src], tmp_path)                               # fetch_details on, but no detail page ever stored
     assert "with_details" not in m["sources"][0]
+
+
+def test_a_tenders_own_link_goes_into_its_row_as_u(tmp_path):
+    stores = {"t": {"A": {"id": "A", "source": "t", "title": "x", "org": "O", "active": True, "link": "https://p.gov.in/n.pdf"},
+                    "B": {"id": "B", "source": "t", "title": "y", "org": "O", "active": True}}}
+    m = index.build_index(stores, SRC, tmp_path)
+    live = _load(tmp_path, m, "live")
+    assert live["A"]["u"] == "https://p.gov.in/n.pdf" and "u" not in live["B"]

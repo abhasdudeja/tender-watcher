@@ -75,14 +75,19 @@
   const hay = (t) => t._hay || (t._hay = norm([t.t, t.o, t.c, t.r, t.id, t.k, t.pc, t.l, t.a, t.z].join(" | ")));
 
   function portalLinks(t) {
+    // the tender's own address on its portal (t.u: GeM lists give a railway notice PDF, or the portal's application address)
+    if (t.u && /^https?:\/\//i.test(t.u)) {
+      const pdf = /\.pdf(\?|$)/i.test(t.u);
+      return { home: t.u, label: pdf ? "Open notice (PDF)" : "Open portal", pdf, hint: /\/app$/.test(t.u) ? "Paste the Tender ID in the portal's search box" : "" };
+    }
     const src = sources[t.s] || {};
     const base = src.base_url || "#";
     if (src.type === "gepnic") {
       // GePNIC deep links expire with the session; land on the portal home, which has
       // a "Search with ID/Title/Reference no" box. We copy the ID for the user.
-      return { home: base.replace(/\/app.*$/, "/app"), hint: "Paste the Tender ID in the portal's search box" };
+      return { home: base.replace(/\/app.*$/, "/app"), label: "Open portal", hint: "Paste the Tender ID in the portal's search box" };
     }
-    return { home: base, hint: "" };
+    return { home: base, label: "Open portal", hint: "" };
   }
 
   // ---------- URL state ----------
@@ -367,7 +372,7 @@
         ${t.v != null ? `<span class="val">${fmtINR(t.v)}${t.e != null ? " · EMD " + fmtINR(t.e) : ""}</span>` : ""}
       </div>
       <div class="actions">
-        ${gone ? "" : `<a class="btn primary" href="${esc(links.home)}" target="_blank" rel="noopener" data-copy="${esc(t.id)}">Open portal ↗</a>`}
+        ${gone ? "" : `<a class="btn primary" href="${esc(links.home)}" target="_blank" rel="noopener"${links.pdf ? "" : ` data-copy="${esc(t.id)}"`}>${esc(links.label)} ↗</a>`}
         <button data-copy="${esc(t.id)}">Copy Tender ID</button>
         <button data-share title="Send a link to this tender to a colleague">Share</button>
         <span class="id">${esc(t.id)}${t.r ? " · Ref " + esc(t.r) : ""}</span>
