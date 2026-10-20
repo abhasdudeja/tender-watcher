@@ -1,23 +1,23 @@
 {
  "slug": "andamannicobar",
  "name": "Andaman & Nicobar",
- "ok": true,
- "started": "2026-10-19T06:10:24Z",
- "orgs": 18,
- "orgs_skipped": 9,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-10-20T06:00:14Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 239,
- "new": 2,
+ "listed": 0,
+ "new": 0,
  "changed": 0,
  "details_failed": 0,
- "details_fetched": 2,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 1,
- "active": 239,
- "finished": "2026-10-19T06:10:37Z",
- "requests": 12
+ "errors": [
+  "organisation list: Failed to perform, curl: (28) Operation timed out after 40001 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-10-20T07:18:15Z",
+ "requests": 0
 }
