@@ -1,0 +1,49 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-21T05:54:17Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-10-21T05:55:58Z",
+     "kind": "503",
+     "since_prev_s": null,
+     "requests_since_prev": 4,
+     "pace_gap_s": 8.46,
+     "headers": {
+      "retry-after": "5"
+     },
+     "retry_after": 5.0,
+     "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>503 Backend fetch failed</title>\n  </head>\n  <body>\n    <h1>Error 503 Backend fetch failed</h1>\n    <p>Backend fetch failed</p>\n    <h3>Guru Meditation:</h3>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-21T05:56:07Z",
+     "kind": "503",
+     "since_prev_s": 8.7,
+     "requests_since_prev": 1,
+     "pace_gap_s": 9.72,
+     "headers": {
+      "retry-after": "5"
+     },
+     "retry_after": 5.0,
+     "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>503 Backend fetch failed</title>\n  </head>\n  <body>\n    <h1>Error 503 Backend fetch failed</h1>\n    <p>Backend fetch failed</p>\n    <h3>Guru Meditation:</h3>",
+     "spacing_s": 12.0
+    },
+    {
+     "t": "2026-10-21T05:56:40Z",
+     "kind": "503",
+     "since_prev_s": 32.9,
+     "requests_since_prev": 2,
+     "pace_gap_s": 11.27,
+     "headers": {
+      "retry-after": "5"
+     },
+     "retry_after": 5.0,
+     "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>503 Backend fetch failed</title>\n  </head>\n  <body>\n    <h1>Error 503 Backend fetch failed</h1>\n    <p>Backend fetch failed</p>\n    <h3>Guru Meditation:</h3>",
+     "spacing_s": 12.0
+    }
+   ]
+  }
+ ]
+}

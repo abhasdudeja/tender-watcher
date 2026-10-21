@@ -2,7 +2,7 @@
  "slug": "gemcppp-state",
  "name": "GeM - CPPP tenders (state portals)",
  "ok": false,
- "started": "2026-10-19T06:10:18Z",
+ "started": "2026-10-21T05:54:17Z",
  "orgs": 0,
  "orgs_skipped": 0,
  "orgs_failed": 1,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [
-  "organisation list: Failed to perform, curl: (7) Failed to connect to gem.gov.in:443 after 8234 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+  "organisation list: HTTP 502"
  ],
- "finished": "2026-10-19T06:11:08Z",
- "requests": 0
+ "finished": "2026-10-21T05:57:32Z",
+ "requests": 12
 }
