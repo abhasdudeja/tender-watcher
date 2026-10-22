@@ -113,30 +113,39 @@ jobs:
           pattern: data-*
           path: data-artifacts
 
-      - name: Assemble data
-        run: |
-          mkdir -p data/_legacy
-          for d in data-artifacts/data-*; do
-            [ -d "$d" ] || continue
-            slug="${d#data-artifacts/data-}"
-            rm -rf "data/$slug"
-            cp -r "$d" "data/$slug"
-            # a verified migration moved the old JSONL aside inside the crawl job; mirror that here
-            if [ -f "data/$slug.jsonl" ]; then mv "data/$slug.jsonl" "data/_legacy/$slug.jsonl"; fi
-          done
-
-      - name: Rebuild site index
-        run: python -m crawler.run --index-only
-
-      - name: Commit data
+      - name: Assemble data, rebuild the index and push
         run: |
           git config user.name  "tenderwatch-bot"
           git config user.email "tenderwatch-bot@users.noreply.github.com"
-          git add data docs/data
-          if git diff --cached --quiet; then
-            echo "no changes"
-          else
+          # The crawl jobs take a while, and the maintainer's laptop (local crawl of the sources GitHub cannot reach)
+          # may push meanwhile, which makes a plain push fail ("fetch first"). So every attempt starts again from the
+          # newest master: this run's data from the artifacts goes on top of it, the index is rebuilt from the result,
+          # and the push is retried (the crawl itself is not repeated).
+          for attempt in 1 2 3 4 5; do
+            git fetch origin master
+            git reset --hard origin/master
+            mkdir -p data/_legacy
+            for d in data-artifacts/data-*; do
+              [ -d "$d" ] || continue
+              slug="${d#data-artifacts/data-}"
+              rm -rf "data/$slug"
+              cp -r "$d" "data/$slug"
+              # a verified migration moved the old JSONL aside inside the crawl job; mirror that here
+              if [ -f "data/$slug.jsonl" ]; then mv "data/$slug.jsonl" "data/_legacy/$slug.jsonl"; fi
+            done
+            python -m crawler.run --index-only
+            git add data docs/data
+            if git diff --cached --quiet; then
+              echo "no changes"
+              exit 0
+            fi
             ACTIVE=$(python -c "import json;print(sum(s['active'] for s in json.load(open('docs/data/index.json'))['sources']))")
             git commit -m "crawl: $(date -u +%Y-%m-%dT%H:%MZ) - $ACTIVE active tenders"
-            git push
-          fi
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected (attempt $attempt of 5): origin moved; starting again from the newest master"
+            sleep $((attempt * 5))
+          done
+          echo "could not push after 5 attempts"
+          exit 1
