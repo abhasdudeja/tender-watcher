@@ -1,0 +1,35 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-23T20:02:05Z",
+   "recoveries_s": [
+    180
+   ],
+   "events": [
+    {
+     "t": "2026-10-23T20:16:43Z",
+     "kind": "wait",
+     "what": "Panchayati Raj Department: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-23T20:19:59Z",
+     "kind": "wait",
+     "what": "Panchayati Raj Department: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-23T20:24:23Z",
+     "kind": "recovered",
+     "what": "Panchayati Raj Department: details",
+     "waited_s": 180,
+     "attempts": 2
+    }
+   ]
+  }
+ ]
+}
