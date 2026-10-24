@@ -2,24 +2,24 @@
  "slug": "uttarpradesh",
  "name": "Uttar Pradesh",
  "ok": true,
- "started": "2026-10-23T20:02:05Z",
- "orgs": 136,
- "orgs_skipped": 67,
+ "started": "2026-10-24T18:55:22Z",
+ "orgs": 134,
+ "orgs_skipped": 40,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
- "listed": 10201,
- "new": 728,
- "changed": 204,
+ "listed": 10450,
+ "new": 1455,
+ "changed": 91,
  "details_failed": 0,
- "details_fetched": 932,
- "throttled": 2,
+ "details_fetched": 1546,
+ "throttled": 3,
  "throttle_recoveries": [
-  180
+  420
  ],
  "gave_up": false,
  "errors": [],
- "deactivated": 690,
- "active": 10201,
- "finished": "2026-10-23T20:30:21Z",
- "requests": 1002
+ "deactivated": 1209,
+ "active": 10450,
+ "finished": "2026-10-24T19:37:35Z",
+ "requests": 1641
 }
