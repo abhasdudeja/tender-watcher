@@ -1,0 +1,23 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-25T19:10:47Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-10-25T19:15:32Z",
+     "kind": "503",
+     "since_prev_s": null,
+     "requests_since_prev": 30,
+     "pace_gap_s": 1.2,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>In case of any difficulties, while accessing the portal, Users are advised to close the existing browser window and reopen the new browser window afresh for accessing the portal.</b>",
+     "spacing_s": 1.8
+    }
+   ]
+  }
+ ]
+}

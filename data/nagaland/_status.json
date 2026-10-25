@@ -2,9 +2,9 @@
  "slug": "nagaland",
  "name": "Nagaland",
  "ok": true,
- "started": "2026-10-24T18:55:21Z",
+ "started": "2026-10-25T19:12:04Z",
  "orgs": 4,
- "orgs_skipped": 1,
+ "orgs_skipped": 3,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 5,
@@ -18,6 +18,6 @@
  "errors": [],
  "deactivated": 0,
  "active": 5,
- "finished": "2026-10-24T18:55:24Z",
- "requests": 4
+ "finished": "2026-10-25T19:12:06Z",
+ "requests": 2
 }
