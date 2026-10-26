@@ -22,6 +22,29 @@
      "attempts": 1
     }
    ]
+  },
+  {
+   "started": "2026-10-26T21:08:14Z",
+   "recoveries_s": [
+    60
+   ],
+   "events": [
+    {
+     "t": "2026-10-26T21:10:31Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-26T21:11:33Z",
+     "kind": "recovered",
+     "what": "organisation list",
+     "waited_s": 60,
+     "attempts": 1
+    }
+   ]
   }
  ]
 }
