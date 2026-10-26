@@ -42,6 +42,26 @@
      "attempts": 1
     }
    ]
+  },
+  {
+   "started": "2026-10-26T05:17:49Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-10-26T05:25:01Z",
+     "kind": "429",
+     "since_prev_s": null,
+     "requests_since_prev": 199,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
+    }
+   ]
   }
  ]
 }
