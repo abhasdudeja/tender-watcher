@@ -1,0 +1,35 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-27T20:53:30Z",
+   "recoveries_s": [
+    180
+   ],
+   "events": [
+    {
+     "t": "2026-10-27T20:58:23Z",
+     "kind": "wait",
+     "what": "MINES & Geology Department: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-27T20:59:59Z",
+     "kind": "wait",
+     "what": "MINES & Geology Department: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-27T21:02:07Z",
+     "kind": "recovered",
+     "what": "MINES & Geology Department: details",
+     "waited_s": 180,
+     "attempts": 2
+    }
+   ]
+  }
+ ]
+}

@@ -2,24 +2,24 @@
  "slug": "kerala",
  "name": "Kerala eTenders",
  "ok": true,
- "started": "2026-10-26T21:08:14Z",
- "orgs": 119,
- "orgs_skipped": 12,
+ "started": "2026-10-27T20:50:59Z",
+ "orgs": 122,
+ "orgs_skipped": 50,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
- "listed": 5407,
- "new": 870,
- "changed": 121,
+ "listed": 5692,
+ "new": 838,
+ "changed": 87,
  "details_failed": 0,
- "details_fetched": 1070,
- "throttled": 1,
+ "details_fetched": 949,
+ "throttled": 2,
  "throttle_recoveries": [
-  60
+  180
  ],
  "gave_up": false,
  "errors": [],
- "deactivated": 1022,
- "active": 5407,
- "finished": "2026-10-26T21:33:12Z",
- "requests": 1178
+ "deactivated": 613,
+ "active": 5692,
+ "finished": "2026-10-27T21:17:35Z",
+ "requests": 1022
 }
