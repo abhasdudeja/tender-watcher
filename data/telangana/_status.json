@@ -1,23 +1,23 @@
 {
  "slug": "telangana",
  "name": "Telangana",
- "ok": false,
- "started": "2026-10-27T20:51:47Z",
- "orgs": 0,
+ "ok": true,
+ "started": "2026-10-28T21:15:07Z",
+ "orgs": 66,
  "orgs_skipped": 0,
- "orgs_failed": 1,
+ "orgs_failed": 0,
  "orgs_unreachable": 0,
- "listed": 0,
- "new": 0,
- "changed": 0,
+ "listed": 2135,
+ "new": 498,
+ "changed": 132,
  "details_failed": 0,
- "details_fetched": 0,
+ "details_fetched": 630,
  "throttled": 0,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [
-  "organisation list: HTTP 502"
- ],
- "finished": "2026-10-27T20:52:04Z",
- "requests": 3
+ "errors": [],
+ "deactivated": 325,
+ "active": 2135,
+ "finished": "2026-10-28T21:26:03Z",
+ "requests": 654
 }
