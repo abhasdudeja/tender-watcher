@@ -369,6 +369,12 @@ from the listing only); *Listed*, *New* and *Details fetched* describe the last 
 normally far below *Active*: a crawl opens a detail page only for new or changed tenders (or details older than
 `detail_max_age_days`, 14 by default).
 
+**Searching.** The list opens on *New* (published in the last 2 days), a capped sample of the newest 2,000 rows. Typing
+two or more characters of search words widens the view to *All tenders* by itself (the notice above the list says
+so, with an *Only new tenders* button to stay inside the view), and clearing the words returns to the view it came from.
+Choosing a view button yourself keeps the search inside that view; a notice then says what is being searched and
+offers *Search all tenders*. The whole index is about 6 MB gzipped (41 MB raw), fetched in pieces and cached.
+
 The Tenders tab loads `orgs.json`, paints a preset, and fetches chunks only when a view needs
 them: an organisation's files, a source's live chunks, or every live chunk for *All tenders* or a search
 (with a loading percentage). Closed chunks load only when *Show closed* is on. Search is client-side over
@@ -474,6 +480,7 @@ Visits are counted against the page path only (not `?q=...`). Events have fixed 
 | `map/metric/active`, `map/metric/new`, `map/metric/closing` | the map's number toggle |
 | `map/style/map`, `map/style/tiles` | the Map / Tiles switch |
 | `tab/map`, `tab/tenders` | the Map / Tenders tabs (also fired by a click on a state) |
+| `search/all` | typing words in New / Closing soon widened the view to all tenders |
 | `share/tender` | the Share button on a tender (the system share sheet or a copied link) |
 | `share/open` | a shared-tender link was opened |
 | `search` | the search box used, once per page load |

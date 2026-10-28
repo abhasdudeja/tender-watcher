@@ -22,7 +22,7 @@ def test_events_never_carry_typed_text():
     calls = re.findall(r"track\(([^)]*)\)", APP)
     assert calls                                                    # the hooks are still there
     allowed = ('"search"', '"view/" + v', '"map/state/" + k', '"map/metric/" + metric', '"map/style/" + style',
-               '"tab/" + t', '"tab/" + to', '"source/" + els.source.value', '"share/tender"', '"share/open"')
+               '"tab/" + t', '"tab/" + to', '"source/" + els.source.value', '"share/tender"', '"share/open"', '"search/all"')
     for c in calls:
         if c == "name":                                             # the const track = (name) => ... definition
             continue

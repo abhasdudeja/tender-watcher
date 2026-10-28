@@ -324,13 +324,30 @@
   // In New / Closing soon only that preset is searched; offer the full search when it comes up (nearly) empty.
   // A capped preset file also gets a button that widens the view to every matching tender (loads the chunks).
   function renderHint(pending, narrowed) {
+    if (lazy && view === "all" && widenedFrom && els.q.value.trim()) {     // the words widened the view: say so, offer the way back
+      const only = widenedFrom === "new" ? "new tenders" : "tenders closing soon";
+      els.hint.hidden = false;
+      els.hint.classList.add("searching");
+      els.hint.innerHTML = `<strong>Searching all tenders, not only ${only}.</strong> <button type="button" data-narrow>Only ${only}</button>`;
+      return;
+    }
     const f = presetFlags();
     const few = lazy && view !== "all" && !pending && narrowed && filtered.length < 5;
     const capped = lazy && view !== "all" && f.sample && !pending;
-    els.hint.hidden = !(few || capped);
+    const searching = lazy && view !== "all" && !!els.q.value.trim();    // typed words in New / Closing soon only look through that view
+    els.hint.hidden = !(few || capped || searching);
+    els.hint.classList.toggle("searching", searching);
     if (els.hint.hidden) return;
     const days = view === "new" ? `published in the last ${plural(presetDays("new"), "day")}` : `closing in the next ${plural(presetDays("closing"), "day")}`;
     let h = "";
+    if (searching) {
+      // the banner replaces the two shorter hints: say plainly what the words are matched against, and offer the way out
+      const scope = f.sample ? `the ${view === "new" ? "newest" : "soonest-closing"} ${fmtN(P[view].rows)} of ${fmtN(P[view].truncated)} tenders ${days}` : `tenders ${days}`;
+      h = `<strong>Searching only ${scope}.</strong> <button type="button" data-all>Search all tenders</button>`;
+      if (f.sample && !pending) h += ` <button type="button" data-full>Search all ${fmtN(P[view].truncated)} ${view === "new" ? "new" : "closing"}</button>`;
+      els.hint.innerHTML = h;
+      return;
+    }
     if (capped) h += `<span>Only the ${view === "new" ? "newest" : "soonest-closing"} ${fmtN(P[view].rows)} are listed.</span> <button type="button" data-full>Show all ${fmtN(P[view].truncated)}</button> `;
     if (few) h += `<span>Only searching tenders ${days}.</span> <button type="button" data-all>Search all tenders</button>`;
     els.hint.innerHTML = h;
@@ -590,9 +607,27 @@
       b.classList.toggle("active", k === view);
     }
   }
-  function setView(v) {
+  // Typing words in New / Closing soon searches every live tender, so nobody has to know that view is narrow: the first
+  // words (two or more characters) widen the view to All tenders, and clearing them returns to the view it came from.
+  // "Only new tenders" in the notice, or a click on a view button, keeps the search inside that view instead.
+  let widenedFrom = null;   // the view a search widened to All tenders
+  let narrowWords = false;  // the visitor chose to search inside New / Closing soon: typing does not widen again
+  function wordsChanged() {
+    if (!lazy) return;
+    const words = els.q.value.trim();
+    if (words.length >= 2) {
+      if (view !== "all" && !narrowWords) { widenedFrom = view; setView("all", true); }
+    } else if (!words) {
+      narrowWords = false;
+      const back = widenedFrom;
+      widenedFrom = null;
+      if (back && view === "all") setView(back, true);
+    }
+  }
+  function setView(v, auto) {
     if (v === view) return;
-    track("view/" + v);
+    if (auto) { if (v === "all") track("search/all"); }
+    else { track("view/" + v); widenedFrom = null; narrowWords = v !== "all" && !!els.q.value.trim(); }
     view = v; fullScope = false;
     updateViewButtons();
     rebuildOptions();
@@ -1030,6 +1065,7 @@
   let searched = false;   // count "a search was used" once per page load, not once per keystroke
   els.q.addEventListener("input", () => {
     if (!searched && els.q.value.trim()) { searched = true; track("search"); }
+    wordsChanged();
     clearTimeout(timer); timer = setTimeout(apply, 120);
   });
   for (const k of ["cat", "close", "value", "sort"]) els[k].addEventListener("change", apply);
@@ -1067,11 +1103,13 @@
   });
   els.views.addEventListener("click", (e) => { const b = e.target.closest("button[data-view]"); if (b) setView(b.dataset.view); });
   els.hint.addEventListener("click", (e) => {
-    if (e.target.closest("button[data-all]")) setView("all");
+    if (e.target.closest("button[data-narrow]")) setView(widenedFrom || "new");
+    else if (e.target.closest("button[data-all]")) setView("all");
     else if (e.target.closest("button[data-full]")) { fullScope = true; ensureLoaded(); apply(); }
   });
   els.clear.addEventListener("click", () => {
-    els.q.value = ""; for (const k of ["source", "org", "cat", "close", "value"]) els[k].value = "";
+    els.q.value = ""; wordsChanged();
+    for (const k of ["source", "org", "cat", "close", "value"]) els[k].value = "";
     newOnly = false; els.isNew.classList.remove("active"); els.isNew.setAttribute("aria-pressed", "false");
     showClosed = false; els.closed.classList.remove("active"); els.closed.setAttribute("aria-pressed", "false");
     if (lazy) { updateViewButtons(); rebuildOptions(); }
