@@ -559,3 +559,14 @@ sources:
     fetch_details: true
     refresh_after_hours: 12
     delay_seconds: 1.0
+
+  - slug: lakshadweep
+    name: Lakshadweep
+    state: IN-LD
+    type: gepnic
+    base_url: https://tendersutl.gov.in/nicgep/app
+    enabled: true
+    ignore_robots: false
+    fetch_details: true
+    refresh_after_hours: 12
+    delay_seconds: 1.0
