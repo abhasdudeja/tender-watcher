@@ -2,13 +2,13 @@
  "slug": "delhi",
  "name": "NCT of Delhi",
  "ok": true,
- "started": "2026-10-29T21:21:10Z",
- "orgs": 21,
+ "started": "2026-10-30T20:58:36Z",
+ "orgs": 20,
  "orgs_skipped": 6,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
- "listed": 473,
- "new": 65,
+ "listed": 482,
+ "new": 75,
  "changed": 4,
  "details_failed": 0,
  "details_fetched": 79,
@@ -17,7 +17,7 @@
  "gave_up": false,
  "errors": [],
  "deactivated": 66,
- "active": 473,
- "finished": "2026-10-29T21:22:48Z",
- "requests": 95
+ "active": 482,
+ "finished": "2026-10-30T21:00:10Z",
+ "requests": 94
 }

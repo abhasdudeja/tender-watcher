@@ -69,6 +69,29 @@
      "attempts": 3
     }
    ]
+  },
+  {
+   "started": "2026-10-30T20:58:35Z",
+   "recoveries_s": [
+    60
+   ],
+   "events": [
+    {
+     "t": "2026-10-30T21:11:56Z",
+     "kind": "wait",
+     "what": "Directorate of Local Bodies UP: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-30T21:14:53Z",
+     "kind": "recovered",
+     "what": "Directorate of Local Bodies UP: details",
+     "waited_s": 60,
+     "attempts": 1
+    }
+   ]
   }
  ]
 }

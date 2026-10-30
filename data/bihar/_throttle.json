@@ -30,6 +30,25 @@
      "attempts": 2
     }
    ]
+  },
+  {
+   "started": "2026-10-30T20:58:35Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-10-30T20:59:04Z",
+     "kind": "503",
+     "since_prev_s": null,
+     "requests_since_prev": 27,
+     "pace_gap_s": 1.14,
+     "headers": {
+      "server": "Apache/2.4.37 (Red Hat Enterprise Linux) OpenSSL/1.1.1k mod_jk/1.2.48"
+     },
+     "retry_after": null,
+     "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>503 Service Unavailable</title>\n</head><body>\n<h1>Service Unavailable</h1>\n<p>The server is temporarily unable to service your\nre",
+     "spacing_s": 1.7
+    }
+   ]
   }
  ]
 }

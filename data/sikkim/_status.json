@@ -2,7 +2,7 @@
  "slug": "sikkim",
  "name": "Sikkin",
  "ok": true,
- "started": "2026-10-29T21:18:32Z",
+ "started": "2026-10-30T20:58:35Z",
  "orgs": 4,
  "orgs_skipped": 2,
  "orgs_failed": 0,
@@ -11,13 +11,13 @@
  "new": 0,
  "changed": 0,
  "details_failed": 0,
- "details_fetched": 1,
+ "details_fetched": 0,
  "throttled": 0,
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
  "deactivated": 0,
  "active": 8,
- "finished": "2026-10-29T21:18:36Z",
- "requests": 4
+ "finished": "2026-10-30T20:58:38Z",
+ "requests": 3
 }
