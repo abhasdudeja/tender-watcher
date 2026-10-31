@@ -1,0 +1,40 @@
+{
+ "runs": [
+  {
+   "started": "2026-10-31T20:10:59Z",
+   "recoveries_s": [
+    60
+   ],
+   "events": [
+    {
+     "t": "2026-10-31T20:12:20Z",
+     "kind": "503",
+     "since_prev_s": null,
+     "requests_since_prev": 51,
+     "pace_gap_s": 1.0,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 1.5
+    },
+    {
+     "t": "2026-10-31T20:13:55Z",
+     "kind": "wait",
+     "what": "Department of Sugar: detail 2026_TNCSF_708721_1",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-31T20:17:05Z",
+     "kind": "recovered",
+     "what": "Department of Sugar: detail 2026_TNCSF_708721_1",
+     "waited_s": 60,
+     "attempts": 1
+    }
+   ]
+  }
+ ]
+}

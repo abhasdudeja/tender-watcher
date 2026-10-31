@@ -61,6 +61,29 @@
      "attempts": 1
     }
    ]
+  },
+  {
+   "started": "2026-10-31T20:11:01Z",
+   "recoveries_s": [
+    60
+   ],
+   "events": [
+    {
+     "t": "2026-10-31T20:17:29Z",
+     "kind": "wait",
+     "what": "KOLKATA MUNICIPAL CORPORATION: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-31T20:18:52Z",
+     "kind": "recovered",
+     "what": "KOLKATA MUNICIPAL CORPORATION: details",
+     "waited_s": 60,
+     "attempts": 1
+    }
+   ]
   }
  ]
 }
