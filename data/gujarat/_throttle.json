@@ -1,29 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-10-15T07:01:39Z",
-   "recoveries_s": [
-    60
-   ],
-   "events": [
-    {
-     "t": "2026-10-15T07:31:23Z",
-     "kind": "wait",
-     "what": "Surat Municipal Corporation: details",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-15T07:33:05Z",
-     "kind": "recovered",
-     "what": "Surat Municipal Corporation: details",
-     "waited_s": 60,
-     "attempts": 1
-    }
-   ]
-  },
-  {
    "started": "2026-10-26T05:17:49Z",
    "recoveries_s": [],
    "events": [
@@ -60,6 +37,51 @@
      "retry_after": 60.0,
      "body": "Request limit exceeded. Please wait a moment and try again.",
      "spacing_s": 3.0
+    }
+   ]
+  },
+  {
+   "started": "2026-10-31T05:43:29Z",
+   "recoveries_s": [
+    60
+   ],
+   "events": [
+    {
+     "t": "2026-10-31T05:49:53Z",
+     "kind": "429",
+     "since_prev_s": null,
+     "requests_since_prev": 176,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
+    },
+    {
+     "t": "2026-10-31T05:54:33Z",
+     "kind": "wait",
+     "what": "Paschim Gujarat Vij Company Limited",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-31T05:56:07Z",
+     "kind": "wait",
+     "what": "Porbandar Municipal Corporation",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-10-31T05:57:22Z",
+     "kind": "recovered",
+     "what": "Porbandar Municipal Corporation",
+     "waited_s": 60,
+     "attempts": 1
     }
    ]
   }
