@@ -2,9 +2,9 @@
  "slug": "pondicherry",
  "name": "Pondicherry",
  "ok": true,
- "started": "2026-10-31T20:11:00Z",
+ "started": "2026-11-01T20:43:31Z",
  "orgs": 8,
- "orgs_skipped": 8,
+ "orgs_skipped": 0,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 50,
@@ -18,6 +18,6 @@
  "errors": [],
  "deactivated": 0,
  "active": 50,
- "finished": "2026-10-31T20:11:02Z",
- "requests": 1
+ "finished": "2026-11-01T20:43:40Z",
+ "requests": 9
 }
