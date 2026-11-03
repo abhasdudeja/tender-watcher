@@ -2,12 +2,12 @@
  "slug": "meghalaya",
  "name": "Meghalaya",
  "ok": true,
- "started": "2026-11-02T23:39:31Z",
+ "started": "2026-11-03T21:54:12Z",
  "orgs": 5,
- "orgs_skipped": 5,
+ "orgs_skipped": 0,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
- "listed": 14,
+ "listed": 10,
  "new": 0,
  "changed": 0,
  "details_failed": 0,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
- "deactivated": 0,
- "active": 14,
- "finished": "2026-11-02T23:39:32Z",
- "requests": 1
+ "deactivated": 4,
+ "active": 10,
+ "finished": "2026-11-03T21:54:18Z",
+ "requests": 6
 }
