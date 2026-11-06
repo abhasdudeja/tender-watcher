@@ -1,29 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-10-11T23:35:54Z",
-   "recoveries_s": [
-    60
-   ],
-   "events": [
-    {
-     "t": "2026-10-11T23:38:10Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-11T23:39:13Z",
-     "kind": "recovered",
-     "what": "organisation list",
-     "waited_s": 60,
-     "attempts": 1
-    }
-   ]
-  },
-  {
    "started": "2026-10-26T21:08:14Z",
    "recoveries_s": [
     60
@@ -74,6 +51,71 @@
      "what": "organisation list",
      "waited_s": 180,
      "attempts": 2
+    }
+   ]
+  },
+  {
+   "started": "2026-11-06T21:43:43Z",
+   "recoveries_s": [
+    420
+   ],
+   "events": [
+    {
+     "t": "2026-11-06T21:56:55Z",
+     "kind": "wait",
+     "what": "Local Self Government Department: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-06T22:00:13Z",
+     "kind": "wait",
+     "what": "Local Self Government Department: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-06T22:04:30Z",
+     "kind": "wait",
+     "what": "Local Self Government Department: details",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-06T22:09:49Z",
+     "kind": "recovered",
+     "what": "Local Self Government Department: details",
+     "waited_s": 420,
+     "attempts": 3
+    },
+    {
+     "t": "2026-11-06T22:12:38Z",
+     "kind": "503",
+     "since_prev_s": null,
+     "requests_since_prev": 497,
+     "pace_gap_s": 1.0,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 1.5
+    },
+    {
+     "t": "2026-11-06T22:12:39Z",
+     "kind": "503",
+     "since_prev_s": 1.0,
+     "requests_since_prev": 1,
+     "pace_gap_s": 1.0,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 1.5
     }
    ]
   }
