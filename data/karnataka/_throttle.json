@@ -123,6 +123,68 @@
      "retry_after": null
     }
    ]
+  },
+  {
+   "started": "2026-11-10T00:21:57Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-11-10T00:29:35Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-10T00:37:30Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-10T00:46:27Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-10T00:57:22Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-10T01:12:19Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-10T01:34:18Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 6,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-10T01:56:17Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 7,
+     "retry_after": null
+    }
+   ]
   }
  ]
 }
