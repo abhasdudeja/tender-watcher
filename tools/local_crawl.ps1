@@ -56,11 +56,16 @@ if (Test-Path data\.crawl.lock) { Abort "data\.crawl.lock exists: a crawl is run
 if ((git rev-parse --abbrev-ref HEAD) -ne "master") { Abort "not on master" }
 $dirty = git status --porcelain
 if ($dirty) { Abort "working tree is not clean:`n$($dirty -join "`n")" }
-git fetch origin 2>$null
-if ($LASTEXITCODE -ne 0) { Abort "git fetch failed (offline? not logged in?)" }
+New-Item -ItemType Directory -Force logs | Out-Null
+$gitLog = "logs\git-sync.log"
+Write-Output "git fetch origin (verbose, logging to $gitLog)"
+"=== $(Get-Date -Format s) git fetch origin ===" | Add-Content $gitLog
+git fetch origin -v --progress 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
+if ($LASTEXITCODE -ne 0) { Abort "git fetch failed (offline? not logged in? see $gitLog)" }
+Write-Output "git fetch done: origin/master = $(git rev-parse --short origin/master)"
 if ([int](git rev-list --count "$remote..HEAD") -ne 0) { Abort "there are local commits that are not pushed yet" }
-git merge --ff-only $remote 2>$null | Out-Null
-if ($LASTEXITCODE -ne 0) { Abort "could not fast-forward to $remote" }
+git merge --ff-only $remote 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
+if ($LASTEXITCODE -ne 0) { Abort "could not fast-forward to $remote (see $gitLog)" }
 
 # ---- 2. crawl, then rebuild the index
 New-Item -ItemType Directory -Force logs | Out-Null
@@ -85,11 +90,12 @@ if ($NoPush) { Write-Output "DONE: committed locally (-NoPush)"; exit 0 }
 
 # ---- 4. push, re-applying our sources on top of a newer origin when needed
 for ($try = 1; $try -le $MaxPushTries; $try++) {
-  git push origin master 2>$null | Out-Null
+  "=== $(Get-Date -Format s) git push origin master (try $try) ===" | Add-Content $gitLog
+  git push origin master -v --progress 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
   if ($LASTEXITCODE -eq 0) { Write-Output "DONE: pushed ($(git log -1 --format='%h %s'))"; exit 0 }
   Write-Output "push attempt $try was rejected; origin has moved, re-applying our data on top"
-  git fetch origin 2>$null
-  if ($LASTEXITCODE -ne 0) { Abort "git fetch failed" }
+  git fetch origin -v --progress 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
+  if ($LASTEXITCODE -ne 0) { Abort "git fetch failed (see $gitLog)" }
   if ([int](git rev-list --count "$remote..HEAD") -ne 1 -or -not ((git log -1 --format=%s) -like "crawl (local)*")) {
     Abort "unexpected local history; not touching it"
   }
