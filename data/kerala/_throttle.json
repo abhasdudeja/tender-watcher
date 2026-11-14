@@ -1,29 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-10-26T21:08:14Z",
-   "recoveries_s": [
-    60
-   ],
-   "events": [
-    {
-     "t": "2026-10-26T21:10:31Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-26T21:11:33Z",
-     "kind": "recovered",
-     "what": "organisation list",
-     "waited_s": 60,
-     "attempts": 1
-    }
-   ]
-  },
-  {
    "started": "2026-10-27T20:50:59Z",
    "recoveries_s": [
     180
@@ -116,6 +93,68 @@
      "retry_after": null,
      "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
      "spacing_s": 1.5
+    }
+   ]
+  },
+  {
+   "started": "2026-11-13T22:05:02Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-11-13T22:07:19Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-13T22:10:34Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-13T22:14:49Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-13T22:21:04Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-13T22:31:19Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-13T22:48:34Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 6,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-13T23:05:49Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 7,
+     "retry_after": null
     }
    ]
   }

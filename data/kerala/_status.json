@@ -1,23 +1,23 @@
 {
  "slug": "kerala",
  "name": "Kerala eTenders",
- "ok": true,
- "started": "2026-11-12T22:23:07Z",
- "orgs": 155,
- "orgs_skipped": 22,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-11-13T22:05:02Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 7480,
- "new": 922,
- "changed": 244,
+ "listed": 0,
+ "new": 0,
+ "changed": 0,
  "details_failed": 0,
- "details_fetched": 1203,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 865,
- "active": 7480,
- "finished": "2026-11-12T22:46:39Z",
- "requests": 1337
+ "errors": [
+  "organisation list: Failed to perform, curl: (28) Operation timed out after 40001 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-11-13T23:23:04Z",
+ "requests": 0
 }
