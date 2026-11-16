@@ -1,26 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-10-30T05:33:14Z",
-   "recoveries_s": [],
-   "events": [
-    {
-     "t": "2026-10-30T05:41:39Z",
-     "kind": "429",
-     "since_prev_s": null,
-     "requests_since_prev": 225,
-     "pace_gap_s": 2.0,
-     "headers": {
-      "retry-after": "60",
-      "server": "(n)Code Server"
-     },
-     "retry_after": 60.0,
-     "body": "Request limit exceeded. Please wait a moment and try again.",
-     "spacing_s": 3.0
-    }
-   ]
-  },
-  {
    "started": "2026-10-31T05:43:29Z",
    "recoveries_s": [
     60
@@ -117,6 +97,96 @@
      "what": "Roads and Buildings: details",
      "waited_s": 1800,
      "attempts": 5
+    }
+   ]
+  },
+  {
+   "started": "2026-11-12T11:29:27Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-11-12T11:34:39Z",
+     "kind": "429",
+     "since_prev_s": null,
+     "requests_since_prev": 150,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
+    },
+    {
+     "t": "2026-11-12T11:53:04Z",
+     "kind": "429",
+     "since_prev_s": 1104.9,
+     "requests_since_prev": 448,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
+    },
+    {
+     "t": "2026-11-12T12:05:12Z",
+     "kind": "429",
+     "since_prev_s": 728.7,
+     "requests_since_prev": 264,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
+    },
+    {
+     "t": "2026-11-14T17:37:24Z",
+     "kind": "429",
+     "since_prev_s": 192734.7,
+     "requests_since_prev": 307,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
+    },
+    {
+     "t": "2026-11-14T17:53:41Z",
+     "kind": "429",
+     "since_prev_s": 977.3,
+     "requests_since_prev": 380,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
+    },
+    {
+     "t": "2026-11-14T18:11:13Z",
+     "kind": "429",
+     "since_prev_s": 1051.8,
+     "requests_since_prev": 417,
+     "pace_gap_s": 2.0,
+     "headers": {
+      "retry-after": "60",
+      "server": "(n)Code Server"
+     },
+     "retry_after": 60.0,
+     "body": "Request limit exceeded. Please wait a moment and try again.",
+     "spacing_s": 3.0
     }
    ]
   }

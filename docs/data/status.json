@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-15T23:06:53Z",
+ "updated": "2026-11-16T04:59:36Z",
  "sources": [
   {
    "slug": "andamannicobar",
@@ -304,24 +304,26 @@
    "slug": "gujarat",
    "name": "Gujarat eProcurement (nProcure)",
    "ok": true,
-   "started": "2026-11-05T06:29:18Z",
-   "orgs": 93,
-   "orgs_skipped": 7,
+   "started": "2026-11-12T11:29:27Z",
+   "orgs": 95,
+   "orgs_skipped": 0,
    "orgs_failed": 0,
    "orgs_unreachable": 4,
-   "listed": 3722,
-   "new": 380,
-   "changed": 102,
-   "details_failed": 0,
-   "details_fetched": 598,
+   "listed": 4175,
+   "new": 1238,
+   "changed": 772,
+   "details_failed": 1,
+   "details_fetched": 2438,
    "throttled": 0,
    "throttle_recoveries": [],
    "gave_up": false,
-   "errors": [],
-   "deactivated": 174,
-   "active": 3722,
-   "finished": "2026-11-05T07:01:47Z",
-   "requests": 692
+   "errors": [
+    "detail 363819: HostNotFound: Failed to perform, curl: (6) Could not resolve host: getcotender.nprocure.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+   ],
+   "deactivated": 785,
+   "active": 4175,
+   "finished": "2026-11-14T18:34:17Z",
+   "requests": 2551
   },
   {
    "slug": "haryana",
