@@ -31,12 +31,23 @@ $env:GIT_TERMINAL_PROMPT = "0"           # never wait for a password prompt
 $env:GCM_INTERACTIVE = "never"
 $py = Join-Path (Get-Location) ".venv\Scripts\python.exe"
 $remote = "origin/master"
+$gitLog = "logs\git-sync.log"
 
 function Abort($msg) { Write-Output "ABORT: $msg"; exit 1 }
 function Run-Index {
   & $py -X utf8 -m crawler.run --index-only | Out-Null
   if ($LASTEXITCODE -ne 0) { Abort "rebuilding the site index failed (exit $LASTEXITCODE)" }
 }
+function Git-Logged {
+  # Run git with stderr merged, append everything to $gitLog as UTF-8 (Tee-Object writes UTF-16 on Windows PowerShell 5.1,
+  # which garbled the log), echo it, and leave the result in $script:GitCode / $script:GitOut.
+  param([string[]]$GitArgs)
+  $lines = @(& git @GitArgs 2>&1 | ForEach-Object { "$_" })      # "$_" turns stderr ErrorRecords into plain text
+  $script:GitCode = $LASTEXITCODE
+  $script:GitOut = $lines -join "`n"
+  if ($lines) { $lines | Add-Content -Path $gitLog -Encoding UTF8; $lines | Out-Host }
+}
+function Last-GitError { (($script:GitOut -split "`n") | Where-Object { $_ -match "error:|fatal:|rejected|denied|failed|Could not|unable" } | Select-Object -Last 3) -join " | " }
 function Active-Total {
   $m = Get-Content docs\data\index.json -Raw -Encoding UTF8 | ConvertFrom-Json
   ($m.sources | Measure-Object -Property active -Sum).Sum
@@ -57,15 +68,14 @@ if ((git rev-parse --abbrev-ref HEAD) -ne "master") { Abort "not on master" }
 $dirty = git status --porcelain
 if ($dirty) { Abort "working tree is not clean:`n$($dirty -join "`n")" }
 New-Item -ItemType Directory -Force logs | Out-Null
-$gitLog = "logs\git-sync.log"
 Write-Output "git fetch origin (verbose, logging to $gitLog)"
-"=== $(Get-Date -Format s) git fetch origin ===" | Add-Content $gitLog
-git fetch origin -v --progress 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
-if ($LASTEXITCODE -ne 0) { Abort "git fetch failed (offline? not logged in? see $gitLog)" }
+"=== $(Get-Date -Format s) git fetch origin ===" | Add-Content $gitLog -Encoding UTF8
+Git-Logged @("fetch","origin","-v","--progress")
+if ($script:GitCode -ne 0) { Abort "git fetch failed (offline? not logged in? see $gitLog): $(Last-GitError)" }
 Write-Output "git fetch done: origin/master = $(git rev-parse --short origin/master)"
 if ([int](git rev-list --count "$remote..HEAD") -ne 0) { Abort "there are local commits that are not pushed yet" }
-git merge --ff-only $remote 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
-if ($LASTEXITCODE -ne 0) { Abort "could not fast-forward to $remote (see $gitLog)" }
+Git-Logged @("merge","--ff-only",$remote)
+if ($script:GitCode -ne 0) { Abort "could not fast-forward to $remote (see $gitLog): $(Last-GitError)" }
 
 # ---- 2. crawl, then rebuild the index
 New-Item -ItemType Directory -Force logs | Out-Null
@@ -90,12 +100,16 @@ if ($NoPush) { Write-Output "DONE: committed locally (-NoPush)"; exit 0 }
 
 # ---- 4. push, re-applying our sources on top of a newer origin when needed
 for ($try = 1; $try -le $MaxPushTries; $try++) {
-  "=== $(Get-Date -Format s) git push origin master (try $try) ===" | Add-Content $gitLog
-  git push origin master -v --progress 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
-  if ($LASTEXITCODE -eq 0) { Write-Output "DONE: pushed ($(git log -1 --format='%h %s'))"; exit 0 }
-  Write-Output "push attempt $try was rejected; origin has moved, re-applying our data on top"
-  git fetch origin -v --progress 2>&1 | Tee-Object -FilePath $gitLog -Append | Out-Host
-  if ($LASTEXITCODE -ne 0) { Abort "git fetch failed (see $gitLog)" }
+  "=== $(Get-Date -Format s) git push origin master (try $try) ===" | Add-Content $gitLog -Encoding UTF8
+  Git-Logged @("push","origin","master","-v","--progress")
+  if ($script:GitCode -eq 0) { Write-Output "DONE: pushed ($(git log -1 --format='%h %s'))"; exit 0 }
+  # Only a non-fast-forward rejection means "origin moved"; auth, network and permission errors must not be retried as such.
+  if ($script:GitOut -notmatch "non-fast-forward|fetch first|\[rejected\]|stale info") {
+    Abort "git push failed (our commit is still local; see $gitLog): $(Last-GitError)"
+  }
+  Write-Output "push attempt $try was rejected (non-fast-forward); origin has moved, re-applying our data on top"
+  Git-Logged @("fetch","origin","-v","--progress")
+  if ($script:GitCode -ne 0) { Abort "git fetch failed (see $gitLog): $(Last-GitError)" }
   if ([int](git rev-list --count "$remote..HEAD") -ne 1 -or -not ((git log -1 --format=%s) -like "crawl (local)*")) {
     Abort "unexpected local history; not touching it"
   }
