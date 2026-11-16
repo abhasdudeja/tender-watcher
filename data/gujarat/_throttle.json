@@ -1,51 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-10-31T05:43:29Z",
-   "recoveries_s": [
-    60
-   ],
-   "events": [
-    {
-     "t": "2026-10-31T05:49:53Z",
-     "kind": "429",
-     "since_prev_s": null,
-     "requests_since_prev": 176,
-     "pace_gap_s": 2.0,
-     "headers": {
-      "retry-after": "60",
-      "server": "(n)Code Server"
-     },
-     "retry_after": 60.0,
-     "body": "Request limit exceeded. Please wait a moment and try again.",
-     "spacing_s": 3.0
-    },
-    {
-     "t": "2026-10-31T05:54:33Z",
-     "kind": "wait",
-     "what": "Paschim Gujarat Vij Company Limited",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-31T05:56:07Z",
-     "kind": "wait",
-     "what": "Porbandar Municipal Corporation",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-31T05:57:22Z",
-     "kind": "recovered",
-     "what": "Porbandar Municipal Corporation",
-     "waited_s": 60,
-     "attempts": 1
-    }
-   ]
-  },
-  {
    "started": "2026-11-03T06:02:50Z",
    "recoveries_s": [
     1800
@@ -187,6 +142,213 @@
      "retry_after": 60.0,
      "body": "Request limit exceeded. Please wait a moment and try again.",
      "spacing_s": 3.0
+    }
+   ]
+  },
+  {
+   "started": "2026-11-16T06:46:17Z",
+   "recoveries_s": [
+    180,
+    420,
+    900,
+    1500
+   ],
+   "events": [
+    {
+     "t": "2026-11-16T07:00:51Z",
+     "kind": "wait",
+     "what": "Ahmedabad Municipal Corporation: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T07:05:38Z",
+     "kind": "wait",
+     "what": "Ahmedabad Municipal Corporation: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T07:09:03Z",
+     "kind": "recovered",
+     "what": "Ahmedabad Municipal Corporation: details",
+     "waited_s": 180,
+     "attempts": 2
+    },
+    {
+     "t": "2026-11-16T07:16:38Z",
+     "kind": "wait",
+     "what": "Dakshin Gujarat Vij Company Ltd. (DGVCL): details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T07:20:39Z",
+     "kind": "wait",
+     "what": "Dakshin Gujarat Vij Company Ltd. (DGVCL): details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T07:24:19Z",
+     "kind": "wait",
+     "what": "Dakshin Gujarat Vij Company Ltd. (DGVCL): details",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T07:28:54Z",
+     "kind": "recovered",
+     "what": "Dakshin Gujarat Vij Company Ltd. (DGVCL): details",
+     "waited_s": 420,
+     "attempts": 3
+    },
+    {
+     "t": "2026-11-16T08:12:16Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T08:15:31Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T08:19:47Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T08:26:02Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T08:35:19Z",
+     "kind": "recovered",
+     "what": "Roads and Buildings: details",
+     "waited_s": 900,
+     "attempts": 4
+    },
+    {
+     "t": "2026-11-16T08:38:34Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T08:41:28Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T08:46:01Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T08:54:08Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T09:04:26Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 600.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T09:16:44Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 600.0,
+     "attempt": 6,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T09:29:02Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 600.0,
+     "attempt": 7,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T09:46:57Z",
+     "kind": "wait",
+     "what": "Uttar Gujarat Vij Company Limited: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T09:50:14Z",
+     "kind": "wait",
+     "what": "Uttar Gujarat Vij Company Limited: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T09:54:32Z",
+     "kind": "wait",
+     "what": "Uttar Gujarat Vij Company Limited: details",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T10:00:50Z",
+     "kind": "wait",
+     "what": "Uttar Gujarat Vij Company Limited: details",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T10:11:07Z",
+     "kind": "wait",
+     "what": "Uttar Gujarat Vij Company Limited: details",
+     "wait_s": 600.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-16T10:22:27Z",
+     "kind": "recovered",
+     "what": "Uttar Gujarat Vij Company Limited: details",
+     "waited_s": 1500,
+     "attempts": 5
     }
    ]
   }
