@@ -1,61 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-11-03T06:02:50Z",
-   "recoveries_s": [
-    1800
-   ],
-   "events": [
-    {
-     "t": "2026-11-03T06:23:56Z",
-     "kind": "wait",
-     "what": "Roads and Buildings: details",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-03T06:27:14Z",
-     "kind": "wait",
-     "what": "Roads and Buildings: details",
-     "wait_s": 120.0,
-     "attempt": 2,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-03T06:32:08Z",
-     "kind": "wait",
-     "what": "Roads and Buildings: details",
-     "wait_s": 240.0,
-     "attempt": 3,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-03T06:37:56Z",
-     "kind": "wait",
-     "what": "Roads and Buildings: details",
-     "wait_s": 480.0,
-     "attempt": 4,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-03T06:48:13Z",
-     "kind": "wait",
-     "what": "Roads and Buildings: details",
-     "wait_s": 900.0,
-     "attempt": 5,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-03T07:06:37Z",
-     "kind": "recovered",
-     "what": "Roads and Buildings: details",
-     "waited_s": 1800,
-     "attempts": 5
-    }
-   ]
-  },
-  {
    "started": "2026-11-12T11:29:27Z",
    "recoveries_s": [],
    "events": [
@@ -347,6 +292,77 @@
      "t": "2026-11-16T10:22:27Z",
      "kind": "recovered",
      "what": "Uttar Gujarat Vij Company Limited: details",
+     "waited_s": 1500,
+     "attempts": 5
+    }
+   ]
+  },
+  {
+   "started": "2026-11-17T05:36:29Z",
+   "recoveries_s": [
+    60,
+    1500
+   ],
+   "events": [
+    {
+     "t": "2026-11-17T05:48:48Z",
+     "kind": "wait",
+     "what": "Gujarat Energy Transmission Corporation Limited: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-17T05:50:26Z",
+     "kind": "recovered",
+     "what": "Gujarat Energy Transmission Corporation Limited: details",
+     "waited_s": 60,
+     "attempts": 1
+    },
+    {
+     "t": "2026-11-17T06:14:57Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-17T06:18:13Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-17T06:22:28Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-17T06:28:43Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-17T06:38:59Z",
+     "kind": "wait",
+     "what": "Roads and Buildings: details",
+     "wait_s": 600.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-17T06:49:38Z",
+     "kind": "recovered",
+     "what": "Roads and Buildings: details",
      "waited_s": 1500,
      "attempts": 5
     }
