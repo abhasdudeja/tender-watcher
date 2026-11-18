@@ -413,7 +413,7 @@ Some portals refuse GitHub's cloud addresses: **Gujarat**, **Andhra Pradesh** an
 times out), the **Mizoram notice board** (HTTP 403) and the two **GeM CPPP lists** (`gem.gov.in`: the connection
 fails). They are set to `enabled: false` in `sources.yaml` (with a "local only" comment), so the Actions crawl skips them and keeps their last good data. `enabled: false` does not stop a
 local run: a source named with `--source` always runs. Crawl them from a machine on an Indian connection with
-`tools/local_crawl.ps1` (a scheduled task runs it daily at about 11:11; a plain `python -m crawler.run` skips disabled
+`tools/local_crawl.ps1` (a Windows Task Scheduler task named "TenderWatch local crawl" runs it daily at 11:11, without a Claude session; its output goes to `logs\scheduler.log`; a plain `python -m crawler.run` skips disabled
 sources, so name them: `--source gujarat --source andhrapradesh ...`). To move a source back to the cloud, set it to
 `enabled: true` and (optionally) remove it from the script's default list.
 
@@ -421,6 +421,11 @@ sources, so name them: `--source gujarat --source andhrapradesh ...`). To move a
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1                 # the six local-only sources
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\local_crawl.ps1 -Slugs sikkim -NoPush
 ```
+
+To follow a running crawl live (the crawler writes to `logs\local-crawl-<time>.log`, so a scheduled run shows nothing on screen),
+run `powershell -NoProfile -ExecutionPolicy Bypass -File tools\watch_crawl.ps1`: it redraws every few seconds with the lock and
+process state, the progress of each unfinished source, the crawler's log tail and the last lines of `logs\scheduler.log`. It only
+reads, and exits when no crawl is running (`-Every`, `-Lines`, `-Once`).
 
 It refuses to start unless the working tree is clean, you are on `master` and nothing is unpushed, then
 fast-forwards to `origin/master`, crawls the sources, rebuilds `docs/data/`, commits `data/` and `docs/data/`
