@@ -2,9 +2,9 @@
  "slug": "arunachalpradesh",
  "name": "Arunachal Pradesh",
  "ok": true,
- "started": "2026-11-17T00:23:49Z",
+ "started": "2026-11-17T23:40:03Z",
  "orgs": 4,
- "orgs_skipped": 3,
+ "orgs_skipped": 1,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 7,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
- "deactivated": 1,
+ "deactivated": 0,
  "active": 7,
- "finished": "2026-11-17T00:23:51Z",
- "requests": 2
+ "finished": "2026-11-17T23:40:07Z",
+ "requests": 4
 }
