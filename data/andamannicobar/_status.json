@@ -1,23 +1,25 @@
 {
  "slug": "andamannicobar",
  "name": "Andaman & Nicobar",
- "ok": true,
- "started": "2026-11-17T23:36:54Z",
- "orgs": 18,
- "orgs_skipped": 2,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-11-18T23:01:00Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 252,
- "new": 22,
- "changed": 13,
+ "listed": 0,
+ "new": 0,
+ "changed": 0,
  "details_failed": 0,
- "details_fetched": 43,
+ "details_fetched": 0,
  "throttled": 0,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 42,
+ "errors": [
+  "organisation list parsed empty"
+ ],
+ "deactivated": 0,
  "active": 252,
- "finished": "2026-11-17T23:37:54Z",
- "requests": 60
+ "finished": "2026-11-18T23:01:02Z",
+ "requests": 1
 }
