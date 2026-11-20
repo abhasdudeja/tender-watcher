@@ -1,45 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-10-15T05:53:43Z",
-   "recoveries_s": [
-    420
-   ],
-   "events": [
-    {
-     "t": "2026-10-15T06:00:55Z",
-     "kind": "wait",
-     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-15T06:05:16Z",
-     "kind": "wait",
-     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
-     "wait_s": 120.0,
-     "attempt": 2,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-15T06:09:32Z",
-     "kind": "wait",
-     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
-     "wait_s": 240.0,
-     "attempt": 3,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-15T06:14:02Z",
-     "kind": "recovered",
-     "what": "MUNICIPAL AFFAIRS DEPARTMENT: details",
-     "waited_s": 420,
-     "attempts": 3
-    }
-   ]
-  },
-  {
    "started": "2026-10-26T21:08:58Z",
    "recoveries_s": [
     60
@@ -82,6 +43,50 @@
      "what": "KOLKATA MUNICIPAL CORPORATION: details",
      "waited_s": 60,
      "attempts": 1
+    }
+   ]
+  },
+  {
+   "started": "2026-11-19T23:09:22Z",
+   "recoveries_s": [
+    180
+   ],
+   "events": [
+    {
+     "t": "2026-11-19T23:11:54Z",
+     "kind": "wait",
+     "what": "BURDWAN DEVELOPMENT AUTHORITY: details",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-19T23:14:50Z",
+     "kind": "503",
+     "since_prev_s": null,
+     "requests_since_prev": 13,
+     "pace_gap_s": 1.07,
+     "headers": {
+      "server": "Server"
+     },
+     "retry_after": null,
+     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
+     "spacing_s": 1.6
+    },
+    {
+     "t": "2026-11-19T23:15:10Z",
+     "kind": "wait",
+     "what": "BURDWAN DEVELOPMENT AUTHORITY: details",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-19T23:17:23Z",
+     "kind": "recovered",
+     "what": "BURDWAN DEVELOPMENT AUTHORITY: details",
+     "waited_s": 180,
+     "attempts": 2
     }
    ]
   }
