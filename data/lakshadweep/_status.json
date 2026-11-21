@@ -2,7 +2,7 @@
  "slug": "lakshadweep",
  "name": "Lakshadweep",
  "ok": true,
- "started": "2026-11-20T22:45:47Z",
+ "started": "2026-11-21T21:49:43Z",
  "orgs": 1,
  "orgs_skipped": 0,
  "orgs_failed": 0,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
- "deactivated": 2,
+ "deactivated": 0,
  "active": 20,
- "finished": "2026-11-20T22:45:51Z",
+ "finished": "2026-11-21T21:49:46Z",
  "requests": 3
 }
