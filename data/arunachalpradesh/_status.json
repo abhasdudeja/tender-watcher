@@ -1,23 +1,25 @@
 {
  "slug": "arunachalpradesh",
  "name": "Arunachal Pradesh",
- "ok": true,
- "started": "2026-11-19T23:12:22Z",
- "orgs": 4,
- "orgs_skipped": 1,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-11-20T22:47:47Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 11,
+ "listed": 0,
  "new": 0,
  "changed": 0,
  "details_failed": 0,
- "details_fetched": 1,
+ "details_fetched": 0,
  "throttled": 0,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
+ "errors": [
+  "organisation list parsed empty"
+ ],
  "deactivated": 0,
  "active": 11,
- "finished": "2026-11-19T23:12:33Z",
- "requests": 5
+ "finished": "2026-11-20T22:47:48Z",
+ "requests": 1
 }

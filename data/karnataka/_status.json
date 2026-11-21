@@ -2,7 +2,7 @@
  "slug": "karnataka",
  "name": "Karnataka",
  "ok": false,
- "started": "2026-11-19T23:10:24Z",
+ "started": "2026-11-20T22:46:30Z",
  "orgs": 0,
  "orgs_skipped": 0,
  "orgs_failed": 1,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [
-  "organisation list: Failed to perform, curl: (28) Failed to connect to kppp.karnataka.gov.in:443 after 133357 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+  "organisation list: Failed to perform, curl: (28) Failed to connect to kppp.karnataka.gov.in:443 after 133358 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
  ],
- "finished": "2026-11-20T01:06:42Z",
+ "finished": "2026-11-21T00:42:48Z",
  "requests": 0
 }
