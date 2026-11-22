@@ -2,9 +2,9 @@
  "slug": "dnhdd",
  "name": "DNH & DD",
  "ok": true,
- "started": "2026-11-21T21:50:56Z",
+ "started": "2026-11-22T21:57:52Z",
  "orgs": 1,
- "orgs_skipped": 0,
+ "orgs_skipped": 1,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 14,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
- "deactivated": 1,
+ "deactivated": 0,
  "active": 14,
- "finished": "2026-11-21T21:50:59Z",
- "requests": 2
+ "finished": "2026-11-22T21:57:55Z",
+ "requests": 1
 }

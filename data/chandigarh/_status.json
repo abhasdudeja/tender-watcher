@@ -2,9 +2,9 @@
  "slug": "chandigarh",
  "name": "Chandigarh",
  "ok": true,
- "started": "2026-11-21T21:48:18Z",
+ "started": "2026-11-22T21:56:39Z",
  "orgs": 5,
- "orgs_skipped": 5,
+ "orgs_skipped": 0,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 312,
@@ -18,6 +18,6 @@
  "errors": [],
  "deactivated": 0,
  "active": 312,
- "finished": "2026-11-21T21:48:20Z",
- "requests": 1
+ "finished": "2026-11-22T21:56:46Z",
+ "requests": 6
 }
