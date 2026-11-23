@@ -2,7 +2,7 @@
  "slug": "gemcppp-state",
  "name": "GeM - CPPP tenders (state portals)",
  "ok": true,
- "started": "2026-11-22T08:19:50Z",
+ "started": "2026-11-23T05:42:18Z",
  "orgs": 36,
  "orgs_skipped": 0,
  "orgs_failed": 0,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
- "deactivated": 11,
+ "deactivated": 0,
  "active": 154,
- "finished": "2026-11-22T08:20:14Z",
+ "finished": "2026-11-23T05:42:37Z",
  "requests": 16
 }
