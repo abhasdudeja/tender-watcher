@@ -1,13 +1,13 @@
 {
  "slug": "meghalaya",
  "name": "Meghalaya",
- "ok": true,
- "started": "2026-11-22T21:57:35Z",
- "orgs": 7,
+ "ok": false,
+ "started": "2026-11-24T03:00:05Z",
+ "orgs": 0,
  "orgs_skipped": 0,
- "orgs_failed": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 11,
+ "listed": 0,
  "new": 0,
  "changed": 0,
  "details_failed": 0,
@@ -15,9 +15,11 @@
  "throttled": 0,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
+ "errors": [
+  "organisation list parsed empty"
+ ],
  "deactivated": 0,
  "active": 11,
- "finished": "2026-11-22T21:57:43Z",
- "requests": 8
+ "finished": "2026-11-24T03:00:07Z",
+ "requests": 1
 }
