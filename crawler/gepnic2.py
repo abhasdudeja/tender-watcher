@@ -60,14 +60,22 @@ def _load(text: str):
     return json.loads(text) if text and text.strip() else {}
 
 
-def parse_org_list(text: str) -> List[str]:
-    """get-org-list -> organisation names (blank and duplicate names dropped, portal order kept)."""
-    names: List[str] = []
+def parse_org_list(text: str) -> List[Dict[str, str]]:
+    """get-org-list -> [{"name": tidied name, "query": the name exactly as the portal sent it}].
+
+    The org-wise call matches the name exactly, runs of spaces included (Andaman's
+    "Chief Engineer<22 spaces>Andaman Public Works Department (APWD)" finds nothing once tidied), so the
+    raw string is what gets sent; the tidied one is the organisation's name in our records, as before.
+    Blank and duplicate names are dropped and the portal's order is kept."""
+    orgs: List[Dict[str, str]] = []
+    seen = set()
     for o in (_load(text) or {}).get("dropdownList") or []:
-        name = _norm(o.get("stringValue"))
-        if name and name not in names:
-            names.append(name)
-    return names
+        raw = o.get("stringValue")
+        name = _norm(raw)
+        if name and name not in seen:
+            seen.add(name)
+            orgs.append({"name": name, "query": str(raw)})
+    return orgs
 
 
 def parse_org_tenders(text: str) -> Dict:
@@ -188,12 +196,14 @@ class Gepnic2Portal:
         return self.sess.post(self.api + path, data=json.dumps(body), headers=JSON_HEADERS, label=label)
 
     def list_orgs(self) -> List[Dict]:
+        """Every organisation the portal lists, with its tender count. The list only names organisations
+        with live tenders, so one whose tender list comes back empty is kept with count 0 and flagged:
+        walk_org then fails it, which keeps the run from closing that organisation's tenders on a bad answer."""
         orgs = []
-        for name in parse_org_list(self._post(ORG_LIST, {}, "orgs")):
-            page = parse_org_tenders(self._post(ORG_TENDERS, self._page_body(name, 0, True), "list"))
+        for o in parse_org_list(self._post(ORG_LIST, {}, "orgs")):
+            page = parse_org_tenders(self._post(ORG_TENDERS, self._page_body(o["query"], 0, True), "list"))
             count = page["total"] if page["total"] is not None else len(page["rows"])
-            if count:
-                orgs.append({"name": name, "count": count, "first_page": page["rows"]})
+            orgs.append(dict(o, count=count, first_page=page["rows"], empty=not page["rows"]))
         return orgs
 
     @staticmethod
@@ -201,9 +211,13 @@ class Gepnic2Portal:
         return {"org": org, "limit": PAGE, "offset": offset, "isCountRequest": count}
 
     def walk_org(self, org: Dict) -> Iterator[Dict]:
+        query = org.get("query", org["name"])
+        if org.get("empty"):
+            raise RuntimeError("listed by the portal, but its tender list came back empty "
+                               "(name mismatch or a portal fault); its stored tenders are kept")
         rows = org.get("first_page")
         if rows is None:
-            rows = parse_org_tenders(self._post(ORG_TENDERS, self._page_body(org["name"], 0, False), "list"))["rows"]
+            rows = parse_org_tenders(self._post(ORG_TENDERS, self._page_body(query, 0, False), "list"))["rows"]
         seen, offset, pages = set(), 0, 1
         while True:
             fresh = [r for r in rows if r["id"] not in seen]
@@ -213,7 +227,7 @@ class Gepnic2Portal:
             offset += PAGE
             if len(rows) < PAGE or not fresh or offset >= org["count"] or pages >= MAX_PAGES_PER_ORG:
                 break
-            rows = parse_org_tenders(self._post(ORG_TENDERS, self._page_body(org["name"], offset, False), "list"))["rows"]
+            rows = parse_org_tenders(self._post(ORG_TENDERS, self._page_body(query, offset, False), "list"))["rows"]
             pages += 1
 
     def fetch_detail(self, org: Dict, row: Dict) -> Dict:
