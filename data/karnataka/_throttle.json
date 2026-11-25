@@ -1,68 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-11-21T21:48:58Z",
-   "recoveries_s": [],
-   "events": [
-    {
-     "t": "2026-11-21T21:56:37Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-21T22:04:32Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 120.0,
-     "attempt": 2,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-21T22:13:29Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 240.0,
-     "attempt": 3,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-21T22:24:24Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 480.0,
-     "attempt": 4,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-21T22:39:21Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 900.0,
-     "attempt": 5,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-21T23:01:20Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 900.0,
-     "attempt": 6,
-     "retry_after": null
-    },
-    {
-     "t": "2026-11-21T23:23:19Z",
-     "kind": "wait",
-     "what": "organisation list",
-     "wait_s": 900.0,
-     "attempt": 7,
-     "retry_after": null
-    }
-   ]
-  },
-  {
    "started": "2026-11-22T21:56:48Z",
    "recoveries_s": [],
    "events": [
@@ -178,6 +116,68 @@
     },
     {
      "t": "2026-11-24T04:35:58Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 7,
+     "retry_after": null
+    }
+   ]
+  },
+  {
+   "started": "2026-11-25T00:58:33Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-11-25T01:06:11Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-25T01:14:06Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-25T01:23:03Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-25T01:33:58Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-25T01:48:55Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-25T02:10:54Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 6,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-25T02:32:53Z",
      "kind": "wait",
      "what": "organisation list",
      "wait_s": 900.0,
