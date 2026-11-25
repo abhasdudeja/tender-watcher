@@ -537,6 +537,7 @@ sources:
     refresh_after_hours: 48
     delay_seconds: 1.0
 
+  # GeM has added no new tenders to either CPPP list since late October 2026 (checked 25-11-2026): they only shrink.
   - slug: gemcppp
     name: GeM - CPPP tenders (central)
     state: central

@@ -3,7 +3,9 @@
 GeM republishes the tenders that the central procurement portal (CPPP) and the state portals publish, as plain
 server-rendered tables, newest published first, 10 per page (the central list has about 24,000 live tenders, mostly
 Indian Railways; the state list about 5,000, nearly all of them tenders of the NIC state portals that are also crawled
-here). Public pages: no login, no CAPTCHA, robots.txt allows them.
+here). Public pages: no login, no CAPTCHA, robots.txt allows them. Those sizes are from October 2026: since late October
+2026 GeM has added nothing to either list (on 25-11-2026: 1,080 central and 70 state entries, newest published 24-10 and
+29-10), so they shrink as tenders close; tools/local_crawl.ps1 warns when a source finds nothing new for several runs.
 
     GET /cppp            page 1                    "Showing 1 to 10 of 23,779 entries" + the table
     GET /cppp/<n>        page n (also /cppp_state/<n>)

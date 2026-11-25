@@ -50,10 +50,11 @@ Tests: `python -m pytest tests`.
 4. Actions → "Crawl tenders" → Run workflow (tick *no_details* for the first run so it finishes
    in minutes). Each source crawls in its own job; a final *publish* job rebuilds the index and
    commits `data/` and `docs/data/` once; Pages redeploys.
-5. It then runs once a day (06:47 IST) by itself. Change the cron in `.github/workflows/crawl.yml`.
+5. It then runs once a day (cron 16:30 UTC = 22:00 IST; GitHub often starts it later) by itself. Change the cron in `.github/workflows/crawl.yml`.
 
 **Check after the first Actions run:** portals sometimes block non-Indian IPs. If the log shows
-timeouts or "organisation list parsed empty", run the crawler on a machine in India (your laptop,
+timeouts or "organisation list parsed empty" (but since November 2026 some NIC portals answer "Unauthorised Access" from
+anywhere, because they moved to NIC's new interface), run the crawler on a machine in India (your laptop,
 a small Indian VPS) and have *it* push to the repo; the site stays on Pages. Nothing else changes.
 
 ## Adding a source
@@ -217,7 +218,10 @@ BHEL, NTPC ...) and `gem.gov.in/cppp_state` (about 4,900, the tenders of the NIC
 size or export option** (so a pass is ~2,400 + ~490 requests, about an hour for the central list; the log prints a page
 counter every 100 pages and a pass stopped by throttling resumes where it stopped). No login, no CAPTCHA, robots.txt
 allows it. GitHub's cloud addresses cannot reach it, so both are `enabled: false` and crawled by `tools/local_crawl.ps1`
-(the central list adds about an hour to a local run). Listing only: closing, opening and published dates, title, reference, organisation, a corrigendum flag and (central)
+(the central list adds about an hour to a local run). **Since late October 2026 GeM has added no new tenders to either
+list** (newest published 24-10-2026 central, 29-10-2026 state; checked 25-11-2026): the lists only shrink as tenders
+close (1,080 central and 70 state entries), so a pass takes minutes and `local_crawl.ps1` warns about both until GeM
+refreshes them. Listing only: closing, opening and published dates, title, reference, organisation, a corrigendum flag and (central)
 GeM's availability report id; no value, EMD or detail page. The tender id is the last "/" part of the "Title/Ref.No./Tender Id"
 cell: for GePNIC tenders (`2026_PRD_5080689_1`) and railway tenders (8 digits) it is the record id; some systems put `NIL`,
 `NULL` or a small number there, so for anything else the id is a hash (organisation, reference, that value, published
@@ -413,7 +417,7 @@ Some portals refuse GitHub's cloud addresses: **Gujarat**, **Andhra Pradesh** an
 times out), the **Mizoram notice board** (HTTP 403) and the two **GeM CPPP lists** (`gem.gov.in`: the connection
 fails). They are set to `enabled: false` in `sources.yaml` (with a "local only" comment), so the Actions crawl skips them and keeps their last good data. `enabled: false` does not stop a
 local run: a source named with `--source` always runs. Crawl them from a machine on an Indian connection with
-`tools/local_crawl.ps1` (a Windows Task Scheduler task named "TenderWatch local crawl" runs it daily at 11:11, without a Claude session; its output goes to `logs\scheduler.log`; a plain `python -m crawler.run` skips disabled
+`tools/local_crawl.ps1` (a Windows Task Scheduler task named "TenderWatch local crawl" runs it daily at 11:11 through `tools\scheduled_crawl.ps1`, without a Claude session; its output goes to `logs\scheduler.log`; a plain `python -m crawler.run` skips disabled
 sources, so name them: `--source gujarat --source andhrapradesh ...`). To move a source back to the cloud, set it to
 `enabled: true` and (optionally) remove it from the script's default list.
 
@@ -434,6 +438,19 @@ meantime, the script puts its own sources' data on top of the new `origin/master
 source if that is newer), rebuilds the index and retries. Its last output line says what happened
 (`DONE: ...` or `ABORT: ...`). The crawler's log is `logs/local-crawl-<time>.log`. It needs the machine's own git
 login (Git Credential Manager); it never asks for a password and never changes credentials.
+
+If an earlier run committed but could not push, the next run does not stop on that commit: it carries that commit's
+sources' data on top of `origin/master` and publishes it together with its own crawl (any other unpushed commit still
+stops it). After the crawl it prints one line per source, appends it to `logs\local-crawl-history.csv`, and prints a
+`WARN:` line for a source that reported problems, found no new tenders in its last 3 runs (when it lists 50 or more),
+or lists over 30% fewer tenders than the median of its last 5 runs (`-StaleRuns`, `-StaleMinListed`, `-DropShare`);
+the `DONE:` line then says how many warnings there were.
+
+The scheduled task runs `tools\scheduled_crawl.ps1`, which runs `local_crawl.ps1`, timestamps its output into
+`logs\scheduler.log` and, when the run stopped on a git fetch/push failure (or another crawl held the data), tries again
+after 30 minutes, at most twice (`-Retries`, `-WaitMinutes`). It exits with the crawl's exit code, so the task's
+*Last Run Result* is 0 only when the run published (or had nothing to publish). The task does not wake the computer:
+a run missed while it sleeps starts as soon as it is awake again.
 
 ## Sharing a tender
 
