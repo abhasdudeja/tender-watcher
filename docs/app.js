@@ -87,6 +87,10 @@
       // a "Search with ID/Title/Reference no" box. We copy the ID for the user.
       return { home: base.replace(/\/app.*$/, "/app"), label: "Open portal", hint: "Paste the Tender ID in the portal's search box" };
     }
+    if (src.type === "gepnic2") {
+      // NIC's new front end: /nicgep/app is only a login page now; Active Tenders has a Tender ID search box
+      return { home: base.replace(/\/nicgep\/app.*$/, "/#/ActiveTenders"), label: "Open portal", hint: "Paste the Tender ID in the Active Tenders search box" };
+    }
     return { home: base, label: "Open portal", hint: "" };
   }
 

@@ -1,0 +1,27 @@
+{
+  "dropdownList" : [ {
+    "id" : 61,
+    "stringValue" : "Department of Sports and Youth Affairs"
+  }, {
+    "id" : 35,
+    "stringValue" : "MEGHALAYA BASIN DEVELOPMENT AUTHORITY  - WORLD BANK"
+  }, {
+    "id" : 6,
+    "stringValue" : "Meghalaya Energy Corporation Limited"
+  }, {
+    "id" : 47,
+    "stringValue" : "Meghalaya Transport Corporation"
+  }, {
+    "id" : 4,
+    "stringValue" : "Ministry of PWD,Meghalaya"
+  }, {
+    "id" : 54,
+    "stringValue" : "Social Welfare Department-ADB"
+  }, {
+    "id" : 44,
+    "stringValue" : "Transport Department"
+  }, {
+    "id" : 12,
+    "stringValue" : "Water Resources Department"
+  } ]
+}
