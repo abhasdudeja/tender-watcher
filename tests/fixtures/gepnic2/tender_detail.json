@@ -1,0 +1,264 @@
+{
+ "tenderDetails": {
+  "id": "bsXp0dFmgcz8Ep2QfSe6Sw",
+  "tenderId": "2026_SWADB_2095_1",
+  "tenderRefNo": "MECDM/ADB/Eggs/PKG50/545/2026",
+  "tenderTitle": "Procurement of Eggs in Garo Hills Region 2nd Package Package Number PKG-050",
+  "orgChain": "Social Welfare Department-ADB||Meghalaya Early Childhood Development Mission (MECDM)",
+  "tenderBasicId": "yiGnUTy4N_GkVZvT4Vvd4g",
+  "tenderStage": "To_be_Opened",
+  "formOfContract": "Item Rate",
+  "packetNumber": 2,
+  "boTypeId": 3,
+  "tenderStatus": "Published",
+  "enableTemplateDetail": "Yes",
+  "twoStageTender": false
+ },
+ "tenderOtherInfo": {
+  "tenderBasicDetails": {
+   "tenderType": "Open Tender",
+   "tenderCategory": "Goods",
+   "isAllowGte": "No",
+   "paymentMode": "Offline",
+   "isAllowMultiCurrencyForFee": "No",
+   "isAllowWithdrawl": "Yes",
+   "formOfContract": "Item Rate",
+   "noOfCovers": 2,
+   "isAllowItemwiseTechEval": "No",
+   "isAllowMultiCurrencyForBOQ": "No",
+   "isAllowTwoStageBidding": "No",
+   "forceGTECompliance": false,
+   "mclAllowed": false,
+   "publishDate": "12-Nov-2026 03:00 PM"
+  },
+  "tenderCoverDocuments": [
+   {
+    "coverType": "Fee/PreQual/Technical",
+    "documentDTOList": [
+     {
+      "coverNo": "omVbI2VfK73CHDR7bmUXOQ",
+      "coverType": "Fee/PreQual/Technical",
+      "coverDesc": "Scan Copy of Bid Security",
+      "docType": ".pdf"
+     },
+     {
+      "coverNo": "-Ujzyj-j4hq7Jk9Cl5ZFdw",
+      "coverType": "Fee/PreQual/Technical",
+      "coverDesc": "Technical Bid",
+      "docType": ".pdf"
+     }
+    ],
+    "sno": 1
+   },
+   {
+    "coverType": "Finance",
+    "documentDTOList": [
+     {
+      "coverNo": "ClBI0B97P5Kdr2s1-xGJew",
+      "coverType": "Finance",
+      "coverDesc": "Filled price bid BoQ",
+      "docType": ".xls"
+     },
+     {
+      "coverNo": "1Ex1R5IyY07acLFwxpvlfQ",
+      "coverType": "Finance",
+      "coverDesc": "Scan copy of filled Price Bid Submission Sheet",
+      "docType": ".pdf"
+     },
+     {
+      "coverNo": "B_EINLfq-vjvxMRatzgM5A",
+      "coverType": "Finance",
+      "coverDesc": "Supporting document work sheet explaining the cost calculations",
+      "docType": ".pdf"
+     }
+    ],
+    "sno": 2
+   }
+  ],
+  "offlinePayments": [
+   {
+    "id": 1,
+    "paymentInstrument": "BG - Bank Guarantee Irrevocable"
+   },
+   {
+    "id": 2,
+    "paymentInstrument": "FDR - Fixed Deposit Receipt"
+   },
+   {
+    "id": 3,
+    "paymentInstrument": "NEFT - NEFT RTGS"
+   }
+  ],
+  "onlineBankers": [],
+  "tenderFeeDetails": {
+   "tenderFee": "0.00",
+   "tenderFeeGST": null,
+   "processingFee": "0.00",
+   "processingFeeGST": null,
+   "totalTenderFee": "0.00",
+   "feePayableTo": "Nil",
+   "feePayableAt": "Nil",
+   "exemptionAllowed": "No",
+   "vatFee": "0.00",
+   "surchargeGST": null,
+   "otherFee": "0.00",
+   "otherChargesGST": null
+  },
+  "feeHeaderDetails": [
+   "Tender Fee",
+   "EMD Amount"
+  ],
+  "tenderWorkItemDetails": {
+   "tenderTitle": "Procurement of Eggs in Garo Hills Region 2nd Package Package Number PKG-050",
+   "workDescription": "Procurement of Eggs in Garo Hills Region 2nd Package Package Number PKG-050",
+   "preQualDetails": "Please refer Tender documents.",
+   "remarks": "NA",
+   "showTenderValue": "true",
+   "currencyName": null,
+   "tenderValue": "8,61,86,277",
+   "productCategory": "Miscellaneous",
+   "productSubCategory": "Eggs",
+   "contractType": "Tender",
+   "bidValidity": 180,
+   "periodOfWork": "365",
+   "location": "Meghalaya",
+   "pincode": 793001,
+   "prebidMeetingPlace": "Office of CEO MECDM",
+   "prebidMeetingAddress": "Meghalaya Early Childhood\r\nDevelopment Mission 1st floor Brookdene Moreau institute of\r\nintegral training campus Dhankheti\r\nJowai road Shillong 793001\r\nMeghalaya India",
+   "preBidMeetingDate": "18-Nov-2026 11:00 AM",
+   "bidOpeningPlace": "Office of CEO MECDM",
+   "allowNDATender": "No",
+   "allowPrefBidder": "No",
+   "allowtqualifytendercritiria": "No",
+   "enableMediaPublishDate": "No",
+   "enableBulletinDate": "No",
+   "allowEagreement": "No",
+   "showBidderConsent": "false",
+   "allowBidderConsent": "No",
+   "allowLoaLevel": "No",
+   "shortTender": "No",
+   "showTenderValueAllowable": "No",
+   "tenderValueAllowableReason": null,
+   "shortTenderReason": null,
+   "isPrivilegeBidder": null,
+   "isMediaPublishAllowed": false,
+   "isTenderBulletinAllowed": false,
+   "iseAggrementAllowed": false,
+   "isEnableShortTender": false,
+   "tenderStatus": null,
+   "isFtaEnabled": false,
+   "allowFtaBidder": "No",
+   "tenderClass": "III class"
+  },
+  "tenderCriticalDates": {
+   "mediaPublishDate": null,
+   "tenderBulletinDate": null,
+   "publishDate": "12-Nov-2026 03:00 PM",
+   "docSaleStartDate": "12-Nov-2026 03:00 PM",
+   "docSaleEndDate": "03-Dec-2026 03:00 PM",
+   "clarificationStartDate": "12-Nov-2026 03:00 PM",
+   "clarificationEndDate": "19-Nov-2026 05:00 PM",
+   "bidSubStartDate": "26-Nov-2026 09:00 AM",
+   "bidSubEndDate": "03-Dec-2026 03:00 PM",
+   "bidOpeningDate": "03-Dec-2026 03:00 PM",
+   "finBidOpeningDate": null,
+   "ndaBidSubClosingDate": "NA",
+   "ndaBidSubApprovalDate": "NA",
+   "isNdaTender": false,
+   "tenderStatus": null,
+   "preBidMeetingDate": "18-Nov-2026 11:00 AM",
+   "finPublishDate": null,
+   "finBidsubOpeningDate": null,
+   "finBidsubClosingDate": null,
+   "finPreBidMeetingDate": null,
+   "publishedDate": null
+  },
+  "nitDocuments": [
+   {
+    "id": 1,
+    "documentName": "Tendernotice_1.pdf",
+    "description": "NIT",
+    "docSize": 45.79,
+    "docCode": "5RQRt-A54Ozm6qZRxHz9dQ",
+    "signedBy": "REDACTED SIGNER",
+    "signedDate": "11-Nov-2026 08:22 PM"
+   }
+  ],
+  "workItemDocuments": [
+   {
+    "id": 1,
+    "documentType": "Tender Documents",
+    "documentName": "TBPkg050.pdf",
+    "description": "Tender Document Technical Part",
+    "docSize": 1351.6,
+    "docCode": "9oolyB3UDZBZYbTuhBPvKA",
+    "signedBy": "REDACTED SIGNER",
+    "signedDate": "11-Nov-2026 08:28 PM",
+    "zipDocumentName": "work_2267.zip"
+   },
+   {
+    "id": 2,
+    "documentType": "Tender Documents",
+    "documentName": "Annexure1to5Pkg050.xls",
+    "description": "Annexure 1 to 5",
+    "docSize": 1015.0,
+    "docCode": "9oolyB3UDZBZYbTuhBPvKA",
+    "signedBy": "REDACTED SIGNER",
+    "signedDate": "11-Nov-2026 08:37 PM",
+    "zipDocumentName": "work_2267.zip"
+   },
+   {
+    "id": 3,
+    "documentType": "BOQ",
+    "documentName": "BOQ_2267.xls",
+    "description": "Unfilled Price Bid BoQ",
+    "docSize": 317.0,
+    "docCode": "9oolyB3UDZBZYbTuhBPvKA",
+    "signedBy": "REDACTED SIGNER",
+    "signedDate": "11-Nov-2026 08:37 PM",
+    "zipDocumentName": "work_2267.zip"
+   },
+   {
+    "id": 4,
+    "documentType": "Tender Documents",
+    "documentName": "FBPkg050.pdf",
+    "description": "Tender Document Price Part",
+    "docSize": 785.75,
+    "docCode": "9oolyB3UDZBZYbTuhBPvKA",
+    "signedBy": "REDACTED SIGNER",
+    "signedDate": "11-Nov-2026 08:29 PM",
+    "zipDocumentName": "work_2267.zip"
+   }
+  ],
+  "ndaDocuments": [],
+  "preBidMeetingDocuments": [],
+  "foreignCurrency": [],
+  "foreignCurrencyBOQ": [],
+  "preferentialCategory": [],
+  "tenderInvitingAuthority": {
+   "invitingOfficer": "CEO MECDM",
+   "invitingOfficerAddress": "Meghalaya Early Childhood\r\nDevelopment Mission 1st floor Brookdene Moreau institute of\r\nintegral training campus Dhankheti\r\nJowai road Shillong 793001\r\nMeghalaya India"
+  },
+  "showAlertMsg": null,
+  "docDownBlock": false,
+  "oiddocuments": [],
+  "emdfeeDetails": {
+   "emdAmount": "8,70,000",
+   "emdFeeGST": null,
+   "emdExemptionAllowed": "No",
+   "emdFeeType": "fixed",
+   "emdPercentage": "NA",
+   "emdPayableTo": "CEO",
+   "emdPayableAt": "Shillong",
+   "bgRequired": "No",
+   "ebgRequired": "No",
+   "minDirectEmdAmount": "0",
+   "swiftTransRequired": "No",
+   "orgBgRequired": false,
+   "orgEbgRequired": false,
+   "orgSwiftTransRequired": false
+  },
+  "tenderCorrigendums": [],
+  "tenderFtaDetails": []
+ }
+}

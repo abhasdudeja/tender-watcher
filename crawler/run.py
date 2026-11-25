@@ -29,11 +29,11 @@ from typing import Dict, List, Optional
 
 import yaml
 
-from . import cheps, dedupe, epsv2, gemcppp, gepnic, index, kppp, mizoram, nprocure, store, tms
+from . import cheps, dedupe, epsv2, gemcppp, gepnic, gepnic2, index, kppp, mizoram, nprocure, store, tms
 from .progress import format_line
 
 ROOT = Path(__file__).resolve().parent.parent
-CRAWLERS = {"gepnic": gepnic.crawl_source, "nprocure": nprocure.crawl_source, "epsv2": epsv2.crawl_source,
+CRAWLERS = {"gepnic": gepnic.crawl_source, "gepnic2": gepnic2.crawl_source, "nprocure": nprocure.crawl_source, "epsv2": epsv2.crawl_source,
             "mizoram": mizoram.crawl_source, "tms": tms.crawl_source, "kppp": kppp.crawl_source,
             "cheps": cheps.crawl_source, "gemcppp": gemcppp.crawl_source}
 PROGRESS_FILE = "progress.json"     # the old single-file layout (still read, never written)

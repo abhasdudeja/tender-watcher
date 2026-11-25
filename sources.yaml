@@ -3,6 +3,10 @@
 # type: gepnic   -> NIC GePNIC eProcurement portals (etenders.kerala.gov.in,
 #                   eprocure.gov.in/eprocure/app, most state portals).
 #                   The crawler appends GePNIC page names to base_url.
+# type: gepnic2  -> GePNIC portals moved to NIC's new front end (JSON API under /nggepnic_home_service; the old
+#                   FrontEnd* pages answer "Unauthorised Access"). Its full tender lists need a CAPTCHA, so the crawler
+#                   reads the CAPTCHA-free organisation-wise page that departments link to (crawler/gepnic2.py).
+#                   base_url stays .../nicgep/app.
 # type: nprocure -> Gujarat's nProcure portal and its client sites.
 # type: mizoram  -> the Mizoram e-Tender notice board (tender.mizoram.gov.in), read through its public JSON API:
 #                   notices only, no detail pages. An empty board is a valid answer.
@@ -282,7 +286,7 @@ sources:
   - slug: meghalaya
     name: Meghalaya
     state: IN-ML
-    type: gepnic
+    type: gepnic2
     base_url: https://meghalayatenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: true
@@ -296,7 +300,7 @@ sources:
   - slug: arunachalpradesh
     name: Arunachal Pradesh
     state: IN-AR
-    type: gepnic
+    type: gepnic2
     base_url: https://arunachaltenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: true
@@ -310,7 +314,7 @@ sources:
   - slug: nagaland
     name: Nagaland
     state: IN-NL
-    type: gepnic
+    type: gepnic2
     base_url: https://nagalandtenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: true
@@ -324,7 +328,7 @@ sources:
   - slug: manipur
     name: Manipur
     state: IN-MN
-    type: gepnic
+    type: gepnic2
     base_url: https://manipurtenders.gov.in/nicgep/app
     enabled: true
     ignore_robots: true
@@ -504,7 +508,7 @@ sources:
   - slug: andamannicobar
     name: Andaman & Nicobar
     state: IN-AN
-    type: gepnic
+    type: gepnic2
     base_url: https://eprocure.andamannicobar.gov.in/nicgep/app
     enabled: true
     ignore_robots: false
@@ -528,7 +532,7 @@ sources:
   - slug: dnhdd
     name: DNH & DD
     state: IN-DH
-    type: gepnic
+    type: gepnic2
     base_url: https://dnhtenders.gov.in/nicgep/app
     max_detail_fetches: 4000
     enabled: true

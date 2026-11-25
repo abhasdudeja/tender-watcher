@@ -101,6 +101,17 @@ Because deep links expire, the site cannot link straight to a tender. **Open por
 portal home and **Copy Tender ID** puts the ID on the clipboard; the portal's *Search with ID*
 box takes it.
 
+### GePNIC portals on NIC's new front end (`type: gepnic2`)
+
+In November 2026 some state GePNIC portals (Meghalaya, Nagaland, Manipur, Arunachal Pradesh, Andaman & Nicobar,
+DNH & DD) moved to NIC's new single-page front end. The old `FrontEnd*` pages now answer "Unauthorised Access", and
+the new **Active Tenders** and **Tenders by Organisation** lists need a CAPTCHA. `crawler/gepnic2.py` does not use
+those. It reads the CAPTCHA-free organisation-wise page that departments link to from their own websites
+(`#/FrontEndLatestActiveTendersOrgwise?org=<name>`), through the same JSON calls that page makes under
+`/nggepnic_home_service`: the organisation list, each organisation's tenders (50 a page), and each new tender's
+detail. Tender IDs and organisation names are the same as before, so these sources carry on from the old crawl.
+**Open portal** goes to the portal's Active Tenders page.
+
 ### How the nProcure crawl works (Gujarat state portal)
 
 `tender.nprocure.com` is one portal for ~165 *clients* (departments, boards, municipal corporations,
