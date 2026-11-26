@@ -1,23 +1,23 @@
 {
  "slug": "haryana",
  "name": "Haryana",
- "ok": true,
- "started": "2026-11-25T00:58:41Z",
- "orgs": 2,
+ "ok": false,
+ "started": "2026-11-26T00:35:52Z",
+ "orgs": 0,
  "orgs_skipped": 0,
- "orgs_failed": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 1984,
- "new": 59,
- "changed": 7,
+ "listed": 0,
+ "new": 0,
+ "changed": 0,
  "details_failed": 0,
- "details_fetched": 80,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 158,
- "active": 1984,
- "finished": "2026-11-25T01:00:17Z",
- "requests": 83
+ "errors": [
+  "organisation list: Failed to perform, curl: (56) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-11-26T01:39:29Z",
+ "requests": 0
 }

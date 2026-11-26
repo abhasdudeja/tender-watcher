@@ -1,23 +1,23 @@
 {
  "slug": "odhisha",
  "name": "Odhisha",
- "ok": true,
- "started": "2026-11-25T01:00:33Z",
- "orgs": 73,
- "orgs_skipped": 33,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-11-26T01:40:22Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 3268,
- "new": 27,
- "changed": 9,
+ "listed": 0,
+ "new": 0,
+ "changed": 0,
  "details_failed": 0,
- "details_fetched": 80,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 60,
- "active": 3268,
- "finished": "2026-11-25T01:02:40Z",
- "requests": 121
+ "errors": [
+  "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-11-26T02:44:03Z",
+ "requests": 0
 }

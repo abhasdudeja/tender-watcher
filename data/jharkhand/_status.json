@@ -1,23 +1,23 @@
 {
  "slug": "jharkhand",
  "name": "Jharkhand",
- "ok": true,
- "started": "2026-11-25T00:59:22Z",
- "orgs": 43,
- "orgs_skipped": 20,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-11-26T00:35:50Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 501,
- "new": 20,
+ "listed": 0,
+ "new": 0,
  "changed": 0,
  "details_failed": 0,
- "details_fetched": 30,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 7,
- "active": 501,
- "finished": "2026-11-25T01:00:17Z",
- "requests": 54
+ "errors": [
+  "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-11-26T01:39:30Z",
+ "requests": 0
 }

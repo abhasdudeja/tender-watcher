@@ -1,23 +1,23 @@
 {
  "slug": "chandigarh",
  "name": "Chandigarh",
- "ok": true,
- "started": "2026-11-25T00:58:41Z",
- "orgs": 5,
+ "ok": false,
+ "started": "2026-11-26T01:12:42Z",
+ "orgs": 0,
  "orgs_skipped": 0,
- "orgs_failed": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 246,
+ "listed": 0,
  "new": 0,
  "changed": 0,
  "details_failed": 0,
- "details_fetched": 3,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 2,
- "active": 246,
- "finished": "2026-11-25T00:58:51Z",
- "requests": 9
+ "errors": [
+  "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-11-26T02:16:21Z",
+ "requests": 0
 }

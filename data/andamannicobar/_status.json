@@ -2,7 +2,7 @@
  "slug": "andamannicobar",
  "name": "Andaman & Nicobar",
  "ok": false,
- "started": "2026-11-25T00:58:31Z",
+ "started": "2026-11-26T01:40:14Z",
  "orgs": 0,
  "orgs_skipped": 0,
  "orgs_failed": 1,
@@ -12,14 +12,12 @@
  "changed": 0,
  "details_failed": 0,
  "details_fetched": 0,
- "throttled": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [
-  "organisation list parsed empty"
+  "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
  ],
- "deactivated": 0,
- "active": 252,
- "finished": "2026-11-25T00:58:33Z",
- "requests": 1
+ "finished": "2026-11-26T02:43:55Z",
+ "requests": 0
 }

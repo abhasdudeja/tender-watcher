@@ -1,23 +1,23 @@
 {
  "slug": "tripura",
  "name": "Tripura",
- "ok": true,
- "started": "2026-11-25T00:58:40Z",
- "orgs": 30,
- "orgs_skipped": 3,
- "orgs_failed": 0,
+ "ok": false,
+ "started": "2026-11-26T00:40:37Z",
+ "orgs": 0,
+ "orgs_skipped": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 164,
- "new": 31,
- "changed": 8,
+ "listed": 0,
+ "new": 0,
+ "changed": 0,
  "details_failed": 0,
- "details_fetched": 41,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 20,
- "active": 164,
- "finished": "2026-11-25T00:59:57Z",
- "requests": 69
+ "errors": [
+  "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-11-26T01:44:13Z",
+ "requests": 0
 }

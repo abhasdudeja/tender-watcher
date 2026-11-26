@@ -1,23 +1,23 @@
 {
  "slug": "lakshadweep",
  "name": "Lakshadweep",
- "ok": true,
- "started": "2026-11-25T01:00:33Z",
- "orgs": 1,
+ "ok": false,
+ "started": "2026-11-26T01:40:18Z",
+ "orgs": 0,
  "orgs_skipped": 0,
- "orgs_failed": 0,
+ "orgs_failed": 1,
  "orgs_unreachable": 0,
- "listed": 20,
- "new": 2,
+ "listed": 0,
+ "new": 0,
  "changed": 0,
  "details_failed": 0,
- "details_fetched": 4,
- "throttled": 0,
+ "details_fetched": 0,
+ "throttled": 7,
  "throttle_recoveries": [],
  "gave_up": false,
- "errors": [],
- "deactivated": 1,
- "active": 20,
- "finished": "2026-11-25T01:00:40Z",
- "requests": 6
+ "errors": [
+  "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+ ],
+ "finished": "2026-11-26T02:44:01Z",
+ "requests": 0
 }
