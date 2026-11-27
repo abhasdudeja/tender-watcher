@@ -2,7 +2,7 @@
  "slug": "haryana",
  "name": "Haryana",
  "ok": false,
- "started": "2026-11-26T00:35:52Z",
+ "started": "2026-11-27T00:44:21Z",
  "orgs": 0,
  "orgs_skipped": 0,
  "orgs_failed": 1,
@@ -18,6 +18,6 @@
  "errors": [
   "organisation list: Failed to perform, curl: (56) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
  ],
- "finished": "2026-11-26T01:39:29Z",
+ "finished": "2026-11-27T01:47:57Z",
  "requests": 0
 }

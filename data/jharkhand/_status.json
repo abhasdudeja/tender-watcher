@@ -2,7 +2,7 @@
  "slug": "jharkhand",
  "name": "Jharkhand",
  "ok": false,
- "started": "2026-11-26T00:35:50Z",
+ "started": "2026-11-27T00:44:22Z",
  "orgs": 0,
  "orgs_skipped": 0,
  "orgs_failed": 1,
@@ -18,6 +18,6 @@
  "errors": [
   "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
  ],
- "finished": "2026-11-26T01:39:30Z",
+ "finished": "2026-11-27T01:48:03Z",
  "requests": 0
 }

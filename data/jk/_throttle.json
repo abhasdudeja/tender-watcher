@@ -1,29 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-10-13T10:33:55Z",
-   "recoveries_s": [
-    60
-   ],
-   "events": [
-    {
-     "t": "2026-10-13T10:36:05Z",
-     "kind": "wait",
-     "what": "DC-PDD: details",
-     "wait_s": 60.0,
-     "attempt": 1,
-     "retry_after": null
-    },
-    {
-     "t": "2026-10-13T10:37:21Z",
-     "kind": "recovered",
-     "what": "DC-PDD: details",
-     "waited_s": 60,
-     "attempts": 1
-    }
-   ]
-  },
-  {
    "started": "2026-10-17T05:34:54Z",
    "recoveries_s": [
     180
@@ -108,6 +85,68 @@
     },
     {
      "t": "2026-11-26T01:24:09Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 7,
+     "retry_after": null
+    }
+   ]
+  },
+  {
+   "started": "2026-11-27T00:44:18Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-11-27T00:44:46Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-27T00:46:13Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-27T00:48:40Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-27T00:53:07Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-27T01:01:34Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-27T01:17:02Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 6,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-27T01:32:29Z",
      "kind": "wait",
      "what": "organisation list",
      "wait_s": 900.0,

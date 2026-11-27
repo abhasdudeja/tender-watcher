@@ -1,11 +1,11 @@
 {
- "updated": "2026-11-26T06:15:09Z",
+ "updated": "2026-11-27T02:53:59Z",
  "sources": [
   {
    "slug": "andamannicobar",
    "name": "Andaman & Nicobar",
    "ok": false,
-   "started": "2026-11-26T01:40:14Z",
+   "started": "2026-11-27T00:44:20Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -21,7 +21,7 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:43:55Z",
+   "finished": "2026-11-27T01:48:00Z",
    "requests": 0
   },
   {
@@ -51,7 +51,7 @@
    "slug": "arunachalpradesh",
    "name": "Arunachal Pradesh",
    "ok": false,
-   "started": "2026-11-26T00:35:43Z",
+   "started": "2026-11-27T00:44:25Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -67,14 +67,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:21Z",
+   "finished": "2026-11-27T01:48:03Z",
    "requests": 0
   },
   {
    "slug": "assam",
    "name": "Assam",
    "ok": false,
-   "started": "2026-11-26T00:35:43Z",
+   "started": "2026-11-27T00:44:31Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -90,37 +90,37 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:21Z",
+   "finished": "2026-11-27T01:48:07Z",
    "requests": 0
   },
   {
    "slug": "bihar",
    "name": "Bihar",
    "ok": true,
-   "started": "2026-11-26T00:36:00Z",
+   "started": "2026-11-27T00:44:27Z",
    "orgs": 49,
-   "orgs_skipped": 30,
+   "orgs_skipped": 6,
    "orgs_failed": 0,
    "orgs_unreachable": 0,
-   "listed": 740,
-   "new": 39,
-   "changed": 30,
+   "listed": 739,
+   "new": 37,
+   "changed": 6,
    "details_failed": 0,
-   "details_fetched": 86,
+   "details_fetched": 60,
    "throttled": 0,
    "throttle_recoveries": [],
    "gave_up": false,
    "errors": [],
-   "deactivated": 21,
-   "active": 740,
-   "finished": "2026-11-26T00:37:37Z",
-   "requests": 90
+   "deactivated": 38,
+   "active": 739,
+   "finished": "2026-11-27T00:45:35Z",
+   "requests": 64
   },
   {
    "slug": "chandigarh",
    "name": "Chandigarh",
    "ok": false,
-   "started": "2026-11-26T01:12:42Z",
+   "started": "2026-11-27T00:44:34Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -136,7 +136,7 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:16:21Z",
+   "finished": "2026-11-27T01:48:11Z",
    "requests": 0
   },
   {
@@ -166,7 +166,7 @@
    "slug": "delhi",
    "name": "NCT of Delhi",
    "ok": false,
-   "started": "2026-11-26T01:40:27Z",
+   "started": "2026-11-27T01:49:03Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -182,14 +182,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:44:04Z",
+   "finished": "2026-11-27T02:52:42Z",
    "requests": 0
   },
   {
    "slug": "dnhdd",
    "name": "DNH & DD",
    "ok": false,
-   "started": "2026-11-26T00:35:52Z",
+   "started": "2026-11-27T01:48:57Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -205,7 +205,7 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:32Z",
+   "finished": "2026-11-27T02:52:38Z",
    "requests": 0
   },
   {
@@ -258,7 +258,7 @@
    "slug": "goa",
    "name": "Goa",
    "ok": false,
-   "started": "2026-11-26T01:40:29Z",
+   "started": "2026-11-27T00:59:27Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -274,14 +274,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:44:10Z",
+   "finished": "2026-11-27T02:03:10Z",
    "requests": 0
   },
   {
    "slug": "govIndia",
    "name": "Govt of India - CPPP",
    "ok": false,
-   "started": "2026-11-26T00:36:21Z",
+   "started": "2026-11-27T00:44:22Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -297,7 +297,7 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:58Z",
+   "finished": "2026-11-27T01:47:59Z",
    "requests": 0
   },
   {
@@ -327,7 +327,7 @@
    "slug": "haryana",
    "name": "Haryana",
    "ok": false,
-   "started": "2026-11-26T00:35:52Z",
+   "started": "2026-11-27T00:44:21Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -343,14 +343,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (56) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:29Z",
+   "finished": "2026-11-27T01:47:57Z",
    "requests": 0
   },
   {
    "slug": "himachal",
    "name": "Himachal Pradesh",
    "ok": false,
-   "started": "2026-11-26T00:35:52Z",
+   "started": "2026-11-27T01:49:02Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -366,14 +366,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:29Z",
+   "finished": "2026-11-27T02:52:39Z",
    "requests": 0
   },
   {
    "slug": "jharkhand",
    "name": "Jharkhand",
    "ok": false,
-   "started": "2026-11-26T00:35:50Z",
+   "started": "2026-11-27T00:44:22Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -389,14 +389,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:30Z",
+   "finished": "2026-11-27T01:48:03Z",
    "requests": 0
   },
   {
    "slug": "jk",
    "name": "Jammu & Kashmir",
    "ok": false,
-   "started": "2026-11-26T00:35:59Z",
+   "started": "2026-11-27T00:44:18Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -412,14 +412,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:37Z",
+   "finished": "2026-11-27T01:47:56Z",
    "requests": 0
   },
   {
    "slug": "karnataka",
    "name": "Karnataka",
    "ok": false,
-   "started": "2026-11-26T00:35:50Z",
+   "started": "2026-11-27T00:44:27Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -433,16 +433,16 @@
    "throttle_recoveries": [],
    "gave_up": false,
    "errors": [
-    "organisation list: Failed to perform, curl: (28) Failed to connect to kppp.karnataka.gov.in:443 after 133360 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+    "organisation list: Failed to perform, curl: (28) Failed to connect to kppp.karnataka.gov.in:443 after 133357 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:32:09Z",
+   "finished": "2026-11-27T02:40:46Z",
    "requests": 0
   },
   {
    "slug": "kerala",
    "name": "Kerala eTenders",
    "ok": false,
-   "started": "2026-11-26T01:40:14Z",
+   "started": "2026-11-27T00:59:25Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -458,14 +458,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:43:58Z",
+   "finished": "2026-11-27T02:03:10Z",
    "requests": 0
   },
   {
    "slug": "ladakh",
    "name": "Ladakh",
    "ok": false,
-   "started": "2026-11-26T01:40:14Z",
+   "started": "2026-11-27T01:04:54Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -481,14 +481,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:43:56Z",
+   "finished": "2026-11-27T02:08:35Z",
    "requests": 0
   },
   {
    "slug": "lakshadweep",
    "name": "Lakshadweep",
    "ok": false,
-   "started": "2026-11-26T01:40:18Z",
+   "started": "2026-11-27T00:44:32Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -504,60 +504,60 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:44:01Z",
+   "finished": "2026-11-27T01:48:14Z",
    "requests": 0
   },
   {
    "slug": "madhyapradesh",
    "name": "Madhya Pradesh",
    "ok": true,
-   "started": "2026-11-26T00:35:47Z",
-   "orgs": 90,
-   "orgs_skipped": 49,
+   "started": "2026-11-27T00:44:32Z",
+   "orgs": 92,
+   "orgs_skipped": 7,
    "orgs_failed": 0,
    "orgs_unreachable": 0,
-   "listed": 4840,
-   "new": 457,
-   "changed": 72,
+   "listed": 5033,
+   "new": 330,
+   "changed": 79,
    "details_failed": 0,
-   "details_fetched": 659,
+   "details_fetched": 701,
    "throttled": 0,
    "throttle_recoveries": [],
    "gave_up": false,
    "errors": [],
-   "deactivated": 413,
-   "active": 4840,
-   "finished": "2026-11-26T00:47:56Z",
-   "requests": 701
+   "deactivated": 179,
+   "active": 5033,
+   "finished": "2026-11-27T00:58:21Z",
+   "requests": 787
   },
   {
    "slug": "maharashtra",
    "name": "Maharashtra State PP",
    "ok": true,
-   "started": "2026-11-26T00:38:23Z",
-   "orgs": 180,
-   "orgs_skipped": 73,
+   "started": "2026-11-27T00:44:28Z",
+   "orgs": 179,
+   "orgs_skipped": 31,
    "orgs_failed": 0,
    "orgs_unreachable": 0,
-   "listed": 6046,
-   "new": 573,
-   "changed": 139,
+   "listed": 6122,
+   "new": 808,
+   "changed": 130,
    "details_failed": 0,
-   "details_fetched": 712,
+   "details_fetched": 957,
    "throttled": 0,
    "throttle_recoveries": [],
    "gave_up": false,
    "errors": [],
-   "deactivated": 751,
-   "active": 6046,
-   "finished": "2026-11-26T00:53:14Z",
-   "requests": 820
+   "deactivated": 786,
+   "active": 6122,
+   "finished": "2026-11-27T01:03:52Z",
+   "requests": 1106
   },
   {
    "slug": "manipur",
    "name": "Manipur",
    "ok": false,
-   "started": "2026-11-26T00:54:16Z",
+   "started": "2026-11-27T00:46:45Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -573,14 +573,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:57:53Z",
+   "finished": "2026-11-27T01:50:22Z",
    "requests": 0
   },
   {
    "slug": "meghalaya",
    "name": "Meghalaya",
    "ok": false,
-   "started": "2026-11-26T00:35:48Z",
+   "started": "2026-11-27T01:49:11Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -596,7 +596,7 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:24Z",
+   "finished": "2026-11-27T02:52:49Z",
    "requests": 0
   },
   {
@@ -651,7 +651,7 @@
    "slug": "nagaland",
    "name": "Nagaland",
    "ok": false,
-   "started": "2026-11-26T00:35:57Z",
+   "started": "2026-11-27T01:48:59Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -667,14 +667,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:33Z",
+   "finished": "2026-11-27T02:52:35Z",
    "requests": 0
   },
   {
    "slug": "odhisha",
    "name": "Odhisha",
    "ok": false,
-   "started": "2026-11-26T01:40:22Z",
+   "started": "2026-11-27T00:44:28Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -690,14 +690,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T02:44:03Z",
+   "finished": "2026-11-27T01:48:09Z",
    "requests": 0
   },
   {
    "slug": "pondicherry",
    "name": "Pondicherry",
    "ok": false,
-   "started": "2026-11-26T00:35:49Z",
+   "started": "2026-11-27T00:44:22Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -713,14 +713,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:31Z",
+   "finished": "2026-11-27T01:48:03Z",
    "requests": 0
   },
   {
    "slug": "punjab",
    "name": "Punjab",
    "ok": false,
-   "started": "2026-11-26T00:36:00Z",
+   "started": "2026-11-27T01:48:53Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -736,14 +736,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:38Z",
+   "finished": "2026-11-27T02:52:29Z",
    "requests": 0
   },
   {
    "slug": "rajasthan",
    "name": "Rajasthan",
    "ok": false,
-   "started": "2026-11-26T00:35:49Z",
+   "started": "2026-11-27T00:44:30Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -759,14 +759,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:24Z",
+   "finished": "2026-11-27T01:48:06Z",
    "requests": 0
   },
   {
    "slug": "sikkim",
    "name": "Sikkin",
    "ok": false,
-   "started": "2026-11-26T00:35:55Z",
+   "started": "2026-11-27T00:51:20Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -782,14 +782,14 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:32Z",
+   "finished": "2026-11-27T01:54:55Z",
    "requests": 0
   },
   {
    "slug": "tamilnadu",
    "name": "Tamil Nadu",
    "ok": false,
-   "started": "2026-11-26T00:35:48Z",
+   "started": "2026-11-27T01:48:53Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -805,37 +805,37 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:39:30Z",
+   "finished": "2026-11-27T02:52:35Z",
    "requests": 0
   },
   {
    "slug": "telangana",
    "name": "Telangana",
    "ok": true,
-   "started": "2026-11-26T01:40:17Z",
-   "orgs": 65,
-   "orgs_skipped": 28,
+   "started": "2026-11-27T00:44:27Z",
+   "orgs": 66,
+   "orgs_skipped": 9,
    "orgs_failed": 0,
    "orgs_unreachable": 0,
-   "listed": 1696,
-   "new": 138,
-   "changed": 25,
+   "listed": 1632,
+   "new": 249,
+   "changed": 27,
    "details_failed": 0,
-   "details_fetched": 209,
+   "details_fetched": 317,
    "throttled": 0,
    "throttle_recoveries": [],
    "gave_up": false,
    "errors": [],
-   "deactivated": 397,
-   "active": 1696,
-   "finished": "2026-11-26T01:44:16Z",
-   "requests": 232
+   "deactivated": 328,
+   "active": 1632,
+   "finished": "2026-11-27T00:50:21Z",
+   "requests": 341
   },
   {
    "slug": "tripura",
    "name": "Tripura",
    "ok": false,
-   "started": "2026-11-26T00:40:37Z",
+   "started": "2026-11-27T00:44:23Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -851,37 +851,37 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:44:13Z",
+   "finished": "2026-11-27T01:48:01Z",
    "requests": 0
   },
   {
    "slug": "uttarpradesh",
    "name": "Uttar Pradesh",
    "ok": true,
-   "started": "2026-11-26T00:35:49Z",
-   "orgs": 133,
-   "orgs_skipped": 59,
+   "started": "2026-11-27T01:48:48Z",
+   "orgs": 130,
+   "orgs_skipped": 18,
    "orgs_failed": 0,
    "orgs_unreachable": 0,
-   "listed": 12543,
-   "new": 1306,
-   "changed": 598,
+   "listed": 12312,
+   "new": 1308,
+   "changed": 683,
    "details_failed": 0,
-   "details_fetched": 1970,
+   "details_fetched": 2130,
    "throttled": 0,
    "throttle_recoveries": [],
    "gave_up": false,
    "errors": [],
-   "deactivated": 1642,
-   "active": 12543,
-   "finished": "2026-11-26T01:11:28Z",
-   "requests": 2045
+   "deactivated": 1578,
+   "active": 12312,
+   "finished": "2026-11-27T02:27:56Z",
+   "requests": 2243
   },
   {
    "slug": "uttrakhand",
    "name": "Uttrakhand",
    "ok": false,
-   "started": "2026-11-26T00:49:00Z",
+   "started": "2026-11-27T00:44:26Z",
    "orgs": 0,
    "orgs_skipped": 0,
    "orgs_failed": 1,
@@ -897,31 +897,33 @@
    "errors": [
     "organisation list: Failed to perform, curl: (35) Recv failure: Connection reset by peer. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
    ],
-   "finished": "2026-11-26T01:52:36Z",
+   "finished": "2026-11-27T01:48:04Z",
    "requests": 0
   },
   {
    "slug": "westbengal",
    "name": "West Bengal",
    "ok": true,
-   "started": "2026-11-26T00:35:58Z",
-   "orgs": 82,
-   "orgs_skipped": 42,
+   "started": "2026-11-27T00:44:25Z",
+   "orgs": 83,
+   "orgs_skipped": 18,
    "orgs_failed": 0,
    "orgs_unreachable": 0,
-   "listed": 2037,
-   "new": 148,
-   "changed": 27,
+   "listed": 2146,
+   "new": 154,
+   "changed": 50,
    "details_failed": 0,
-   "details_fetched": 186,
-   "throttled": 0,
-   "throttle_recoveries": [],
+   "details_fetched": 215,
+   "throttled": 2,
+   "throttle_recoveries": [
+    180
+   ],
    "gave_up": false,
    "errors": [],
-   "deactivated": 230,
-   "active": 2037,
-   "finished": "2026-11-26T00:40:01Z",
-   "requests": 227
+   "deactivated": 89,
+   "active": 2146,
+   "finished": "2026-11-27T00:58:25Z",
+   "requests": 281
   }
  ]
 }
