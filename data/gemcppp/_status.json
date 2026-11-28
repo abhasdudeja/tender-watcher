@@ -2,12 +2,12 @@
  "slug": "gemcppp",
  "name": "GeM - CPPP tenders (central)",
  "ok": true,
- "started": "2026-11-27T05:43:09Z",
- "orgs": 70,
+ "started": "2026-11-28T05:43:06Z",
+ "orgs": 65,
  "orgs_skipped": 0,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
- "listed": 839,
+ "listed": 771,
  "new": 0,
  "changed": 0,
  "details_failed": 0,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
- "deactivated": 111,
- "active": 839,
- "finished": "2026-11-27T05:45:11Z",
- "requests": 85
+ "deactivated": 68,
+ "active": 771,
+ "finished": "2026-11-28T05:45:02Z",
+ "requests": 78
 }

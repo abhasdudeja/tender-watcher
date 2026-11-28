@@ -2,9 +2,9 @@
  "slug": "mizoram-etender",
  "name": "Mizoram e-Tender",
  "ok": true,
- "started": "2026-11-27T05:43:09Z",
+ "started": "2026-11-28T05:43:06Z",
  "orgs": 6,
- "orgs_skipped": 0,
+ "orgs_skipped": 6,
  "orgs_failed": 0,
  "orgs_unreachable": 0,
  "listed": 9,
@@ -16,8 +16,8 @@
  "throttle_recoveries": [],
  "gave_up": false,
  "errors": [],
- "deactivated": 1,
+ "deactivated": 0,
  "active": 9,
- "finished": "2026-11-27T05:43:10Z",
+ "finished": "2026-11-28T05:43:06Z",
  "requests": 1
 }
