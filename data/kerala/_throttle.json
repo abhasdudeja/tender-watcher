@@ -1,25 +1,6 @@
 {
  "runs": [
   {
-   "started": "2026-11-21T21:48:23Z",
-   "recoveries_s": [],
-   "events": [
-    {
-     "t": "2026-11-21T22:15:16Z",
-     "kind": "503",
-     "since_prev_s": null,
-     "requests_since_prev": 1102,
-     "pace_gap_s": 2.21,
-     "headers": {
-      "server": "Server"
-     },
-     "retry_after": null,
-     "body": "<b>Problem in accessing the portal, It is suggested that you may close the Browser window and reopen the browser for accessing the portal. Inconvenience caused is regretted.</b>",
-     "spacing_s": 3.3
-    }
-   ]
-  },
-  {
    "started": "2026-11-26T01:40:14Z",
    "recoveries_s": [],
    "events": [
@@ -135,6 +116,68 @@
     },
     {
      "t": "2026-11-27T01:47:42Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 7,
+     "retry_after": null
+    }
+   ]
+  },
+  {
+   "started": "2026-11-28T01:16:09Z",
+   "recoveries_s": [],
+   "events": [
+    {
+     "t": "2026-11-28T01:16:41Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 60.0,
+     "attempt": 1,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-28T01:18:08Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 120.0,
+     "attempt": 2,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-28T01:20:36Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 240.0,
+     "attempt": 3,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-28T01:25:03Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 480.0,
+     "attempt": 4,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-28T01:33:31Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 5,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-28T01:48:59Z",
+     "kind": "wait",
+     "what": "organisation list",
+     "wait_s": 900.0,
+     "attempt": 6,
+     "retry_after": null
+    },
+    {
+     "t": "2026-11-28T02:04:26Z",
      "kind": "wait",
      "what": "organisation list",
      "wait_s": 900.0,
